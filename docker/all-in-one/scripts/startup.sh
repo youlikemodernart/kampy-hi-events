@@ -1,5 +1,11 @@
 #!/bin/sh
 
+export VITE_FRONTEND_URL="${VITE_FRONTEND_URL:-${APP_FRONTEND_URL:-/}}"
+if [ -n "${APP_FRONTEND_URL}" ]; then
+    export VITE_API_URL_CLIENT="${VITE_API_URL_CLIENT:-${APP_FRONTEND_URL}/api}"
+fi
+export VITE_API_URL_SERVER="${VITE_API_URL_SERVER:-http://localhost:80/api}"
+
 cd /app/backend
 
 if ! php artisan migrate --force; then
