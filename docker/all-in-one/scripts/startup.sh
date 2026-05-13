@@ -8,6 +8,15 @@ export VITE_API_URL_SERVER="${VITE_API_URL_SERVER:-http://localhost:80/api}"
 
 cd /app/backend
 
+echo "Ensuring Laravel writable directories exist..."
+mkdir -p /app/backend/bootstrap/cache \
+    /app/backend/storage/app/public \
+    /app/backend/storage/framework/cache/data \
+    /app/backend/storage/framework/sessions \
+    /app/backend/storage/framework/views \
+    /app/backend/storage/framework/testing \
+    /app/backend/storage/logs
+
 if ! php artisan migrate --force; then
     echo "============================================"
     echo "ERROR: Migrations could not complete. Check the error above."
