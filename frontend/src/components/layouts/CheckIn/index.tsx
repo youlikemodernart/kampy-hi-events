@@ -411,6 +411,7 @@ const CheckIn = () => {
                             display={'flex'}
                             variant={'transparent'}
                             color={'white'}
+                            size={'xl'}
                             onClick={() => infoModalHandlers.open()}
                         >
                             <IconInfoCircle/>

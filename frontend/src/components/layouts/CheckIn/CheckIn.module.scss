@@ -39,6 +39,10 @@
       .searchInput {
         flex: 1;
         margin-bottom: 0 !important;
+
+        :global(.mantine-Input-input) {
+          min-height: 44px;
+        }
       }
 
       .scanButton {
@@ -101,6 +105,10 @@
 
     .actions {
       flex-grow: initial;
+
+      :global(.mantine-Button-root) {
+        min-height: 44px;
+      }
     }
   }
 }
