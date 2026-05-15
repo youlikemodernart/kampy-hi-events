@@ -20,6 +20,22 @@
     padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
   }
 
+  @include mixins.respond-below(sm) {
+    :global(.mantine-Input-input) {
+      min-height: 44px;
+    }
+
+    :global(.mantine-Checkbox-input) {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+    }
+
+    :global(.mantine-Checkbox-body) {
+      align-items: center;
+    }
+  }
+
   .innerContainer {
     max-width: 700px;
     margin: 0 auto;
