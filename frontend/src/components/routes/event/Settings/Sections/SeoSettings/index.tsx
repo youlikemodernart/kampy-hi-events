@@ -18,6 +18,7 @@ export const SeoSettings = () => {
     const form = useForm({
         initialValues: {
             allow_search_engine_indexing: true,
+            is_publicly_listed: true,
             seo_title: '',
             seo_description: '',
             seo_keywords: '',
@@ -29,6 +30,7 @@ export const SeoSettings = () => {
         if (eventSettingsQuery?.isFetched && eventSettingsQuery?.data) {
             form.setValues({
                 allow_search_engine_indexing: eventSettingsQuery.data.allow_search_engine_indexing,
+                is_publicly_listed: eventSettingsQuery.data.is_publicly_listed ?? true,
                 seo_title: eventSettingsQuery.data.seo_title,
                 seo_description: eventSettingsQuery.data.seo_description,
                 seo_keywords: eventSettingsQuery.data.seo_keywords,
@@ -80,6 +82,11 @@ export const SeoSettings = () => {
                         {...form.getInputProps('allow_search_engine_indexing', {type: 'checkbox'})}
                         description={t`Allow search engines to index this event`}
                         label={t`Allow search engine indexing`}
+                    />
+                    <Switch
+                        {...form.getInputProps('is_publicly_listed', {type: 'checkbox'})}
+                        description={t`Show this live event on the public organizer page. Turn this off to keep the event accessible only by direct link.`}
+                        label={t`List event publicly`}
                     />
                     <Button loading={updateMutation.isPending} type={'submit'}>
                         {t`Save`}

@@ -62,7 +62,9 @@ class UpdateEventSettingsHandler
                     'seo_description' => $settings->seo_description,
                     'seo_keywords' => $settings->seo_keywords,
                     'allow_search_engine_indexing' => $settings->allow_search_engine_indexing,
+                    'is_publicly_listed' => $settings->is_publicly_listed,
                     'notify_organizer_of_new_orders' => $settings->notify_organizer_of_new_orders,
+                    'send_attendee_ticket_email' => $settings->send_attendee_ticket_email,
                     'price_display_mode' => $settings->price_display_mode->name,
                     'hide_getting_started_page' => $settings->hide_getting_started_page,
 

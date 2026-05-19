@@ -214,6 +214,7 @@ export interface EventSettings {
     seo_description?: string;
     seo_keywords?: string;
     allow_search_engine_indexing?: boolean;
+    is_publicly_listed?: boolean;
     price_display_mode?: 'INCLUSIVE' | 'EXCLUSIVE';
     hide_getting_started_page: boolean;
     attendee_details_collection_method?: AttendeeDetailsCollectionMethod;
@@ -245,6 +246,7 @@ export interface EventSettings {
 
     // Marketing settings
     show_marketing_opt_in?: boolean;
+    send_attendee_ticket_email?: boolean;
 
     // Platform fee settings
     pass_platform_fee_to_buyer?: boolean;

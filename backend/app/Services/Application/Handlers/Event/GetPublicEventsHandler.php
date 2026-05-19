@@ -14,6 +14,7 @@ use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrganizerRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Event\DTO\GetPublicOrganizerEventsDTO;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class GetPublicEventsHandler
@@ -59,6 +60,11 @@ class GetPublicEventsHandler
             where: [
                 'organizer_id' => $dto->organizerId,
                 'status' => EventStatus::LIVE->name,
+                static function (Builder $builder) {
+                    $builder->whereHas('event_settings', static function (Builder $eventSettingsQuery) {
+                        $eventSettingsQuery->where('is_publicly_listed', true);
+                    });
+                },
             ],
             params: $dto->queryParams
         );

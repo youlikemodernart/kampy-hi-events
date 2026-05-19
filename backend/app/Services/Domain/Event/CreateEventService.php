@@ -225,6 +225,8 @@ class CreateEventService
             'invoice_tax_details' => null,
 
             'attendee_details_collection_method' => $organizerSettings->getDefaultAttendeeDetailsCollectionMethod(),
+            'is_publicly_listed' => true,
+            'send_attendee_ticket_email' => true,
             'show_marketing_opt_in' => $organizerSettings->getDefaultShowMarketingOptIn(),
             'pass_platform_fee_to_buyer' => $organizerSettings->getDefaultPassPlatformFeeToBuyer(),
             'allow_attendee_self_edit' => $organizerSettings->getDefaultAllowAttendeeSelfEdit() ?? false,

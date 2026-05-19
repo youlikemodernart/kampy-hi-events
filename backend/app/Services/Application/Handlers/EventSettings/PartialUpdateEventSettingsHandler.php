@@ -80,8 +80,10 @@ class PartialUpdateEventSettingsHandler
                 'seo_description' => $eventSettingsDTO->settings['seo_description'] ?? $existingSettings->getSeoDescription(),
                 'seo_keywords' => $eventSettingsDTO->settings['seo_keywords'] ?? $existingSettings->getSeoKeywords(),
                 'allow_search_engine_indexing' => $eventSettingsDTO->settings['allow_search_engine_indexing'] ?? $existingSettings->getAllowSearchEngineIndexing(),
+                'is_publicly_listed' => $eventSettingsDTO->settings['is_publicly_listed'] ?? $existingSettings->getIsPubliclyListed(),
 
                 'notify_organizer_of_new_orders' => $eventSettingsDTO->settings['notify_organizer_of_new_orders'] ?? $existingSettings->getNotifyOrganizerOfNewOrders(),
+                'send_attendee_ticket_email' => $eventSettingsDTO->settings['send_attendee_ticket_email'] ?? $existingSettings->getSendAttendeeTicketEmail(),
                 'price_display_mode' => $eventSettingsDTO->settings['price_display_mode'] ?? $existingSettings->getPriceDisplayMode(),
                 'hide_getting_started_page' => $eventSettingsDTO->settings['hide_getting_started_page'] ?? $existingSettings->getHideGettingStartedPage(),
 

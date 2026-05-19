@@ -34,12 +34,14 @@ abstract class EventSettingDomainObjectAbstract extends \HiEvents\DomainObjects\
     final public const ONLINE_EVENT_CONNECTION_DETAILS = 'online_event_connection_details';
     final public const IS_ONLINE_EVENT = 'is_online_event';
     final public const ALLOW_SEARCH_ENGINE_INDEXING = 'allow_search_engine_indexing';
+    final public const IS_PUBLICLY_LISTED = 'is_publicly_listed';
     final public const SEO_TITLE = 'seo_title';
     final public const SEO_DESCRIPTION = 'seo_description';
     final public const SOCIAL_MEDIA_HANDLES = 'social_media_handles';
     final public const SHOW_SOCIAL_MEDIA_HANDLES = 'show_social_media_handles';
     final public const SEO_KEYWORDS = 'seo_keywords';
     final public const NOTIFY_ORGANIZER_OF_NEW_ORDERS = 'notify_organizer_of_new_orders';
+    final public const SEND_ATTENDEE_TICKET_EMAIL = 'send_attendee_ticket_email';
     final public const PRICE_DISPLAY_MODE = 'price_display_mode';
     final public const HIDE_GETTING_STARTED_PAGE = 'hide_getting_started_page';
     final public const SHOW_SHARE_BUTTONS = 'show_share_buttons';
@@ -92,12 +94,14 @@ abstract class EventSettingDomainObjectAbstract extends \HiEvents\DomainObjects\
     protected ?string $online_event_connection_details = null;
     protected bool $is_online_event = false;
     protected bool $allow_search_engine_indexing = true;
+    protected bool $is_publicly_listed = true;
     protected ?string $seo_title = null;
     protected ?string $seo_description = null;
     protected array|string|null $social_media_handles = null;
     protected ?bool $show_social_media_handles = null;
     protected ?string $seo_keywords = null;
     protected bool $notify_organizer_of_new_orders = true;
+    protected bool $send_attendee_ticket_email = true;
     protected string $price_display_mode = 'INCLUSIVE';
     protected bool $hide_getting_started_page = false;
     protected bool $show_share_buttons = true;
@@ -153,12 +157,14 @@ abstract class EventSettingDomainObjectAbstract extends \HiEvents\DomainObjects\
                     'online_event_connection_details' => $this->online_event_connection_details ?? null,
                     'is_online_event' => $this->is_online_event ?? null,
                     'allow_search_engine_indexing' => $this->allow_search_engine_indexing ?? null,
+                    'is_publicly_listed' => $this->is_publicly_listed ?? null,
                     'seo_title' => $this->seo_title ?? null,
                     'seo_description' => $this->seo_description ?? null,
                     'social_media_handles' => $this->social_media_handles ?? null,
                     'show_social_media_handles' => $this->show_social_media_handles ?? null,
                     'seo_keywords' => $this->seo_keywords ?? null,
                     'notify_organizer_of_new_orders' => $this->notify_organizer_of_new_orders ?? null,
+                    'send_attendee_ticket_email' => $this->send_attendee_ticket_email ?? null,
                     'price_display_mode' => $this->price_display_mode ?? null,
                     'hide_getting_started_page' => $this->hide_getting_started_page ?? null,
                     'show_share_buttons' => $this->show_share_buttons ?? null,
@@ -453,6 +459,17 @@ abstract class EventSettingDomainObjectAbstract extends \HiEvents\DomainObjects\
         return $this->allow_search_engine_indexing;
     }
 
+    public function setIsPubliclyListed(bool $is_publicly_listed): self
+    {
+        $this->is_publicly_listed = $is_publicly_listed;
+        return $this;
+    }
+
+    public function getIsPubliclyListed(): bool
+    {
+        return $this->is_publicly_listed;
+    }
+
     public function setSeoTitle(?string $seo_title): self
     {
         $this->seo_title = $seo_title;
@@ -517,6 +534,17 @@ abstract class EventSettingDomainObjectAbstract extends \HiEvents\DomainObjects\
     public function getNotifyOrganizerOfNewOrders(): bool
     {
         return $this->notify_organizer_of_new_orders;
+    }
+
+    public function setSendAttendeeTicketEmail(bool $send_attendee_ticket_email): self
+    {
+        $this->send_attendee_ticket_email = $send_attendee_ticket_email;
+        return $this;
+    }
+
+    public function getSendAttendeeTicketEmail(): bool
+    {
+        return $this->send_attendee_ticket_email;
     }
 
     public function setPriceDisplayMode(string $price_display_mode): self

@@ -42,8 +42,10 @@ class EventSettingsResource extends JsonResource
             'seo_description' => $this->getSeoDescription(),
             'seo_keywords' => $this->getSeoKeywords(),
             'allow_search_engine_indexing' => $this->getAllowSearchEngineIndexing(),
+            'is_publicly_listed' => $this->getIsPubliclyListed(),
 
             'notify_organizer_of_new_orders' => $this->getNotifyOrganizerOfNewOrders(),
+            'send_attendee_ticket_email' => $this->getSendAttendeeTicketEmail(),
 
             'price_display_mode' => $this->getPriceDisplayMode(),
             'hide_getting_started_page' => $this->getHideGettingStartedPage(),

@@ -57,7 +57,7 @@ class EmailTokenContextBuilderTest extends TestCase
 
         // Test organizer context
         $this->assertEquals('Great Organizer', $context['organizer']['name']);
-        $this->assertEquals('contact@organizer.com', $context['organizer']['email']);
+        $this->assertEquals('support@event.com', $context['organizer']['email']);
 
         // Test settings context
         $this->assertEquals('support@event.com', $context['settings']['support_email']);
@@ -206,6 +206,7 @@ class EmailTokenContextBuilderTest extends TestCase
     {
         return Mockery::mock(EventSettingDomainObject::class, [
             'getSupportEmail' => 'support@event.com',
+            'getOrganizationName' => null,
             'getOfflinePaymentInstructions' => 'Pay by bank transfer',
             'getPostCheckoutMessage' => 'Thank you for your purchase!',
             'getLocationDetails' => null,

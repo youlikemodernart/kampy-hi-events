@@ -54,8 +54,10 @@ class UpdateEventSettingsRequest extends BaseRequest
             'seo_description' => ['string', 'max:255', 'nullable'],
             'seo_keywords' => ['string', 'max:255', 'nullable'],
             'allow_search_engine_indexing' => ['boolean'],
+            'is_publicly_listed' => ['boolean'],
 
             'notify_organizer_of_new_orders' => ['boolean'],
+            'send_attendee_ticket_email' => ['boolean'],
 
             'price_display_mode' => [Rule::in(PriceDisplayMode::valuesArray())],
 

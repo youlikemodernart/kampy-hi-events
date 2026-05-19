@@ -45,8 +45,10 @@ class UpdateEventSettingsDTO extends BaseDTO
         public readonly ?string                 $online_event_connection_details = null,
 
         public readonly ?bool                   $allow_search_engine_indexing = true,
+        public readonly bool                    $is_publicly_listed = true,
 
         public readonly ?bool                   $notify_organizer_of_new_orders = null,
+        public readonly bool                    $send_attendee_ticket_email = true,
 
         public readonly ?PriceDisplayMode       $price_display_mode = PriceDisplayMode::INCLUSIVE,
 
@@ -124,7 +126,9 @@ class UpdateEventSettingsDTO extends BaseDTO
             is_online_event: false,
             online_event_connection_details: null,
             allow_search_engine_indexing: true,
+            is_publicly_listed: true,
             notify_organizer_of_new_orders: null,
+            send_attendee_ticket_email: true,
             price_display_mode: PriceDisplayMode::INCLUSIVE,
             hide_getting_started_page: false,
 
