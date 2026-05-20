@@ -43,6 +43,7 @@
   text-decoration: none;
   color: inherit;
   min-height: 140px;
+  cursor: pointer;
 
   @include mixins.respond-below(md, true) {
     flex-direction: column;

@@ -1,3 +1,4 @@
+import type {KeyboardEvent} from 'react';
 import {ActionIcon, Tooltip} from '@mantine/core';
 import {Event, IdParam, Product} from "../../../types.ts";
 import classes from "./EventCard.module.scss";
@@ -165,11 +166,33 @@ export function EventCard({event}: EventCardProps) {
 
     const isEnded = event.lifecycle_status === 'ENDED';
     const isDraft = event.status === 'DRAFT';
+    const dashboardPath = `/manage/event/${event.id}/dashboard`;
+
+    const handleCardClick = () => {
+        navigate(dashboardPath);
+    };
+
+    const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.target !== event.currentTarget) {
+            return;
+        }
+
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            navigate(dashboardPath);
+        }
+    };
 
     return (
         <>
             <Card className={`${classes.eventCard} ${isEnded ? classes.isEnded : ''} ${isDraft ? classes.isDraft : ''}`}>
-                <NavLink to={`/manage/event/${event.id}/dashboard`} className={classes.cardLink}>
+                <div
+                    role="link"
+                    tabIndex={0}
+                    onClick={handleCardClick}
+                    onKeyDown={handleCardKeyDown}
+                    className={classes.cardLink}
+                >
                     <div className={classes.imageContainer}>
                         <div
                             className={`${classes.image} ${!coverImage ? classes.placeholderImage : ''}`}
@@ -237,7 +260,7 @@ export function EventCard({event}: EventCardProps) {
                             </Tooltip>
                         </div>
 
-                        <div className={classes.menuButton} onClick={(e) => e.preventDefault()}>
+                        <div className={classes.menuButton} onClick={(e) => e.stopPropagation()}>
                             <ActionMenu
                                 itemsGroups={menuItems}
                                 target={
@@ -252,7 +275,7 @@ export function EventCard({event}: EventCardProps) {
                             />
                         </div>
                     </div>
-                </NavLink>
+                </div>
             </Card>
             {isDuplicateModalOpen && <DuplicateEventModal eventId={eventId} onClose={duplicateModal.close}/>}
         </>

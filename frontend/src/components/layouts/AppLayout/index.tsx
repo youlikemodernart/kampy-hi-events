@@ -48,10 +48,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                                                  actionGroupContent = null,
                                                  sidebarFooter = null,
                                              }) => {
-    const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
-        if (typeof window === 'undefined') return true; // SSR default
-        return window.innerWidth >= 768; // Desktop open, mobile closed
-    });
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
     const [topBarShadow, setTopBarShadow] = useState<boolean>(false);
 
     useEffect(() => {
@@ -74,6 +71,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             }
         };
 
+        handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
