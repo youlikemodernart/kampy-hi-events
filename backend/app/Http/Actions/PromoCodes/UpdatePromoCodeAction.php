@@ -33,9 +33,9 @@ class UpdatePromoCodeAction extends BaseAction
 
         try {
             $promoCode = $this->updatePromoCodeHandler->handle($promoCodeId, new UpsertPromoCodeDTO(
-                code: strtolower($request->input('code')),
+                code: strtolower(trim($request->input('code'))),
                 event_id: $eventId,
-                applicable_product_ids: $request->input('applicable_product_ids'),
+                applicable_product_ids: $request->input('applicable_product_ids', []),
                 discount_type: PromoCodeDiscountTypeEnum::fromName($request->input('discount_type')),
                 discount: $request->float('discount'),
                 expiry_date: $request->input('expiry_date'),

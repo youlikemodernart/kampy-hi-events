@@ -32,13 +32,23 @@ import {ProductAvailabilityMessage} from "../../../common/ProductPriceAvailabili
 import {PoweredByFooter} from "../../../common/PoweredByFooter";
 import {Event, Product} from "../../../../types.ts";
 import {eventsClientPublic} from "../../../../api/event.client.ts";
-import {promoCodeClientPublic} from "../../../../api/promo-code.client.ts";
+import {normalizePromoCode, promoCodeClientPublic} from "../../../../api/promo-code.client.ts";
 import {IconChevronRight, IconX} from "@tabler/icons-react"
 import {getSessionIdentifier} from "../../../../utilites/sessionIdentifier.ts";
 import {Constants} from "../../../../constants.ts";
 import {clearWaitlistJoinedForEvent} from "../../../../hooks/useWaitlistJoined.ts";
 
 const AFFILIATE_EXPIRY_DAYS = 30;
+
+const removePromoCodeQueryParams = () => {
+    removeQueryStringFromUrl('promo_code');
+    removeQueryStringFromUrl('PromoCode');
+};
+
+const setPromoCodeQueryParam = (promoCode: string) => {
+    removePromoCodeQueryParams();
+    addQueryStringToUrl('promo_code', promoCode);
+};
 
 const sendHeightToIframeWidgets = () => {
     const height = document.documentElement.scrollHeight;
@@ -84,6 +94,7 @@ const SelectProducts = (props: SelectProductsProps) => {
     const navigate = useNavigate();
 
     const promoRef = useRef<HTMLInputElement>(null);
+    const invalidPromoToastShownRef = useRef<string | null>(null);
     const [showPromoCodeInput, setShowPromoCodeInput] = useInputState<boolean>(false);
     const [event, setEvent] = useState(props.event);
     const [orderInProcessOverlayVisible, setOrderInProcessOverlayVisible] = useState(false);
@@ -138,7 +149,7 @@ const SelectProducts = (props: SelectProductsProps) => {
     const form = useForm<ProductFormPayload>({
         initialValues: {
             products: undefined,
-            promo_code: props.promoCodeValid ? props.promoCode || null : null,
+            promo_code: props.promoCodeValid ? normalizePromoCode(props.promoCode) : null,
             affiliate_code: affiliateCode || null,
             session_identifier: undefined,
         },
@@ -176,10 +187,12 @@ const SelectProducts = (props: SelectProductsProps) => {
 
     const promoCodeEventRefetchMutation = useMutation({
         mutationFn: async (promoCode: string | null) => {
-            if (promoCode) {
+            const normalizedPromoCode = normalizePromoCode(promoCode);
+
+            if (normalizedPromoCode) {
                 const validPromoCode = await promoCodeClientPublic.validateCode(
                     eventId,
-                    promoCode
+                    normalizedPromoCode
                 );
 
                 if (!validPromoCode.valid) {
@@ -190,17 +203,17 @@ const SelectProducts = (props: SelectProductsProps) => {
 
             const eventWithPromoCodeApplied = await eventsClientPublic.findByID(
                 eventId,
-                promoCode
+                normalizedPromoCode
             );
 
             setEvent(eventWithPromoCodeApplied.data);
 
-            if (promoCode) {
-                form.setFieldValue("promo_code", promoCode);
+            if (normalizedPromoCode) {
+                form.setFieldValue("promo_code", normalizedPromoCode);
             } else {
                 form.setFieldValue("promo_code", null);
                 setShowPromoCodeInput(false)
-                removeQueryStringFromUrl('promo_code');
+                removePromoCodeQueryParams();
             }
         },
     });
@@ -224,18 +237,24 @@ const SelectProducts = (props: SelectProductsProps) => {
         if (form.values.promo_code) {
             const promo_code = form.values.promo_code;
             showSuccess(t`Promo ${promo_code} code applied`);
-            addQueryStringToUrl('promo_code', promo_code);
+            setPromoCodeQueryParam(promo_code);
         }
     }, [form.values.promo_code])
 
     useEffect(() => {
         if (typeof props.promoCodeValid !== 'undefined') {
-            if (!props.promoCodeValid) {
-                showError(t`That promo code is invalid`);
-                removeQueryStringFromUrl('promo_code');
+            if (!props.promoCodeValid && props.promoCode) {
+                if (invalidPromoToastShownRef.current !== props.promoCode) {
+                    showError(t`That promo code is invalid`);
+                    invalidPromoToastShownRef.current = props.promoCode;
+                }
+                removePromoCodeQueryParams();
+            }
+            if (props.promoCodeValid) {
+                invalidPromoToastShownRef.current = null;
             }
         }
-    }, [props.promoCodeValid])
+    }, [props.promoCodeValid, props.promoCode])
 
     const populateFormValue = () => {
         const productValues: Array<ProductFormValue> = [];
@@ -287,7 +306,7 @@ const SelectProducts = (props: SelectProductsProps) => {
     };
 
     const handleApplyPromoCode = () => {
-        const promoCode = promoRef.current?.value;
+        const promoCode = normalizePromoCode(promoRef.current?.value);
         if (promoCode && promoCode.length >= 3) {
             promoCodeEventRefetchMutation.mutate(promoCode);
         } else {

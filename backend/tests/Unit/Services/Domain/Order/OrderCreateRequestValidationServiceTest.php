@@ -6,6 +6,7 @@ use HiEvents\DomainObjects\Enums\ProductPriceType;
 use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\ProductDomainObject;
 use HiEvents\DomainObjects\ProductPriceDomainObject;
+use HiEvents\DomainObjects\PromoCodeDomainObject;
 use HiEvents\DomainObjects\Status\EventStatus;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\PromoCodeRepositoryInterface;
@@ -150,12 +151,157 @@ class OrderCreateRequestValidationServiceTest extends TestCase
         $this->service->validateRequestData($eventId, $data);
     }
 
+    public function testNegativeQuantityIsRejected(): void
+    {
+        $data = [
+            'products' => [
+                [
+                    'product_id' => 10,
+                    'quantities' => [
+                        ['price_id' => 101, 'quantity' => -1],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->expectException(ValidationException::class);
+        $this->service->validateRequestData(1, $data);
+    }
+
+    public function testInvalidPromoCodeValidityIsRejected(): void
+    {
+        $eventId = 1;
+        $event = Mockery::mock(EventDomainObject::class);
+        $event->shouldReceive('getId')->andReturn($eventId);
+        $this->eventRepository->shouldReceive('findById')->with($eventId)->andReturn($event);
+
+        $promoCode = Mockery::mock(PromoCodeDomainObject::class);
+        $promoCode->shouldReceive('isValid')->andReturn(false);
+        $this->promoCodeRepository->shouldReceive('findFirstWhere')->andReturn($promoCode);
+
+        $data = [
+            'promo_code' => 'expired',
+            'products' => [
+                [
+                    'product_id' => 10,
+                    'quantities' => [
+                        ['price_id' => 101, 'quantity' => 1],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->expectException(ValidationException::class);
+        $this->service->validateRequestData($eventId, $data);
+    }
+
+    public function testPromoCodeMustApplyToSelectedProduct(): void
+    {
+        $eventId = 1;
+        $productId = 10;
+        $priceId = 101;
+
+        $promoCode = Mockery::mock(PromoCodeDomainObject::class);
+        $promoCode->shouldReceive('isValid')->andReturn(true);
+        $promoCode->shouldReceive('appliesToProduct')->andReturn(false);
+        $this->promoCodeRepository->shouldReceive('findFirstWhere')->andReturn($promoCode);
+
+        $this->setupMocks(
+            eventId: $eventId,
+            productId: $productId,
+            priceIds: [$priceId],
+            priceLabels: ['Test Tier'],
+            availabilities: [
+                ['price_id' => $priceId, 'quantity_available' => 5, 'quantity_reserved' => 0],
+            ],
+        );
+
+        $data = [
+            'promo_code' => 'staff',
+            'products' => [
+                [
+                    'product_id' => $productId,
+                    'quantities' => [
+                        ['price_id' => $priceId, 'quantity' => 1],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->expectException(ValidationException::class);
+        $this->service->validateRequestData($eventId, $data);
+    }
+
+    public function testHiddenProductIsRejected(): void
+    {
+        $eventId = 1;
+        $productId = 10;
+        $priceId = 101;
+
+        $this->setupMocks(
+            eventId: $eventId,
+            productId: $productId,
+            priceIds: [$priceId],
+            priceLabels: ['Test Tier'],
+            availabilities: [
+                ['price_id' => $priceId, 'quantity_available' => 5, 'quantity_reserved' => 0],
+            ],
+            productIsHidden: true,
+        );
+
+        $data = [
+            'products' => [
+                [
+                    'product_id' => $productId,
+                    'quantities' => [
+                        ['price_id' => $priceId, 'quantity' => 1],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->expectException(ValidationException::class);
+        $this->service->validateRequestData($eventId, $data);
+    }
+
+    public function testDuplicateProductSelectionsAreRejected(): void
+    {
+        $eventId = 1;
+        $event = Mockery::mock(EventDomainObject::class);
+        $event->shouldReceive('getId')->andReturn($eventId);
+        $this->eventRepository->shouldReceive('findById')->with($eventId)->andReturn($event);
+
+        $data = [
+            'products' => [
+                [
+                    'product_id' => 10,
+                    'quantities' => [
+                        ['price_id' => 101, 'quantity' => 1],
+                    ],
+                ],
+                [
+                    'product_id' => 10,
+                    'quantities' => [
+                        ['price_id' => 101, 'quantity' => 1],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->expectException(ValidationException::class);
+        $this->service->validateRequestData($eventId, $data);
+    }
+
     private function setupMocks(
         int   $eventId,
         int   $productId,
         array $priceIds,
         array $priceLabels,
         array $availabilities,
+        bool  $productIsHidden = false,
+        bool  $productIsBeforeSale = false,
+        bool  $productIsAfterSale = false,
+        bool  $productIsHiddenWithoutPromoCode = false,
     ): void
     {
         $event = Mockery::mock(EventDomainObject::class);
@@ -170,6 +316,9 @@ class OrderCreateRequestValidationServiceTest extends TestCase
             $price = Mockery::mock(ProductPriceDomainObject::class);
             $price->shouldReceive('getId')->andReturn($priceId);
             $price->shouldReceive('getLabel')->andReturn($priceLabels[$i] ?? null);
+            $price->shouldReceive('getIsHidden')->andReturn(false);
+            $price->shouldReceive('isBeforeSaleStartDate')->andReturn(false);
+            $price->shouldReceive('isAfterSaleEndDate')->andReturn(false);
             $productPrices->push($price);
         }
 
@@ -180,7 +329,14 @@ class OrderCreateRequestValidationServiceTest extends TestCase
         $product->shouldReceive('getMaxPerOrder')->andReturn(100);
         $product->shouldReceive('getMinPerOrder')->andReturn(1);
         $product->shouldReceive('isSoldOut')->andReturn(false);
+        $product->shouldReceive('getIsHidden')->andReturn($productIsHidden);
+        $product->shouldReceive('isBeforeSaleStartDate')->andReturn($productIsBeforeSale);
+        $product->shouldReceive('isAfterSaleEndDate')->andReturn($productIsAfterSale);
+        $product->shouldReceive('getIsHiddenWithoutPromoCode')->andReturn($productIsHiddenWithoutPromoCode);
         $product->shouldReceive('getType')->andReturn(ProductPriceType::TIERED->name);
+        $product->shouldReceive('isTieredType')->andReturn(true);
+        $product->shouldReceive('isDonationType')->andReturn(false);
+        $product->shouldReceive('isFreeType')->andReturn(false);
         $product->shouldReceive('getProductPrices')->andReturn($productPrices);
 
         $this->productRepository->shouldReceive('loadRelation')->andReturnSelf();

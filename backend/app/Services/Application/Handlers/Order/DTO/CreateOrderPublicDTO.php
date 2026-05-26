@@ -17,6 +17,8 @@ class CreateOrderPublicDTO extends BaseDTO
         public readonly ?string    $order_locale = null,
         public readonly ?string    $promo_code = null,
         public readonly ?string    $affiliate_code = null,
+        public readonly ?int       $authenticated_account_id = null,
+        public readonly ?string    $authenticated_user_role = null,
     )
     {
     }

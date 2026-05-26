@@ -45,7 +45,7 @@ class GetPublicEventHandlerTest extends TestCase
         $event->setProductCategories(collect());
 
         $this->setupEventRepositoryMock($event, $data->eventId);
-        $this->promoCodeRepository->shouldReceive('findFirstWhere')->once()->andReturnNull();
+        $this->promoCodeRepository->shouldNotReceive('findFirstWhere');
         $this->ticketFilterService->shouldReceive('filter')->once()->withAnyArgs()->andReturn(collect());
         $this->eventPageViewIncrementService->shouldReceive('increment')->once()->with($data->eventId, $data->ipAddress);
 
@@ -61,7 +61,10 @@ class GetPublicEventHandlerTest extends TestCase
         $promoCode->shouldReceive('isValid')->andReturn(false);
 
         $this->setupEventRepositoryMock($event, $data->eventId);
-        $this->promoCodeRepository->shouldReceive('findFirstWhere')->once()->andReturn($promoCode);
+        $this->promoCodeRepository->shouldReceive('findFirstWhere')->once()->with([
+            'event_id' => $data->eventId,
+            'code' => 'invalid',
+        ])->andReturn($promoCode);
         $this->ticketFilterService->shouldReceive('filter')->once()->withAnyArgs()->andReturn(collect());
         $this->eventPageViewIncrementService->shouldReceive('increment')->once()->with($data->eventId, $data->ipAddress);
 
@@ -70,14 +73,17 @@ class GetPublicEventHandlerTest extends TestCase
 
     public function testHandleWithValidPromoCode(): void
     {
-        $data = new GetPublicEventDTO(eventId: 1, isAuthenticated: false, ipAddress: '127.0.0.1', promoCode: 'VALID');
+        $data = new GetPublicEventDTO(eventId: 1, isAuthenticated: false, ipAddress: '127.0.0.1', promoCode: ' VALID ');
         $event = new EventDomainObject();
         $event->setProductCategories(collect());
         $promoCode = m::mock(PromoCodeDomainObject::class)->makePartial();
         $promoCode->shouldReceive('isValid')->andReturn(true);
 
         $this->setupEventRepositoryMock($event, $data->eventId);
-        $this->promoCodeRepository->shouldReceive('findFirstWhere')->once()->andReturn($promoCode);
+        $this->promoCodeRepository->shouldReceive('findFirstWhere')->once()->with([
+            'event_id' => $data->eventId,
+            'code' => 'valid',
+        ])->andReturn($promoCode);
         $this->ticketFilterService->shouldReceive('filter')->once()->withAnyArgs()->andReturn(collect());
         $this->eventPageViewIncrementService->shouldReceive('increment')->once()->with($data->eventId, $data->ipAddress);
 

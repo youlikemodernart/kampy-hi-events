@@ -11,6 +11,7 @@ use HiEvents\DomainObjects\Generated\AffiliateDomainObjectAbstract;
 use HiEvents\DomainObjects\Generated\PromoCodeDomainObjectAbstract;
 use HiEvents\DomainObjects\OrderDomainObject;
 use HiEvents\DomainObjects\PromoCodeDomainObject;
+use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\DomainObjects\Status\AffiliateStatus;
 use HiEvents\DomainObjects\Status\EventStatus;
 use HiEvents\Repository\Interfaces\AffiliateRepositoryInterface;
@@ -120,11 +121,27 @@ class CreateOrderHandler
 
     public function validateEventStatus(EventDomainObject $event, CreateOrderPublicDTO $createOrderPublicDTO): void
     {
-        if (!$createOrderPublicDTO->is_user_authenticated && $event->getStatus() !== EventStatus::LIVE->name) {
-            throw new UnauthorizedException(
-                __('This event is not live.')
-            );
+        if ($event->getStatus() === EventStatus::LIVE->name) {
+            return;
         }
+
+        if (
+            $createOrderPublicDTO->is_user_authenticated
+            && $createOrderPublicDTO->authenticated_account_id === $event->getAccountId()
+        ) {
+            return;
+        }
+
+        if (
+            $createOrderPublicDTO->is_user_authenticated
+            && $createOrderPublicDTO->authenticated_user_role === Role::SUPERADMIN->value
+        ) {
+            return;
+        }
+
+        throw new UnauthorizedException(
+            __('This event is not live.')
+        );
     }
 
     /**

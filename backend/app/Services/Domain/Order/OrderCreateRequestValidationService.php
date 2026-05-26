@@ -9,6 +9,7 @@ use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\Generated\PromoCodeDomainObjectAbstract;
 use HiEvents\DomainObjects\ProductDomainObject;
 use HiEvents\DomainObjects\ProductPriceDomainObject;
+use HiEvents\DomainObjects\PromoCodeDomainObject;
 use HiEvents\Helper\Currency;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\PromoCodeRepositoryInterface;
@@ -43,7 +44,7 @@ class OrderCreateRequestValidationService
         $this->validateTypes($data);
 
         $event = $this->eventRepository->findById($eventId);
-        $this->validatePromoCode($eventId, $data);
+        $promoCode = $this->validatePromoCode($eventId, $data);
         $this->validateProductSelection($data);
 
         $this->availableProductQuantities = $this->fetchAvailableProductQuantitiesService
@@ -53,26 +54,30 @@ class OrderCreateRequestValidationService
             );
 
         $this->validateOverallCapacity($data);
-        $this->validateProductDetails($event, $data);
+        $this->validateProductDetails($event, $data, $promoCode);
     }
 
     /**
      * @throws ValidationException
      */
-    private function validatePromoCode(int $eventId, array $data): void
+    private function validatePromoCode(int $eventId, array $data): ?PromoCodeDomainObject
     {
-        if (isset($data['promo_code'])) {
-            $promoCode = $this->promoCodeRepository->findFirstWhere([
-                PromoCodeDomainObjectAbstract::CODE => strtolower(trim($data['promo_code'])),
-                PromoCodeDomainObjectAbstract::EVENT_ID => $eventId,
-            ]);
-
-            if (!$promoCode) {
-                throw ValidationException::withMessages([
-                    'promo_code' => __('This promo code is invalid'),
-                ]);
-            }
+        if (!isset($data['promo_code'])) {
+            return null;
         }
+
+        $promoCode = $this->promoCodeRepository->findFirstWhere([
+            PromoCodeDomainObjectAbstract::CODE => strtolower(trim($data['promo_code'])),
+            PromoCodeDomainObjectAbstract::EVENT_ID => $eventId,
+        ]);
+
+        if (!$promoCode?->isValid()) {
+            throw ValidationException::withMessages([
+                'promo_code' => __('This promo code is invalid'),
+            ]);
+        }
+
+        return $promoCode;
     }
 
     /**
@@ -84,7 +89,7 @@ class OrderCreateRequestValidationService
             'products' => 'required|array',
             'products.*.product_id' => 'required|integer',
             'products.*.quantities' => 'required|array',
-            'products.*.quantities.*.quantity' => 'required|integer',
+            'products.*.quantities.*.quantity' => 'required|integer|min:0',
             'products.*.quantities.*.price_id' => 'required|integer',
             'products.*.quantities.*.price' => 'numeric|min:0',
         ]);
@@ -100,11 +105,13 @@ class OrderCreateRequestValidationService
     private function validateProductSelection(array $data): void
     {
         $productData = collect($data['products']);
-        if ($productData->isEmpty() || $productData->sum(fn($product) => collect($product['quantities'])->sum('quantity')) === 0) {
+        if ($productData->isEmpty() || $productData->sum(fn($product) => collect($product['quantities'])->sum('quantity')) <= 0) {
             throw ValidationException::withMessages([
                 'products' => __('You haven\'t selected any products')
             ]);
         }
+
+        $this->validateNoDuplicateProductSelections($data);
     }
 
     /**
@@ -122,19 +129,20 @@ class OrderCreateRequestValidationService
      * @throws ValidationException
      * @throws Exception
      */
-    private function validateProductDetails(EventDomainObject $event, array $data): void
+    private function validateProductDetails(EventDomainObject $event, array $data, ?PromoCodeDomainObject $promoCode): void
     {
         $products = $this->getProducts($data);
+        $this->validatePromoCodeAppliesToSelectedProducts($promoCode, $products, $data);
 
         foreach ($data['products'] as $productIndex => $productAndQuantities) {
-            $this->validateSingleProductDetails($event, $productIndex, $productAndQuantities, $products);
+            $this->validateSingleProductDetails($event, $productIndex, $productAndQuantities, $products, $promoCode);
         }
     }
 
     /**
      * @throws ValidationException
      */
-    private function validateSingleProductDetails(EventDomainObject $event, int $productIndex, array $productAndQuantities, $products): void
+    private function validateSingleProductDetails(EventDomainObject $event, int $productIndex, array $productAndQuantities, $products, ?PromoCodeDomainObject $promoCode): void
     {
         $productId = $productAndQuantities['product_id'];
         $totalQuantity = collect($productAndQuantities['quantities'])->sum('quantity');
@@ -153,6 +161,12 @@ class OrderCreateRequestValidationService
             event: $event,
             productId: $productId,
             product: $product
+        );
+
+        $this->validateProductOrderability(
+            productIndex: $productIndex,
+            product: $product,
+            promoCode: $promoCode,
         );
 
         $this->validateProductQuantity(
@@ -295,6 +309,15 @@ class OrderCreateRequestValidationService
             $validPriceIds = $product->getProductPrices()?->map(fn(ProductPriceDomainObject $price) => $price->getId());
             if (!in_array($priceId, $validPriceIds->toArray(), true)) {
                 $errors["products.$productIndex.quantities.$quantityIndex.price_id"] = __('Invalid price ID');
+                continue;
+            }
+
+            /** @var ProductPriceDomainObject|null $productPrice */
+            $productPrice = $product->getProductPrices()
+                ?->first(fn(ProductPriceDomainObject $price) => $price->getId() === $priceId);
+
+            if ($quantity > 0 && $product->isTieredType() && $this->isProductPriceUnavailable($productPrice)) {
+                $errors["products.$productIndex.quantities.$quantityIndex.price_id"] = __('This price is not available');
             }
         }
 
@@ -306,9 +329,120 @@ class OrderCreateRequestValidationService
     /**
      * @throws ValidationException
      */
+    private function validateNoDuplicateProductSelections(array $data): void
+    {
+        $selectedProductIds = [];
+
+        foreach ($data['products'] as $productIndex => $productAndQuantities) {
+            $selectedQuantity = collect($productAndQuantities['quantities'])->sum('quantity');
+
+            if ($selectedQuantity <= 0) {
+                continue;
+            }
+
+            $productId = $productAndQuantities['product_id'];
+            if (isset($selectedProductIds[$productId])) {
+                throw ValidationException::withMessages([
+                    "products.$productIndex.product_id" => __('Duplicate product selections are not allowed'),
+                ]);
+            }
+
+            $selectedProductIds[$productId] = true;
+        }
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validateProductOrderability(
+        int $productIndex,
+        ProductDomainObject $product,
+        ?PromoCodeDomainObject $promoCode,
+    ): void
+    {
+        if ($product->getIsHidden()) {
+            throw ValidationException::withMessages([
+                "products.$productIndex" => __('This product is not available'),
+            ]);
+        }
+
+        if ($product->isBeforeSaleStartDate() || $product->isAfterSaleEndDate()) {
+            throw ValidationException::withMessages([
+                "products.$productIndex" => __('This product is not on sale'),
+            ]);
+        }
+
+        if ($product->getIsHiddenWithoutPromoCode() && !($promoCode && $promoCode->appliesToProduct($product))) {
+            throw ValidationException::withMessages([
+                "products.$productIndex" => __('A valid promo code is required for this product'),
+            ]);
+        }
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validatePromoCodeAppliesToSelectedProducts(?PromoCodeDomainObject $promoCode, Collection $products, array $data): void
+    {
+        if ($promoCode === null) {
+            return;
+        }
+
+        $selectedProductIds = collect($data['products'])
+            ->filter(fn($product) => collect($product['quantities'])->sum('quantity') > 0)
+            ->pluck('product_id')
+            ->all();
+
+        $selectedProducts = $products
+            ->filter(fn(ProductDomainObject $product) => in_array($product->getId(), $selectedProductIds, true));
+
+        if ($selectedProducts->isEmpty()) {
+            return;
+        }
+
+        $appliesToSelectedProduct = $selectedProducts
+            ->contains(fn(ProductDomainObject $product) => $this->promoCodeAppliesToProduct($promoCode, $product));
+
+        if (!$appliesToSelectedProduct) {
+            throw ValidationException::withMessages([
+                'promo_code' => __('This promo code is invalid for the selected products'),
+            ]);
+        }
+    }
+
+    private function promoCodeAppliesToProduct(PromoCodeDomainObject $promoCode, ProductDomainObject $product): bool
+    {
+        if (!$promoCode->appliesToProduct($product)) {
+            return false;
+        }
+
+        if ($promoCode->isDiscountCode()) {
+            return !$product->isDonationType() && !$product->isFreeType();
+        }
+
+        return true;
+    }
+
+    private function isProductPriceUnavailable(?ProductPriceDomainObject $productPrice): bool
+    {
+        return $productPrice === null
+            || $productPrice->getIsHidden()
+            || $productPrice->isBeforeSaleStartDate()
+            || $productPrice->isAfterSaleEndDate();
+    }
+
+    /**
+     * @throws ValidationException
+     */
     private function validateProductPricesQuantity(array $quantities, ProductDomainObject $product, int $productIndex): void
     {
         foreach ($quantities as $productQuantity) {
+            if ($productQuantity['quantity'] < 0) {
+                throw ValidationException::withMessages([
+                    "products.$productIndex" => __('Product quantities cannot be negative'),
+                ]);
+            }
+
             if ($productQuantity['quantity'] === 0) {
                 continue;
             }

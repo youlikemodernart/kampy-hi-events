@@ -55,10 +55,17 @@ class GetPublicEventHandler
             ], name: 'organizer'))
             ->findById($data->eventId);
 
-        $promoCodeDomainObject = $this->promoCodeRepository->findFirstWhere([
-            PromoCodeDomainObjectAbstract::EVENT_ID => $data->eventId,
-            PromoCodeDomainObjectAbstract::CODE => $data->promoCode,
-        ]);
+        $normalizedPromoCode = $data->promoCode !== null
+            ? strtolower(trim($data->promoCode))
+            : null;
+        $normalizedPromoCode = $normalizedPromoCode === '' ? null : $normalizedPromoCode;
+
+        $promoCodeDomainObject = $normalizedPromoCode !== null
+            ? $this->promoCodeRepository->findFirstWhere([
+                PromoCodeDomainObjectAbstract::EVENT_ID => $data->eventId,
+                PromoCodeDomainObjectAbstract::CODE => $normalizedPromoCode,
+            ])
+            : null;
 
         if (!$promoCodeDomainObject?->isValid()) {
             $promoCodeDomainObject = null;

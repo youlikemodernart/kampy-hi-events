@@ -13,6 +13,7 @@ import {
 } from "../types";
 import {publicApi} from "./public-client.ts";
 import {queryParamsHelper} from "../utilites/queryParamsHelper.ts";
+import {normalizePromoCode} from "./promo-code.client.ts";
 
 export const eventsClient = {
     create: async (event: Partial<Event>) => {
@@ -105,7 +106,9 @@ export const eventsClientPublic = {
     },
 
     findByID: async (eventId: any, promoCode: null | string) => {
-        const response = await publicApi.get<GenericDataResponse<Event>>('events/' + eventId + (promoCode ? '?promo_code=' + promoCode : ''));
+        const normalizedPromoCode = normalizePromoCode(promoCode);
+        const promoCodeQuery = normalizedPromoCode ? '?promo_code=' + encodeURIComponent(normalizedPromoCode) : '';
+        const response = await publicApi.get<GenericDataResponse<Event>>('events/' + eventId + promoCodeQuery);
         return response.data;
     },
 }

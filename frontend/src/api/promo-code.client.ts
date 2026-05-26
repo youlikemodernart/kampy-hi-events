@@ -5,6 +5,11 @@ import {
 import {publicApi} from "./public-client.ts";
 import {queryParamsHelper} from "../utilites/queryParamsHelper.ts";
 
+export const normalizePromoCode = (promoCode?: string | null): string | null => {
+    const normalizedPromoCode = promoCode?.trim().toLowerCase();
+    return normalizedPromoCode || null;
+};
+
 export const promoCodeClient = {
     create: async (eventId: IdParam, promoCode: PromoCode) => {
         const response = await api.post<GenericDataResponse<PromoCode>>(
@@ -36,8 +41,14 @@ export const promoCodeClient = {
 
 export const promoCodeClientPublic = {
     validateCode: async (eventId: IdParam, promoCode: string | null) => {
+        const normalizedPromoCode = normalizePromoCode(promoCode);
+
+        if (!normalizedPromoCode) {
+            return {valid: false};
+        }
+
         const response = await publicApi.get<{ valid: boolean }>(
-            `events/${eventId}/promo-codes/${promoCode}`
+            `events/${eventId}/promo-codes/${encodeURIComponent(normalizedPromoCode)}`
         );
         return response.data;
     },

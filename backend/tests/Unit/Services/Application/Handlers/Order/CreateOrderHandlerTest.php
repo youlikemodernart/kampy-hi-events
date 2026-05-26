@@ -20,6 +20,7 @@ use HiEvents\Services\Domain\Product\DTO\AvailableProductQuantitiesDTO;
 use HiEvents\Services\Domain\Product\DTO\AvailableProductQuantitiesResponseDTO;
 use HiEvents\Services\Domain\Product\DTO\OrderProductPriceDTO;
 use Illuminate\Database\DatabaseManager;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Mockery\MockInterface;
@@ -138,6 +139,25 @@ class CreateOrderHandlerTest extends TestCase
 
         $result = $this->handler->handle($eventId, $dto);
         $this->assertInstanceOf(OrderDomainObject::class, $result);
+    }
+
+    public function testAuthenticatedUserFromDifferentAccountCannotCreateOrderForDraftEvent(): void
+    {
+        $event = Mockery::mock(EventDomainObject::class);
+        $event->shouldReceive('getStatus')->andReturn(EventStatus::DRAFT->name);
+        $event->shouldReceive('getAccountId')->andReturn(99);
+
+        $dto = CreateOrderPublicDTO::fromArray([
+            'is_user_authenticated' => true,
+            'authenticated_account_id' => 42,
+            'authenticated_user_role' => 'ORGANIZER',
+            'session_identifier' => 'test-session',
+            'order_locale' => 'en',
+            'products' => collect(),
+        ]);
+
+        $this->expectException(UnauthorizedException::class);
+        $this->handler->validateEventStatus($event, $dto);
     }
 
     private function createOrderDTO(int $productId = 10, int $priceId = 100, int $quantity = 1): CreateOrderPublicDTO
