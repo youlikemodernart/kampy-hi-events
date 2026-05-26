@@ -52,14 +52,36 @@ async function main() {
         app.use(base, sirv(path.join(__dirname, "./dist/client"), { extensions: [] }));
     }
 
+    const browserEnvironmentVariableKeys = [
+        'VITE_APP_PRIMARY_COLOR',
+        'VITE_APP_SECONDARY_COLOR',
+        'VITE_APP_NAME',
+        'VITE_APP_FAVICON',
+        'VITE_APP_LOGO_DARK',
+        'VITE_APP_LOGO_LIGHT',
+        'VITE_CHATWOOT_BASE_URL',
+        'VITE_CHATWOOT_WEBSITE_TOKEN',
+        'VITE_HIDE_ABOUT_LINK',
+        'VITE_TOS_URL',
+        'VITE_PRIVACY_URL',
+        'VITE_PLATFORM_SUPPORT_EMAIL',
+        'VITE_STRIPE_PUBLISHABLE_KEY',
+        'VITE_I_HAVE_PURCHASED_A_LICENCE',
+        'VITE_FRONTEND_URL',
+        'VITE_DEFAULT_IMAGE_URL',
+        'VITE_API_URL_CLIENT',
+        'VITE_COOKIE_CONSENT_ENABLED',
+        'VITE_COOKIE_CONSENT_TEXT',
+    ];
+
     const getViteEnvironmentVariables = () => {
         const envVars = {};
-        for (const key in process.env) {
-            if (key.startsWith('VITE_')) {
+        for (const key of browserEnvironmentVariableKeys) {
+            if (process.env[key] !== undefined) {
                 envVars[key] = process.env[key];
             }
         }
-        return JSON.stringify(envVars);
+        return JSON.stringify(envVars).replace(/</g, '\\u003c');
     };
 
     app.get('/robots.txt', (req, res) => {
