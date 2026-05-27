@@ -2,8 +2,10 @@
 
 namespace Tests\Unit\Services\Application\Handlers\CheckInList\Public;
 
+use HiEvents\DomainObjects\AttendeeCheckInDomainObject;
 use HiEvents\DomainObjects\AttendeeDomainObject;
 use HiEvents\DomainObjects\CheckInListDomainObject;
+use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Exceptions\CannotCheckInException;
 use HiEvents\Repository\Interfaces\AttendeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\CheckInListRepositoryInterface;
@@ -95,8 +97,17 @@ class GetCheckInListAttendeePublicHandlerTest extends TestCase
         $checkInList->shouldReceive('getExpiresAt')->once()->andReturn(null);
         $checkInList->shouldReceive('getActivatesAt')->once()->andReturn(null);
         $checkInList->shouldReceive('getEventId')->once()->andReturn(123);
+        $checkInList->shouldReceive('getId')->once()->andReturn(456);
+
+        $otherCheckIn = m::mock(AttendeeCheckInDomainObject::class);
+        $otherCheckIn->shouldReceive('getCheckInListId')->once()->andReturn(789);
+
+        $matchingCheckIn = m::mock(AttendeeCheckInDomainObject::class);
+        $matchingCheckIn->shouldReceive('getCheckInListId')->once()->andReturn(456);
 
         $attendee = m::mock(AttendeeDomainObject::class);
+        $attendee->shouldReceive('getCheckIns')->once()->andReturn(collect([$otherCheckIn, $matchingCheckIn]));
+        $attendee->shouldReceive('setCheckIn')->once()->with($matchingCheckIn)->andReturnSelf();
 
         $this->checkInListRepository
             ->shouldReceive('loadRelation')
@@ -107,6 +118,12 @@ class GetCheckInListAttendeePublicHandlerTest extends TestCase
             ->shouldReceive('findFirstWhere')
             ->once()
             ->andReturn($checkInList);
+
+        $this->attendeeRepository
+            ->shouldReceive('loadRelation')
+            ->once()
+            ->with(m::type(Relationship::class))
+            ->andReturnSelf();
 
         $this->attendeeRepository
             ->shouldReceive('findFirstWhere')

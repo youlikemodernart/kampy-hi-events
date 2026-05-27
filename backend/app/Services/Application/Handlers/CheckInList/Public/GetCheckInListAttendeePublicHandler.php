@@ -2,6 +2,7 @@
 
 namespace HiEvents\Services\Application\Handlers\CheckInList\Public;
 
+use HiEvents\DomainObjects\AttendeeCheckInDomainObject;
 use HiEvents\DomainObjects\AttendeeDomainObject;
 use HiEvents\DomainObjects\CheckInListDomainObject;
 use HiEvents\DomainObjects\EventDomainObject;
@@ -41,10 +42,22 @@ class GetCheckInListAttendeePublicHandler
 
         $this->validateCheckInListIsActive($checkInList);
 
-        return $this->attendeeRepository->findFirstWhere([
-            'public_id' => $attendeePublicId,
-            'event_id' => $checkInList->getEventId(),
-        ]);
+        $checkInListId = $checkInList->getId();
+
+        $attendee = $this->attendeeRepository
+            ->loadRelation(new Relationship(AttendeeCheckInDomainObject::class, name: 'check_ins'))
+            ->findFirstWhere([
+                'public_id' => $attendeePublicId,
+                'event_id' => $checkInList->getEventId(),
+            ]);
+
+        $attendee->setCheckIn(
+            $attendee->getCheckIns()?->first(
+                fn ($checkIn) => $checkIn->getCheckInListId() === $checkInListId
+            )
+        );
+
+        return $attendee;
     }
 
     /**
