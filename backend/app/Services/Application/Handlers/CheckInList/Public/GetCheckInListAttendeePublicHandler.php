@@ -51,6 +51,10 @@ class GetCheckInListAttendeePublicHandler
                 'event_id' => $checkInList->getEventId(),
             ]);
 
+        if (!$attendee) {
+            throw new ResourceNotFoundException(__('Attendee not found'));
+        }
+
         $attendee->setCheckIn(
             $attendee->getCheckIns()?->first(
                 fn ($checkIn) => $checkIn->getCheckInListId() === $checkInListId

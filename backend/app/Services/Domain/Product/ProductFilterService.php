@@ -64,17 +64,11 @@ class ProductFilterService
                 : $productsCategories;
         }
 
-        $eventId = $products->first()->getEventId();
-        $this->loadAccountConfiguration($eventId);
-
-        $productQuantities = $this
-            ->fetchAvailableProductQuantitiesService
-            ->getAvailableProductQuantities($eventId);
-
-        $filteredProducts = $products
-            ->map(fn(ProductDomainObject $product) => $this->processProduct($product, $productQuantities->productQuantities, $promoCode))
-            ->reject(fn(ProductDomainObject $product) => $this->filterProduct($product, $promoCode, $hideSoldOutProducts))
-            ->each(fn(ProductDomainObject $product) => $this->processProductPrices($product, $hideSoldOutProducts));
+        $filteredProducts = $this->filterProducts(
+            products: $products,
+            promoCode: $promoCode,
+            hideSoldOutProducts: $hideSoldOutProducts,
+        );
 
         $filteredCategories = $hideHiddenCategories
             ? $productsCategories->reject(fn(ProductCategoryDomainObject $category) => $category->getIsHidden())
@@ -86,6 +80,36 @@ class ProductFilterService
                     static fn(ProductDomainObject $product) => $product->getProductCategoryId() === $category->getId()
                 )
             ));
+    }
+
+    /**
+     * @param Collection<ProductDomainObject> $products
+     * @param PromoCodeDomainObject|null $promoCode
+     * @param bool $hideSoldOutProducts
+     * @return Collection<ProductDomainObject>
+     */
+    public function filterProducts(
+        Collection             $products,
+        ?PromoCodeDomainObject $promoCode = null,
+        bool                   $hideSoldOutProducts = true,
+    ): Collection
+    {
+        if ($products->isEmpty()) {
+            return $products;
+        }
+
+        $eventId = $products->first()->getEventId();
+        $this->loadAccountConfiguration($eventId);
+
+        $productQuantities = $this
+            ->fetchAvailableProductQuantitiesService
+            ->getAvailableProductQuantities($eventId);
+
+        return $products
+            ->map(fn(ProductDomainObject $product) => $this->processProduct($product, $productQuantities->productQuantities, $promoCode))
+            ->reject(fn(ProductDomainObject $product) => $this->filterProduct($product, $promoCode, $hideSoldOutProducts))
+            ->each(fn(ProductDomainObject $product) => $this->processProductPrices($product, $hideSoldOutProducts))
+            ->values();
     }
 
     private function loadAccountConfiguration(int $eventId): void

@@ -129,6 +129,22 @@ class CompleteOrderHandlerTest extends TestCase
         $this->completeOrderHandler->handle($orderShortId, $orderData);
     }
 
+    public function testHandleThrowsResourceNotFoundExceptionWhenRouteEventDoesNotMatchOrder(): void
+    {
+        $this->expectException(ResourceNotFoundException::class);
+
+        $orderShortId = 'ABC123';
+        $orderData = $this->createMockCompleteOrderDTO();
+        $orderData->event_id = 999;
+        $order = $this->createMockOrder();
+
+        $this->orderRepository->shouldReceive('findByShortId')->with($orderShortId)->andReturn($order);
+        $this->orderRepository->shouldReceive('loadRelation')->andReturnSelf();
+        $this->eventSettingsRepository->shouldNotReceive('findFirstWhere');
+
+        $this->completeOrderHandler->handle($orderShortId, $orderData);
+    }
+
     public function testHandleThrowsResourceConflictExceptionWhenOrderAlreadyProcessed(): void
     {
         $this->expectException(ResourceConflictException::class);

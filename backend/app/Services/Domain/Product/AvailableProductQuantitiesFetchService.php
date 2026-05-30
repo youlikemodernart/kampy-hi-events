@@ -27,8 +27,12 @@ class AvailableProductQuantitiesFetchService
     {
     }
 
-    public function getAvailableProductQuantities(int $eventId, bool $ignoreCache = false): AvailableProductQuantitiesResponseDTO
+    public function getAvailableProductQuantities(int $eventId, bool $ignoreCache = false, ?string $excludeSessionId = null): AvailableProductQuantitiesResponseDTO
     {
+        if ($excludeSessionId !== null) {
+            $ignoreCache = true;
+        }
+
         if (!$ignoreCache && $this->config->get('app.homepage_product_quantities_cache_ttl')) {
             $cachedData = $this->getDataFromCache($eventId);
             if ($cachedData) {
@@ -44,7 +48,7 @@ class AvailableProductQuantitiesFetchService
                 'status' => CapacityAssignmentStatus::ACTIVE->name,
             ]);
 
-        $reservedProductQuantities = $this->fetchReservedProductQuantities($eventId);
+        $reservedProductQuantities = $this->fetchReservedProductQuantities($eventId, $excludeSessionId);
         $productCapacities = $this->calculateProductCapacities($capacities);
 
         $quantities = $reservedProductQuantities->map(function (AvailableProductQuantitiesDTO $dto) use ($productCapacities) {
@@ -69,8 +73,21 @@ class AvailableProductQuantitiesFetchService
         return $finalData;
     }
 
-    private function fetchReservedProductQuantities(int $eventId): Collection
+    private function fetchReservedProductQuantities(int $eventId, ?string $excludeSessionId = null): Collection
     {
+        $excludeSessionReservationSql = $excludeSessionId === null
+            ? ''
+            : 'AND (orders.session_id IS NULL OR orders.session_id <> :excludeSessionId)';
+
+        $bindings = [
+            'eventId' => $eventId,
+            'reserved' => OrderStatus::RESERVED->name,
+        ];
+
+        if ($excludeSessionId !== null) {
+            $bindings['excludeSessionId'] = $excludeSessionId;
+        }
+
         $result = $this->db->select(<<<SQL
         WITH reserved_quantities AS (
             SELECT
@@ -81,6 +98,7 @@ class AvailableProductQuantitiesFetchService
                         WHEN orders.status = :reserved
                              AND orders.reserved_until > NOW()
                              AND orders.deleted_at IS NULL
+                             $excludeSessionReservationSql
                         THEN order_items.quantity
                         ELSE 0
                     END
@@ -126,10 +144,7 @@ class AvailableProductQuantitiesFetchService
             AND products.deleted_at IS NULL
             AND product_prices.deleted_at IS NULL
         GROUP BY products.id, product_prices.id, reserved_quantities.quantity_reserved;
-    SQL, [
-            'eventId' => $eventId,
-            'reserved' => OrderStatus::RESERVED->name
-        ]);
+    SQL, $bindings);
 
         return collect($result)->map(fn($row) => AvailableProductQuantitiesDTO::fromArray([
             'product_id' => $row->product_id,

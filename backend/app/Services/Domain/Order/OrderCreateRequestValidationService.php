@@ -39,7 +39,7 @@ class OrderCreateRequestValidationService
      * @throws ValidationException
      * @throws Exception
      */
-    public function validateRequestData(int $eventId, array $data = []): void
+    public function validateRequestData(int $eventId, array $data = [], ?string $excludeSessionId = null): void
     {
         $this->validateTypes($data);
 
@@ -51,6 +51,7 @@ class OrderCreateRequestValidationService
             ->getAvailableProductQuantities(
                 $event->getId(),
                 ignoreCache: true,
+                excludeSessionId: $excludeSessionId,
             );
 
         $this->validateOverallCapacity($data);
@@ -112,6 +113,7 @@ class OrderCreateRequestValidationService
         }
 
         $this->validateNoDuplicateProductSelections($data);
+        $this->validateNoDuplicatePriceSelections($data);
     }
 
     /**
@@ -348,6 +350,35 @@ class OrderCreateRequestValidationService
             }
 
             $selectedProductIds[$productId] = true;
+        }
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validateNoDuplicatePriceSelections(array $data): void
+    {
+        foreach ($data['products'] as $productIndex => $productAndQuantities) {
+            $selectedPriceIds = [];
+
+            foreach ($productAndQuantities['quantities'] as $quantityIndex => $quantityData) {
+                if (($quantityData['quantity'] ?? 0) <= 0) {
+                    continue;
+                }
+
+                $priceId = $quantityData['price_id'] ?? null;
+                if ($priceId === null) {
+                    continue;
+                }
+
+                if (isset($selectedPriceIds[$priceId])) {
+                    throw ValidationException::withMessages([
+                        "products.$productIndex.quantities.$quantityIndex.price_id" => __('Duplicate price selections are not allowed'),
+                    ]);
+                }
+
+                $selectedPriceIds[$priceId] = true;
+            }
         }
     }
 

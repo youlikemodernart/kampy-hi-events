@@ -152,18 +152,28 @@ class CreateOrderHandler
         $availability = $this->availableProductQuantitiesFetchService
             ->getAvailableProductQuantities($eventId, ignoreCache: true);
 
+        $requestedByProductAndPrice = [];
+
         foreach ($createOrderPublicDTO->products as $product) {
             foreach ($product->quantities as $priceQuantity) {
                 if ($priceQuantity->quantity <= 0) {
                     continue;
                 }
 
+                $requestedByProductAndPrice[$product->product_id][$priceQuantity->price_id]
+                    = ($requestedByProductAndPrice[$product->product_id][$priceQuantity->price_id] ?? 0)
+                    + $priceQuantity->quantity;
+            }
+        }
+
+        foreach ($requestedByProductAndPrice as $productId => $requestedByPriceId) {
+            foreach ($requestedByPriceId as $priceId => $quantityRequested) {
                 $available = $availability->productQuantities
-                    ->where('product_id', $product->product_id)
-                    ->where('price_id', $priceQuantity->price_id)
+                    ->where('product_id', $productId)
+                    ->where('price_id', $priceId)
                     ->first()?->quantity_available ?? 0;
 
-                if ($priceQuantity->quantity > $available) {
+                if ($quantityRequested > $available) {
                     throw ValidationException::withMessages([
                         'products' => __('Not enough products available. Please try again.'),
                     ]);

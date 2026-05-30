@@ -91,6 +91,44 @@ class GetCheckInListAttendeePublicHandlerTest extends TestCase
         $this->handler->handle('short-id', 'attendee-public-id');
     }
 
+    public function testHandleThrowsNotFoundIfAttendeeMissing(): void
+    {
+        $checkInList = m::mock(CheckInListDomainObject::class);
+        $checkInList->shouldReceive('getExpiresAt')->once()->andReturn(null);
+        $checkInList->shouldReceive('getActivatesAt')->once()->andReturn(null);
+        $checkInList->shouldReceive('getEventId')->once()->andReturn(123);
+        $checkInList->shouldReceive('getId')->once()->andReturn(456);
+
+        $this->checkInListRepository
+            ->shouldReceive('loadRelation')
+            ->andReturnSelf()
+            ->times(2);
+
+        $this->checkInListRepository
+            ->shouldReceive('findFirstWhere')
+            ->once()
+            ->andReturn($checkInList);
+
+        $this->attendeeRepository
+            ->shouldReceive('loadRelation')
+            ->once()
+            ->with(m::type(Relationship::class))
+            ->andReturnSelf();
+
+        $this->attendeeRepository
+            ->shouldReceive('findFirstWhere')
+            ->once()
+            ->with([
+                'public_id' => 'missing-attendee-public-id',
+                'event_id' => 123,
+            ])
+            ->andReturnNull();
+
+        $this->expectException(ResourceNotFoundException::class);
+
+        $this->handler->handle('short-id', 'missing-attendee-public-id');
+    }
+
     public function testHandleReturnsAttendeeSuccessfully(): void
     {
         $checkInList = m::mock(CheckInListDomainObject::class);

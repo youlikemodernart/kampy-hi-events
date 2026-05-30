@@ -71,15 +71,17 @@ class CompleteOrderHandler
      */
     public function handle(string $orderShortId, CompleteOrderDTO $orderData): OrderDomainObject
     {
-        /** @var EventSettingDomainObject $eventSettings */
-        $eventSettings = $this->eventSettingsRepository->findFirstWhere([
-            'event_id' => $orderData->event_id,
-        ]);
+        $eventSettings = null;
 
-        $updatedOrder = DB::transaction(function () use ($orderData, $orderShortId, $eventSettings) {
+        $updatedOrder = DB::transaction(function () use ($orderData, $orderShortId, &$eventSettings) {
             $orderDTO = $orderData->order;
 
-            $order = $this->getOrder($orderShortId);
+            $order = $this->getOrder($orderShortId, $orderData->event_id);
+
+            /** @var EventSettingDomainObject $eventSettings */
+            $eventSettings = $this->eventSettingsRepository->findFirstWhere([
+                'event_id' => $orderData->event_id,
+            ]);
 
             $updatedOrder = $this->updateOrder($order, $orderDTO);
 
@@ -275,10 +277,17 @@ class CompleteOrderHandler
         }
     }
 
+    private function validateOrderBelongsToEvent(OrderDomainObject $order, int $eventId): void
+    {
+        if ($order->getEventId() !== $eventId) {
+            throw new ResourceNotFoundException(__('Order not found'));
+        }
+    }
+
     /**
      * @throws ResourceConflictException
      */
-    private function getOrder(string $orderShortId): OrderDomainObject
+    private function getOrder(string $orderShortId, int $eventId): OrderDomainObject
     {
         $order = $this->orderRepository
             ->loadRelation(
@@ -291,6 +300,8 @@ class CompleteOrderHandler
         if ($order === null) {
             throw new ResourceNotFoundException(__('Order not found'));
         }
+
+        $this->validateOrderBelongsToEvent($order, $eventId);
 
         if ($order->getSessionId() === null
             || !$this->sessionManagementService->verifySession($order->getSessionId())) {

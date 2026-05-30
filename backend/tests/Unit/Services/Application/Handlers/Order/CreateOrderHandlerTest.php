@@ -115,6 +115,109 @@ class CreateOrderHandlerTest extends TestCase
         $this->handler->handle($eventId, $dto);
     }
 
+    public function testThrowsWhenDuplicateProductRowsExceedAvailabilityInAggregate(): void
+    {
+        $eventId = 1;
+
+        $this->databaseManager->shouldReceive('statement')->andReturn(true);
+        $this->setupEventMock($eventId);
+        $this->orderManagementService->shouldReceive('deleteExistingOrders');
+
+        $this->availabilityService->shouldReceive('getAvailableProductQuantities')
+            ->with($eventId, true)
+            ->andReturn(new AvailableProductQuantitiesResponseDTO(
+                productQuantities: collect([
+                    AvailableProductQuantitiesDTO::fromArray([
+                        'product_id' => 10,
+                        'price_id' => 100,
+                        'product_title' => 'Test',
+                        'price_label' => null,
+                        'quantity_available' => 1,
+                        'quantity_reserved' => 0,
+                        'initial_quantity_available' => 10,
+                    ]),
+                ]),
+            ));
+
+        $dto = CreateOrderPublicDTO::fromArray([
+            'is_user_authenticated' => false,
+            'session_identifier' => 'test-session',
+            'order_locale' => 'en',
+            'products' => collect([
+                ProductOrderDetailsDTO::fromArray([
+                    'product_id' => 10,
+                    'quantities' => collect([
+                        OrderProductPriceDTO::fromArray([
+                            'price_id' => 100,
+                            'quantity' => 1,
+                        ]),
+                    ]),
+                ]),
+                ProductOrderDetailsDTO::fromArray([
+                    'product_id' => 10,
+                    'quantities' => collect([
+                        OrderProductPriceDTO::fromArray([
+                            'price_id' => 100,
+                            'quantity' => 1,
+                        ]),
+                    ]),
+                ]),
+            ]),
+        ]);
+
+        $this->expectException(ValidationException::class);
+        $this->handler->handle($eventId, $dto);
+    }
+
+    public function testThrowsWhenDuplicatePriceRowsExceedAvailabilityInAggregate(): void
+    {
+        $eventId = 1;
+
+        $this->databaseManager->shouldReceive('statement')->andReturn(true);
+        $this->setupEventMock($eventId);
+        $this->orderManagementService->shouldReceive('deleteExistingOrders');
+
+        $this->availabilityService->shouldReceive('getAvailableProductQuantities')
+            ->with($eventId, true)
+            ->andReturn(new AvailableProductQuantitiesResponseDTO(
+                productQuantities: collect([
+                    AvailableProductQuantitiesDTO::fromArray([
+                        'product_id' => 10,
+                        'price_id' => 100,
+                        'product_title' => 'Test',
+                        'price_label' => null,
+                        'quantity_available' => 1,
+                        'quantity_reserved' => 0,
+                        'initial_quantity_available' => 10,
+                    ]),
+                ]),
+            ));
+
+        $dto = CreateOrderPublicDTO::fromArray([
+            'is_user_authenticated' => false,
+            'session_identifier' => 'test-session',
+            'order_locale' => 'en',
+            'products' => collect([
+                ProductOrderDetailsDTO::fromArray([
+                    'product_id' => 10,
+                    'quantities' => collect([
+                        OrderProductPriceDTO::fromArray([
+                            'price_id' => 100,
+                            'quantity' => 1,
+                        ]),
+                        OrderProductPriceDTO::fromArray([
+                            'price_id' => 100,
+                            'quantity' => 1,
+                        ]),
+                    ]),
+                ]),
+            ]),
+        ]);
+
+        $this->expectException(ValidationException::class);
+        $this->handler->handle($eventId, $dto);
+    }
+
     public function testPassesWhenQuantityIsWithinAvailability(): void
     {
         $eventId = 1;

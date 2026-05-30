@@ -5,10 +5,12 @@ namespace HiEvents\Services\Application\Handlers\Order\Payment\Stripe;
 use HiEvents\DomainObjects\OrderDomainObject;
 use HiEvents\DomainObjects\Status\OrderPaymentStatus;
 use HiEvents\DomainObjects\StripePaymentDomainObject;
+use HiEvents\Exceptions\UnauthorizedException;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Order\Payment\Stripe\DTO\StripePaymentIntentPublicDTO;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PaymentIntentSucceededHandler;
+use HiEvents\Services\Infrastructure\Session\CheckoutSessionManagementService;
 use HiEvents\Services\Infrastructure\Stripe\StripeClientFactory;
 use Psr\Log\LoggerInterface;
 use Stripe\Exception\ApiErrorException;
@@ -18,9 +20,10 @@ class GetPaymentIntentHandler
 {
     public function __construct(
         private readonly StripeClientFactory           $stripeClientFactory,
-        private readonly OrderRepositoryInterface      $orderRepository,
-        private readonly LoggerInterface               $logger,
-        private readonly PaymentIntentSucceededHandler $paymentIntentSucceededHandler,
+        private readonly OrderRepositoryInterface          $orderRepository,
+        private readonly LoggerInterface                   $logger,
+        private readonly PaymentIntentSucceededHandler     $paymentIntentSucceededHandler,
+        private readonly CheckoutSessionManagementService  $sessionManagementService,
     )
     {
     }
@@ -37,6 +40,15 @@ class GetPaymentIntentHandler
                 'event_id' => $eventId,
                 'short_id' => $orderShortId
             ]);
+
+        if ($order === null || $order->getStripePayment() === null) {
+            throw new ResourceNotFoundException(__('Payment intent not found'));
+        }
+
+        if ($order->getPaymentStatus() !== OrderPaymentStatus::PAYMENT_RECEIVED->name
+            && ($order->getSessionId() === null || !$this->sessionManagementService->verifySession($order->getSessionId()))) {
+            throw new UnauthorizedException(__('Sorry, we could not verify your session. Please create a new order.'));
+        }
 
         $accountId = $order->getStripePayment()->getConnectedAccountId();
         $paymentPlatform = $order->getStripePayment()->getStripePlatformEnum();

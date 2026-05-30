@@ -36,7 +36,7 @@ class GetOrderPublicHandler
     {
         $order = $this->getOrderDomainObject($getOrderData);
 
-        if (!$order) {
+        if (!$order || $order->getEventId() !== $getOrderData->eventId) {
             throw new ResourceNotFoundException(__('Order not found'));
         }
 

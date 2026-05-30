@@ -33,10 +33,7 @@
                 ' allow-top-navigation-by-user-activation' +
                 ' allow-downloads' +
                 ' allow-modals' +
-                ' allow-orientation-lock' +
-                ' allow-pointer-lock' +
-                ' allow-popups-to-escape-sandbox' +
-                ' allow-presentation'
+                ' allow-pointer-lock'
             );
 
             iframe.setAttribute('title', 'Event Widget');

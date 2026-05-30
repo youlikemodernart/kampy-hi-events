@@ -292,6 +292,29 @@ class OrderCreateRequestValidationServiceTest extends TestCase
         $this->service->validateRequestData($eventId, $data);
     }
 
+    public function testDuplicatePriceSelectionsForSameProductAreRejected(): void
+    {
+        $eventId = 1;
+        $event = Mockery::mock(EventDomainObject::class);
+        $event->shouldReceive('getId')->andReturn($eventId);
+        $this->eventRepository->shouldReceive('findById')->with($eventId)->andReturn($event);
+
+        $data = [
+            'products' => [
+                [
+                    'product_id' => 10,
+                    'quantities' => [
+                        ['price_id' => 101, 'quantity' => 1],
+                        ['price_id' => 101, 'quantity' => 1],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->expectException(ValidationException::class);
+        $this->service->validateRequestData($eventId, $data);
+    }
+
     private function setupMocks(
         int   $eventId,
         int   $productId,
@@ -357,7 +380,7 @@ class OrderCreateRequestValidationServiceTest extends TestCase
         }
 
         $this->availabilityService->shouldReceive('getAvailableProductQuantities')
-            ->with($eventId, Mockery::any())
+            ->with($eventId, Mockery::any(), Mockery::any())
             ->andReturn(new AvailableProductQuantitiesResponseDTO(
                 productQuantities: $quantityDTOs,
                 capacities: collect(),
