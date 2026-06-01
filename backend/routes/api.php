@@ -241,7 +241,7 @@ $router->prefix('/auth')->group(
 /**
  * Logged In Routes
  */
-$router->middleware(['auth:api'])->group(
+$router->middleware(['auth:api', 'route.permission'])->group(
     function (Router $router): void {
         // Auth
         $router->get('/auth/logout', LogoutAction::class);
@@ -447,7 +447,7 @@ $router->middleware(['auth:api'])->group(
     }
 );
 
-$router->prefix('/admin')->middleware(['auth:api'])->group(
+$router->prefix('/admin')->middleware(['auth:api', 'route.permission'])->group(
     function (Router $router): void {
         $router->get('/stats', GetAdminStatsAction::class);
         $router->get('/dashboard', GetAdminDashboardDataAction::class);

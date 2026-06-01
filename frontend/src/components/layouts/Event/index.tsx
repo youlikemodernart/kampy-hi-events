@@ -48,6 +48,7 @@ import {useGetMe} from "../../../queries/useGetMe.ts";
 import {useResendEmailConfirmation} from "../../../mutations/useResendEmailConfirmation.ts";
 import {useState} from "react";
 import {eventHomepageUrl} from "../../../utilites/urlHelper.ts";
+import {currentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 const EventLayout = () => {
     const location = useLocation();
@@ -60,8 +61,17 @@ const EventLayout = () => {
 
     const {data: event, isFetched: isEventFetched} = useGetEvent(eventId);
     const {data: eventSettings, isFetched: isEventSettingsFetched} = useGetEventSettings(eventId);
-    const {data: eventStats} = useGetEventStats(eventId);
     const {data: me} = useGetMe();
+    const canViewReports = currentUserCan(me?.permissions, 'reports.view');
+    const canManageEvent = currentUserCan(me?.permissions, 'event.manage');
+    const canPublishEvent = currentUserCan(me?.permissions, 'event.publish');
+    const canManageContent = currentUserCan(me?.permissions, 'event.content.manage');
+    const canViewAttendees = currentUserCan(me?.permissions, 'attendees.view');
+    const canViewOrders = currentUserCan(me?.permissions, 'orders.view');
+    const canManageMessages = currentUserCan(me?.permissions, 'messages.manage');
+    const canManageIntegrations = currentUserCan(me?.permissions, 'integrations.manage');
+    const canManageCheckIn = currentUserCan(me?.permissions, 'check_in.manage');
+    const {data: eventStats} = useGetEventStats(eventId, 'month', canViewReports || canViewOrders || canViewAttendees);
 
     const resendEmailConfirmationMutation = useResendEmailConfirmation();
     const [emailConfirmationResent, setEmailConfirmationResent] = useState(false);
@@ -91,40 +101,41 @@ const EventLayout = () => {
             icon: IconStar,
             showWhen: () => !eventSettings?.hide_getting_started_page
         },
-        {link: 'dashboard', label: t`Dashboard`, icon: IconDashboard},
+        {link: 'dashboard', label: t`Dashboard`, icon: IconDashboard, showWhen: () => canViewReports || canViewOrders || canViewAttendees},
         {
             link: 'reports',
             label: t`Reports`,
             icon: IconChartPie,
-            isActive: (isActive) => isActive || location.pathname.includes('/report/')
+            isActive: (isActive) => isActive || location.pathname.includes('/report/'),
+            showWhen: () => canViewReports,
         },
 
         // 2. EVENT SETUP
-        {label: t`Setup & Design`},
-        {link: 'settings', label: t`Event Settings`, icon: IconSettings},
-        {link: 'homepage-designer', label: t`Homepage Designer`, icon: IconPaint},
-        {link: 'ticket-designer', label: t`Ticket Designer`, icon: IconTicket},
-        {link: 'questions', label: t`Registration Questions`, icon: IconUserQuestion},
+        {label: t`Setup & Design`, showWhen: () => canManageEvent || canManageContent},
+        {link: 'settings', label: t`Event Settings`, icon: IconSettings, showWhen: () => canManageEvent},
+        {link: 'homepage-designer', label: t`Homepage Designer`, icon: IconPaint, showWhen: () => canManageContent},
+        {link: 'ticket-designer', label: t`Ticket Designer`, icon: IconTicket, showWhen: () => canManageContent},
+        {link: 'questions', label: t`Registration Questions`, icon: IconUserQuestion, showWhen: () => canManageContent},
 
         // 3. Ticketing & Sales
-        {label: t`Ticketing & Sales`},
-        {link: 'products', label: t`Tickets & Products`, icon: IconTicket},
-        {link: 'orders', label: t`Orders`, icon: IconReceipt, badge: eventStats?.total_orders},
-        {link: 'promo-codes', label: t`Promo Codes`, icon: IconDiscount2},
-        {link: 'affiliates', label: t`Affiliates`, icon: IconTrendingUp},
+        {label: t`Ticketing & Sales`, showWhen: () => canManageContent || canViewOrders},
+        {link: 'products', label: t`Tickets & Products`, icon: IconTicket, showWhen: () => canManageContent},
+        {link: 'orders', label: t`Orders`, icon: IconReceipt, badge: eventStats?.total_orders, showWhen: () => canViewOrders},
+        {link: 'promo-codes', label: t`Promo Codes`, icon: IconDiscount2, showWhen: () => canManageContent},
+        {link: 'affiliates', label: t`Affiliates`, icon: IconTrendingUp, showWhen: () => canManageContent},
 
         // 4. GUESTS
-        {label: t`Guest Management`},
-        {link: 'attendees', label: t`Attendees`, icon: IconUsers, badge: eventStats?.total_attendees_registered},
-        {link: 'check-in', label: t`Check-In Lists`, icon: IconQrcode},
-        {link: 'messages', label: t`Messages`, icon: IconSend},
-        {link: 'sold-out-waitlist', label: t`Waitlist`, icon: IconListCheck},
-        {link: 'capacity-assignments', label: t`Capacity Management`, icon: IconUsersGroup},
+        {label: t`Guest Management`, showWhen: () => canViewAttendees || canManageCheckIn || canManageMessages || canViewOrders || canManageContent},
+        {link: 'attendees', label: t`Attendees`, icon: IconUsers, badge: eventStats?.total_attendees_registered, showWhen: () => canViewAttendees},
+        {link: 'check-in', label: t`Check-In Lists`, icon: IconQrcode, showWhen: () => canManageCheckIn},
+        {link: 'messages', label: t`Messages`, icon: IconSend, showWhen: () => canManageMessages},
+        {link: 'sold-out-waitlist', label: t`Waitlist`, icon: IconListCheck, showWhen: () => canViewOrders},
+        {link: 'capacity-assignments', label: t`Capacity Management`, icon: IconUsersGroup, showWhen: () => canManageContent},
 
         // 5. INTEGRATIONS
-        {label: t`Integrations`},
-        {link: 'widget', label: t`Widget Embed`, icon: IconDeviceTabletCode},
-        {link: 'webhooks', label: t`Webhooks`, icon: IconWebhook},
+        {label: t`Integrations`, showWhen: () => canManageIntegrations || canManageContent},
+        {link: 'widget', label: t`Widget Embed`, icon: IconDeviceTabletCode, showWhen: () => canManageContent},
+        {link: 'webhooks', label: t`Webhooks`, icon: IconWebhook, showWhen: () => canManageIntegrations},
 
 
     ];
@@ -180,7 +191,7 @@ const EventLayout = () => {
             entityType="event"
             topBarContent={(
                 <div className={classes.statusToggleContainer}>
-                    {isEventFetched && (
+                    {isEventFetched && canPublishEvent && (
                         <TopBarButton
                             onClick={handleStatusToggle}
                             size="sm"

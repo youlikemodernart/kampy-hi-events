@@ -2,13 +2,14 @@
 
 namespace HiEvents\Http\Actions\PromoCodes;
 
-use HiEvents\DomainObjects\Enums\Role;
+use HiEvents\DomainObjects\Enums\Permission;
 use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\Generated\PromoCodeDomainObjectAbstract;
 use HiEvents\DomainObjects\Status\EventStatus;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\PromoCodeRepositoryInterface;
+use HiEvents\Services\Infrastructure\Authorization\PublicEventAccessService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,6 +18,7 @@ class GetPromoCodePublic extends BaseAction
     public function __construct(
         private readonly PromoCodeRepositoryInterface $promoCodeRepository,
         private readonly EventRepositoryInterface     $eventRepository,
+        private readonly PublicEventAccessService     $publicEventAccessService,
     )
     {
     }
@@ -49,13 +51,6 @@ class GetPromoCodePublic extends BaseAction
             return true;
         }
 
-        if ($this->isUserAuthenticated() && $event->getAccountId() === $this->getAuthenticatedAccountId()) {
-            return true;
-        }
-
-        $authenticatedUserRole = $this->isUserAuthenticated() ? $this->getAuthenticatedUserRole() : null;
-
-        return $authenticatedUserRole === Role::SUPERADMIN
-            || $authenticatedUserRole === Role::SUPERADMIN->value;
+        return $this->publicEventAccessService->canAccessEvent($event, Permission::EVENT_VIEW);
     }
 }

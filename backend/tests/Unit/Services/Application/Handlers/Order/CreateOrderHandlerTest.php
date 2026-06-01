@@ -19,6 +19,7 @@ use HiEvents\Services\Domain\Product\AvailableProductQuantitiesFetchService;
 use HiEvents\Services\Domain\Product\DTO\AvailableProductQuantitiesDTO;
 use HiEvents\Services\Domain\Product\DTO\AvailableProductQuantitiesResponseDTO;
 use HiEvents\Services\Domain\Product\DTO\OrderProductPriceDTO;
+use HiEvents\Services\Infrastructure\Authorization\PublicEventAccessService;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
@@ -35,6 +36,7 @@ class CreateOrderHandlerTest extends TestCase
     private OrderItemProcessingService|MockInterface $orderItemProcessingService;
     private AvailableProductQuantitiesFetchService|MockInterface $availabilityService;
     private DatabaseManager|MockInterface $databaseManager;
+    private PublicEventAccessService|MockInterface $publicEventAccessService;
     private CreateOrderHandler $handler;
 
     protected function setUp(): void
@@ -48,6 +50,7 @@ class CreateOrderHandlerTest extends TestCase
         $this->orderItemProcessingService = Mockery::mock(OrderItemProcessingService::class);
         $this->availabilityService = Mockery::mock(AvailableProductQuantitiesFetchService::class);
         $this->databaseManager = Mockery::mock(DatabaseManager::class);
+        $this->publicEventAccessService = Mockery::mock(PublicEventAccessService::class);
 
         $this->databaseManager->shouldReceive('transaction')
             ->andReturnUsing(fn($callback) => $callback());
@@ -60,6 +63,7 @@ class CreateOrderHandlerTest extends TestCase
             $this->orderItemProcessingService,
             $this->availabilityService,
             $this->databaseManager,
+            $this->publicEventAccessService,
         );
     }
 
@@ -244,16 +248,20 @@ class CreateOrderHandlerTest extends TestCase
         $this->assertInstanceOf(OrderDomainObject::class, $result);
     }
 
-    public function testAuthenticatedUserFromDifferentAccountCannotCreateOrderForDraftEvent(): void
+    public function testUserWithoutEventManagePermissionCannotCreateOrderForDraftEvent(): void
     {
         $event = Mockery::mock(EventDomainObject::class);
         $event->shouldReceive('getStatus')->andReturn(EventStatus::DRAFT->name);
         $event->shouldReceive('getAccountId')->andReturn(99);
 
+        $this->publicEventAccessService
+            ->shouldReceive('canAccessEvent')
+            ->once()
+            ->with($event, \HiEvents\DomainObjects\Enums\Permission::EVENT_MANAGE)
+            ->andReturnFalse();
+
         $dto = CreateOrderPublicDTO::fromArray([
             'is_user_authenticated' => true,
-            'authenticated_account_id' => 42,
-            'authenticated_user_role' => 'ORGANIZER',
             'session_identifier' => 'test-session',
             'order_locale' => 'en',
             'products' => collect(),
@@ -261,6 +269,29 @@ class CreateOrderHandlerTest extends TestCase
 
         $this->expectException(UnauthorizedException::class);
         $this->handler->validateEventStatus($event, $dto);
+    }
+
+    public function testUserWithEventManagePermissionCanCreateOrderForDraftEvent(): void
+    {
+        $event = Mockery::mock(EventDomainObject::class);
+        $event->shouldReceive('getStatus')->andReturn(EventStatus::DRAFT->name);
+        $event->shouldReceive('getAccountId')->andReturn(99);
+
+        $this->publicEventAccessService
+            ->shouldReceive('canAccessEvent')
+            ->once()
+            ->with($event, \HiEvents\DomainObjects\Enums\Permission::EVENT_MANAGE)
+            ->andReturnTrue();
+
+        $dto = CreateOrderPublicDTO::fromArray([
+            'is_user_authenticated' => true,
+            'session_identifier' => 'test-session',
+            'order_locale' => 'en',
+            'products' => collect(),
+        ]);
+
+        $this->handler->validateEventStatus($event, $dto);
+        $this->addToAssertionCount(1);
     }
 
     private function createOrderDTO(int $productId = 10, int $priceId = 100, int $quantity = 1): CreateOrderPublicDTO

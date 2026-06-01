@@ -72,6 +72,29 @@ const Users = () => {
         }
     }
 
+    const roleLabel = (user: User) => {
+        if (user.role_label) {
+            return user.role_label;
+        }
+
+        switch (user.role) {
+            case 'ORGANIZER':
+                return t`Event Manager`;
+            case 'CHECK_IN':
+                return t`Check-in Staff`;
+            case 'FINANCE':
+                return t`Finance`;
+            case 'REPORTING':
+                return t`Reporting`;
+            case 'ADMIN':
+                return t`Admin`;
+            case 'SUPERADMIN':
+                return t`Super Admin`;
+            default:
+                return user.role;
+        }
+    }
+
     const rows = users?.map((user) => (
         <Table.Tr key={user.id}>
             <Table.Td>
@@ -92,8 +115,7 @@ const Users = () => {
             <Table.Td>
                 <Badge variant="outline">
                     <Group gap={5}>
-                        {user.role === 'ORGANIZER' && <IconUser size={14}/>}
-                        {user.role === 'ADMIN' && <IconUserShield size={14}/>} {user.role}
+                        {user.role === 'ADMIN' || user.role === 'SUPERADMIN' ? <IconUserShield size={14}/> : <IconUser size={14}/>} {roleLabel(user)}
                     </Group>
                 </Badge>
             </Table.Td>

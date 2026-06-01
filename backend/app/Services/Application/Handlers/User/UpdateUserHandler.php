@@ -46,13 +46,21 @@ class UpdateUserHandler
             ));
         }
 
-        /** @var AccountUserDomainObject $accountUser */
-        $accountUser = $this->accountUserRepository->findFirstWhere(
+        $accountUsers = $this->accountUserRepository->findWhere(
             where: [
                 'user_id' => $updateUserData->id,
                 'account_id' => $updateUserData->account_id,
             ]
         );
+
+        if ($accountUsers->count() !== 1) {
+            throw new CannotUpdateResourceException(__(
+                'Cannot update ambiguous account membership for this user'
+            ));
+        }
+
+        /** @var AccountUserDomainObject $accountUser */
+        $accountUser = $accountUsers->first();
 
         if ($updateUserData->role !== Role::ADMIN && $accountUser->getIsAccountOwner()) {
             throw new CannotUpdateResourceException(__(
@@ -82,8 +90,7 @@ class UpdateUserHandler
                 'status' => $updateUserData->status->name,
             ],
             where: [
-                'user_id' => $updateUserData->id,
-                'account_id' => $updateUserData->account_id,
+                'id' => $accountUser->getId(),
             ]
         );
 

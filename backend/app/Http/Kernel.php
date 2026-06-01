@@ -4,6 +4,7 @@ namespace HiEvents\Http;
 
 use HiEvents\Http\Middleware\Authenticate;
 use HiEvents\Http\Middleware\EncryptCookies;
+use HiEvents\Http\Middleware\EnsureRoutePermission;
 use HiEvents\Http\Middleware\HandleDeprecatedTimezones;
 use HiEvents\Http\Middleware\LogImpersonationMiddleware;
 use HiEvents\Http\Middleware\PreventRequestsDuringMaintenance;
@@ -91,6 +92,7 @@ class Kernel extends HttpKernel
         'can' => Authorize::class,
         'guest' => RedirectIfAuthenticated::class,
         'password.confirm' => RequirePassword::class,
+        'route.permission' => EnsureRoutePermission::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,

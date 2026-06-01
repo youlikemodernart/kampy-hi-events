@@ -22,7 +22,7 @@ class GetOrganizerEventsPublicAction extends BaseAction
         $events = $this->handler->handle(new GetPublicOrganizerEventsDTO(
             organizerId: $organizerId,
             queryParams: $this->getPaginationQueryParams($request),
-            authenticatedAccountId: $this->isUserAuthenticated() ? $this->getAuthenticatedAccountId() : null
+            authenticatedAccountId: null
         ));
 
         return $this->resourceResponse(

@@ -3,6 +3,7 @@
 namespace HiEvents\Resources\User;
 
 use Exception;
+use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\DomainObjects\UserDomainObject;
 use HiEvents\Resources\BaseResource;
 use Illuminate\Http\Request;
@@ -43,6 +44,8 @@ class UserResource extends BaseResource
             ]),
             $this->mergeWhen($this->getCurrentAccountUser() !== null, fn() => [
                 'role' => $this->getCurrentAccountUser()?->getRole(),
+                'role_label' => $this->getCurrentRole()?->getDisplayName(),
+                'permissions' => $this->getCurrentRole()?->getPermissionValues() ?? [],
                 'is_account_owner' => $this->getCurrentAccountUser()?->getIsAccountOwner(),
                 'last_login_at' => $this->getCurrentAccountUser()?->getLastLoginAt(),
                 'status' => $this->getCurrentAccountUser()?->getStatus(),
@@ -52,5 +55,16 @@ class UserResource extends BaseResource
                 'pending_email' => $this->getPendingEmail(),
             ]),
         ];
+    }
+
+    private function getCurrentRole(): ?Role
+    {
+        $role = $this->getCurrentAccountUser()?->getRole();
+
+        if ($role === null) {
+            return null;
+        }
+
+        return Role::tryFrom($role);
     }
 }

@@ -17,6 +17,7 @@ import {useDisclosure} from "@mantine/hooks";
 import {AboutModal} from "../../modals/AboutModal";
 import {getConfig} from "../../../utilites/config.ts";
 import {CreateOrganizerModal} from "../../modals/CreateOrganizerModal";
+import {currentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 interface Link {
     label: string;
@@ -41,14 +42,17 @@ export const GlobalMenu = () => {
             icon: IconUser,
             link: "/manage/profile",
         },
-        {
+    ];
+
+    if (currentUserCan(me?.permissions, 'account.manage') || currentUserCan(me?.permissions, 'team.manage') || currentUserCan(me?.permissions, 'billing.manage')) {
+        links.push({
             label: t`Account Settings`,
             icon: IconSettingsCog,
             link: `/account/settings`,
-        },
-    ];
+        });
+    }
 
-    if (me?.role === 'ADMIN' || me?.role === 'SUPERADMIN') {
+    if (currentUserCan(me?.permissions, 'team.manage')) {
         links.push({
             label: t`User Management`,
             icon: IconUsers,
@@ -72,14 +76,16 @@ export const GlobalMenu = () => {
         });
     }
 
-    links.push({
-        label: t`Create Organizer`,
-        icon: IconPlus,
-        onClick: (event: any) => {
-            event.preventDefault();
-            openCreateOrganizerModal();
-        }
-    });
+    if (currentUserCan(me?.permissions, 'organizer.manage')) {
+        links.push({
+            label: t`Create Organizer`,
+            icon: IconPlus,
+            onClick: (event: any) => {
+                event.preventDefault();
+                openCreateOrganizerModal();
+            }
+        });
+    }
 
     links.push({
         label: t`Logout`,

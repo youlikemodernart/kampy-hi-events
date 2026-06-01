@@ -86,6 +86,33 @@ export interface LoginResponse {
     accounts: Account[];
 }
 
+export type UserRole = 'ADMIN' | 'ORGANIZER' | 'FINANCE' | 'REPORTING' | 'CHECK_IN' | 'SUPERADMIN';
+
+export type Permission =
+    | 'authenticated'
+    | 'system.admin'
+    | 'account.view'
+    | 'account.manage'
+    | 'team.manage'
+    | 'billing.manage'
+    | 'organizer.view'
+    | 'organizer.manage'
+    | 'event.view'
+    | 'event.content.view'
+    | 'event.manage'
+    | 'event.publish'
+    | 'event.content.manage'
+    | 'attendees.view'
+    | 'attendees.manage'
+    | 'orders.view'
+    | 'orders.manage'
+    | 'orders.refund'
+    | 'reports.view'
+    | 'reports.export'
+    | 'messages.manage'
+    | 'integrations.manage'
+    | 'check_in.manage';
+
 export interface User {
     id?: IdParam;
     account_id?: IdParam;
@@ -103,7 +130,9 @@ export interface User {
     pending_email?: string;
     last_login_at?: string;
     status?: 'ACTIVE' | 'INACTIVE' | 'INVITED';
-    role?: 'ADMIN' | 'ORGANIZER' | 'SUPERADMIN';
+    role?: UserRole;
+    role_label?: string;
+    permissions?: Permission[];
     is_account_owner?: boolean;
     locale?: SupportedLocales;
     marketing_opted_in_at?: string | null;

@@ -2,11 +2,13 @@
 
 namespace Tests\Unit\Http\Actions\PromoCodes;
 
+use HiEvents\DomainObjects\Enums\Permission;
 use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\Status\EventStatus;
 use HiEvents\Http\Actions\PromoCodes\GetPromoCodePublic;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\PromoCodeRepositoryInterface;
+use HiEvents\Services\Infrastructure\Authorization\PublicEventAccessService;
 use Illuminate\Http\Request;
 use Mockery;
 use Mockery\MockInterface;
@@ -16,6 +18,7 @@ class GetPromoCodePublicTest extends TestCase
 {
     private PromoCodeRepositoryInterface|MockInterface $promoCodeRepository;
     private EventRepositoryInterface|MockInterface $eventRepository;
+    private PublicEventAccessService|MockInterface $publicEventAccessService;
     private GetPromoCodePublic $action;
 
     protected function setUp(): void
@@ -26,10 +29,12 @@ class GetPromoCodePublicTest extends TestCase
 
         $this->promoCodeRepository = Mockery::mock(PromoCodeRepositoryInterface::class);
         $this->eventRepository = Mockery::mock(EventRepositoryInterface::class);
+        $this->publicEventAccessService = Mockery::mock(PublicEventAccessService::class);
 
         $this->action = new GetPromoCodePublic(
             $this->promoCodeRepository,
             $this->eventRepository,
+            $this->publicEventAccessService,
         );
     }
 
@@ -48,6 +53,7 @@ class GetPromoCodePublicTest extends TestCase
             ])
             ->andReturnNull();
         $this->promoCodeRepository->shouldNotReceive('findFirstWhere');
+        $this->publicEventAccessService->shouldNotReceive('canAccessEvent');
 
         $response = ($this->action)(2, 'staff', Request::create('/'));
 
@@ -68,6 +74,11 @@ class GetPromoCodePublicTest extends TestCase
             ])
             ->andReturn($event);
         $this->promoCodeRepository->shouldNotReceive('findFirstWhere');
+        $this->publicEventAccessService
+            ->shouldReceive('canAccessEvent')
+            ->once()
+            ->with($event, Permission::EVENT_VIEW)
+            ->andReturnFalse();
 
         $response = ($this->action)(2, 'staff', Request::create('/'));
 

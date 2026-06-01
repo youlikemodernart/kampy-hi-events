@@ -3,12 +3,15 @@
 namespace HiEvents\Services\Domain\Auth;
 
 use Exception;
+use HiEvents\DomainObjects\AccountUserDomainObject;
 use HiEvents\DomainObjects\Enums\Role;
+use HiEvents\DomainObjects\Status\UserStatus;
 use HiEvents\DomainObjects\Interfaces\DomainObjectInterface;
 use HiEvents\DomainObjects\UserDomainObject;
 use HiEvents\Models\User;
 use HiEvents\Repository\Interfaces\AccountUserRepositoryInterface;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Support\Collection;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use PHPOpenSourceSaver\JWTAuth\Payload;
 
@@ -42,19 +45,16 @@ readonly class AuthUserService
 
     public function getAuthenticatedUserRole(): ?Role
     {
-        if (!$this->authManager->check()) {
+        $user = $this->getUser();
+
+        $role = $user?->getCurrentAccountUser()?->getRole();
+
+        if ($role === null) {
             return null;
         }
 
         try {
-            /** @var Payload $payload */
-            $payload = $this->authManager->payload();
-        } catch (JWTException) {
-            return null;
-        }
-
-        try {
-            return Role::from($payload->get('role'));
+            return Role::from($role);
         } catch (Exception) {
             return null;
         }
@@ -67,15 +67,38 @@ readonly class AuthUserService
             $user = UserDomainObject::hydrateFromModel($user);
 
             if ($accountId = $this->getAuthenticatedAccountId()) {
-                $user->setCurrentAccountUser($this->accountUserRepository->findFirstWhere([
-                    'user_id' => $user->getId(),
-                    'account_id' => $accountId,
-                ]));
+                $user->setCurrentAccountUser($this->getCurrentAccountUser($user, $accountId));
             }
 
             return $user;
         }
 
         return null;
+    }
+
+    private function getCurrentAccountUser(UserDomainObject $user, int $accountId): ?AccountUserDomainObject
+    {
+        $accountUsers = $this->accountUserRepository->findWhere([
+            'user_id' => $user->getId(),
+            'account_id' => $accountId,
+        ]);
+
+        return $this->selectCurrentAccountUser($accountUsers);
+    }
+
+    /**
+     * @param Collection<int, AccountUserDomainObject> $accountUsers
+     */
+    private function selectCurrentAccountUser(Collection $accountUsers): ?AccountUserDomainObject
+    {
+        $activeAccountUsers = $accountUsers->filter(
+            fn(AccountUserDomainObject $accountUser): bool => $accountUser->getStatus() === UserStatus::ACTIVE->name,
+        );
+
+        if ($activeAccountUsers->count() !== 1) {
+            return null;
+        }
+
+        return $activeAccountUsers->first();
     }
 }

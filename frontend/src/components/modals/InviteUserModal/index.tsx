@@ -40,13 +40,31 @@ export const InviteUserModal = ({onClose}: GenericModalProps) => {
             icon: <IconUserShield/>,
             label: t`Admin`,
             value: 'ADMIN',
-            description: t`Admin users have full access to events and account settings.`,
+            description: t`Full access to team, account settings, billing, events, orders, reports, and check-in.`,
         },
         {
             icon: <IconUser/>,
-            label: t`Organizer`,
+            label: t`Event Manager`,
             value: 'ORGANIZER',
-            description: t`Organizers can only manage events and products. They cannot manage users, account settings or billing information.`,
+            description: t`Manage event setup, ticketing, guest operations, reports, messages, integrations, and check-in.`,
+        },
+        {
+            icon: <IconUser/>,
+            label: t`Finance`,
+            value: 'FINANCE',
+            description: t`View orders, attendees, reports, and exports. Can refund, cancel, and mark orders as paid.`,
+        },
+        {
+            icon: <IconUser/>,
+            label: t`Reporting`,
+            value: 'REPORTING',
+            description: t`Read-only access to event data, orders, attendees, reports, and exports.`,
+        },
+        {
+            icon: <IconUser/>,
+            label: t`Check-in Staff`,
+            value: 'CHECK_IN',
+            description: t`Can access check-in lists and check attendees in or out.`,
         },
     ];
 

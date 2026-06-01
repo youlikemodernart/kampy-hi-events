@@ -2,11 +2,13 @@
 
 namespace HiEvents\Http\Actions\Organizers;
 
+use HiEvents\DomainObjects\Enums\Permission;
 use HiEvents\DomainObjects\OrganizerDomainObject;
 use HiEvents\DomainObjects\Status\OrganizerStatus;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Resources\Organizer\OrganizerResourcePublic;
 use HiEvents\Services\Application\Handlers\Organizer\GetPublicOrganizerHandler;
+use HiEvents\Services\Infrastructure\Authorization\PublicEventAccessService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Psr\Log\LoggerInterface;
@@ -16,6 +18,7 @@ class GetPublicOrganizerAction extends BaseAction
     public function __construct(
         private readonly GetPublicOrganizerHandler $handler,
         private readonly LoggerInterface           $logger,
+        private readonly PublicEventAccessService  $publicEventAccessService,
 
     )
     {
@@ -45,10 +48,6 @@ class GetPublicOrganizerAction extends BaseAction
             return true;
         }
 
-        if ($this->isUserAuthenticated() && $organizer->getAccountId() === $this->getAuthenticatedAccountId()) {
-            return true;
-        }
-
-        return false;
+        return $this->publicEventAccessService->canAccessOrganizer($organizer, Permission::ORGANIZER_VIEW);
     }
 }

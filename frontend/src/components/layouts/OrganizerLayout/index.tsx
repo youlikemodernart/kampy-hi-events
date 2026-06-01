@@ -41,6 +41,7 @@ import { confirmationDialog } from "../../../utilites/confirmationDialog.tsx";
 import { showError, showSuccess } from "../../../utilites/notifications.tsx";
 import { useResendEmailConfirmation } from "../../../mutations/useResendEmailConfirmation.ts";
 import { useGetMe } from "../../../queries/useGetMe.ts";
+import { currentUserCan } from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 const OrganizerLayout = () => {
     const { organizerId } = useParams();
@@ -61,6 +62,14 @@ const OrganizerLayout = () => {
     const resendEmailConfirmationMutation = useResendEmailConfirmation();
     const [emailConfirmationResent, setEmailConfirmationResent] = useState(false);
     const { data: me } = useGetMe();
+    const canManageTeam = currentUserCan(me?.permissions, 'team.manage');
+    const canManageBilling = currentUserCan(me?.permissions, 'billing.manage');
+    const canManageOrganizer = currentUserCan(me?.permissions, 'organizer.manage');
+    const canViewReports = currentUserCan(me?.permissions, 'reports.view');
+    const canManageIntegrations = currentUserCan(me?.permissions, 'integrations.manage');
+    const canViewEvents = currentUserCan(me?.permissions, 'event.view');
+    const canManageEvents = currentUserCan(me?.permissions, 'event.manage');
+    const canManageEventContent = currentUserCan(me?.permissions, 'event.content.manage');
     const isUserEmailVerfied = me?.is_email_verified;
     const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -75,23 +84,24 @@ const OrganizerLayout = () => {
             showWhen: () => organizers && organizers.length > 1,
         },
         { label: 'Overview' },
-        { link: 'dashboard', label: t`Organizer Dashboard`, icon: IconDashboard },
+        { link: 'dashboard', label: t`Organizer Dashboard`, icon: IconDashboard, showWhen: () => canViewReports || canManageOrganizer },
         {
             link: 'reports',
             label: t`Reports`,
             icon: IconChartPie,
-            isActive: (isActive) => isActive || location.pathname.includes('/report/')
+            isActive: (isActive) => isActive || location.pathname.includes('/report/'),
+            showWhen: () => canViewReports,
         },
 
-        { label: t`Manage` },
-        { link: 'events', label: t`Events`, icon: IconCalendar },
-        { link: 'settings', label: t`Settings`, icon: IconSettings },
+        { label: t`Manage`, showWhen: () => canViewEvents || canManageOrganizer },
+        { link: 'events', label: t`Events`, icon: IconCalendar, showWhen: () => canViewEvents || canManageEvents },
+        { link: 'settings', label: t`Settings`, icon: IconSettings, showWhen: () => canManageOrganizer },
 
-        { label: t`Tools` },
-        { link: 'organizer-homepage-designer', label: t`Homepage Designer`, icon: IconPaint },
+        { label: t`Tools`, showWhen: () => canManageOrganizer || canManageEventContent },
+        { link: 'organizer-homepage-designer', label: t`Homepage Designer`, icon: IconPaint, showWhen: () => canManageOrganizer || canManageEventContent },
 
-        { label: t`Integrations` },
-        { link: 'webhooks', label: t`Webhooks`, icon: IconWebhook },
+        { label: t`Integrations`, showWhen: () => canManageIntegrations },
+        { link: 'webhooks', label: t`Webhooks`, icon: IconWebhook, showWhen: () => canManageIntegrations },
     ];
 
     const handleEmailConfirmationResend = () => {
@@ -151,17 +161,19 @@ const OrganizerLayout = () => {
         },
         {
             content: (
-                <span
-                    className={classes.createEventBreadcrumb}
-                    onClick={() => setShowCreateEventModal(true)}
-                >
-                    <IconCalendarPlus size={16} /> {t`Create Event`}
-                </span>
+                canManageEvents ? (
+                    <span
+                        className={classes.createEventBreadcrumb}
+                        onClick={() => setShowCreateEventModal(true)}
+                    >
+                        <IconCalendarPlus size={16} /> {t`Create Event`}
+                    </span>
+                ) : null
             ),
         }
     ];
 
-    const callouts: CalloutConfig[] = [
+    const callouts: CalloutConfig[] = canManageTeam ? [
         {
             icon: <IconUsersGroup size={20} />,
             heading: t`Invite Your Team`,
@@ -173,9 +185,9 @@ const OrganizerLayout = () => {
             },
             storageKey: `organizer-${organizerId}-team-callout-dismissed`
         },
-    ];
+    ] : [];
 
-    if (account && !account?.stripe_connect_setup_complete) {
+    if (canManageBilling && account && !account?.stripe_connect_setup_complete) {
         callouts.unshift({
             icon: <IconBrandStripe size={20} />,
             heading: t`Connect Stripe`,
@@ -200,7 +212,7 @@ const OrganizerLayout = () => {
                 entityType="organizer"
                 topBarContent={(
                     <div className={classes.statusToggleContainer}>
-                        {organizer && (
+                        {organizer && canManageOrganizer && (
                             <TopBarButton
                                 onClick={handleStatusToggle}
                                 size="sm"

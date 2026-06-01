@@ -2,10 +2,12 @@
 
 namespace HiEvents\Services\Application\Handlers\Organizer;
 
+use HiEvents\DomainObjects\Enums\Permission;
 use HiEvents\DomainObjects\Status\OrganizerStatus;
 use HiEvents\Mail\Organizer\OrganizerContactEmail;
 use HiEvents\Repository\Interfaces\OrganizerRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Organizer\DTO\SendOrganizerContactMessageDTO;
+use HiEvents\Services\Infrastructure\Authorization\PublicEventAccessService;
 use HiEvents\Services\Infrastructure\HtmlPurifier\HtmlPurifierService;
 use Illuminate\Mail\Mailer;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -16,6 +18,7 @@ class SendOrganizerContactMessageHandler
         private readonly Mailer                       $mailer,
         private readonly OrganizerRepositoryInterface $organizerRepository,
         private readonly HtmlPurifierService          $purifier,
+        private readonly PublicEventAccessService     $publicEventAccessService,
     )
     {
     }
@@ -24,8 +27,9 @@ class SendOrganizerContactMessageHandler
     {
         $organizer = $this->organizerRepository->findById($dto->organizer_id);
 
-        // Don't allow people to contact organizers that are not live, except for the organizer's own account
-        if ($organizer->getStatus() !== OrganizerStatus::LIVE->value && $dto->account_id !== $organizer->getAccountId()) {
+        if ($organizer->getStatus() !== OrganizerStatus::LIVE->value
+            && !$this->publicEventAccessService->canAccessOrganizer($organizer, Permission::ORGANIZER_MANAGE)
+        ) {
             throw new ResourceNotFoundException(__('Organizer not found'));
         }
 

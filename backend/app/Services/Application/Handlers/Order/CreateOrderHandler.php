@@ -11,7 +11,7 @@ use HiEvents\DomainObjects\Generated\AffiliateDomainObjectAbstract;
 use HiEvents\DomainObjects\Generated\PromoCodeDomainObjectAbstract;
 use HiEvents\DomainObjects\OrderDomainObject;
 use HiEvents\DomainObjects\PromoCodeDomainObject;
-use HiEvents\DomainObjects\Enums\Role;
+use HiEvents\DomainObjects\Enums\Permission;
 use HiEvents\DomainObjects\Status\AffiliateStatus;
 use HiEvents\DomainObjects\Status\EventStatus;
 use HiEvents\Repository\Interfaces\AffiliateRepositoryInterface;
@@ -21,6 +21,7 @@ use HiEvents\Services\Application\Handlers\Order\DTO\CreateOrderPublicDTO;
 use HiEvents\Services\Domain\Order\OrderItemProcessingService;
 use HiEvents\Services\Domain\Order\OrderManagementService;
 use HiEvents\Services\Domain\Product\AvailableProductQuantitiesFetchService;
+use HiEvents\Services\Infrastructure\Authorization\PublicEventAccessService;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
@@ -36,6 +37,7 @@ class CreateOrderHandler
         private readonly OrderItemProcessingService             $orderItemProcessingService,
         private readonly AvailableProductQuantitiesFetchService $availableProductQuantitiesFetchService,
         private readonly DatabaseManager                        $databaseManager,
+        private readonly PublicEventAccessService               $publicEventAccessService,
     )
     {
     }
@@ -125,17 +127,7 @@ class CreateOrderHandler
             return;
         }
 
-        if (
-            $createOrderPublicDTO->is_user_authenticated
-            && $createOrderPublicDTO->authenticated_account_id === $event->getAccountId()
-        ) {
-            return;
-        }
-
-        if (
-            $createOrderPublicDTO->is_user_authenticated
-            && $createOrderPublicDTO->authenticated_user_role === Role::SUPERADMIN->value
-        ) {
+        if ($this->publicEventAccessService->canAccessEvent($event, Permission::EVENT_MANAGE)) {
             return;
         }
 

@@ -3,6 +3,7 @@
 namespace HiEvents\Services\Infrastructure\Authorization;
 
 use HiEvents\DomainObjects\AccountDomainObject;
+use HiEvents\DomainObjects\Enums\Permission;
 use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\ImageDomainObject;
@@ -31,19 +32,34 @@ readonly class IsAuthorizedService
     {
     }
 
-    /**
-     * @todo This is a very simplistic way of handling roles. Currently we have an ADMIN and ORGANIZER role, but we
-     *      will have a more granular approach to roles.
-     */
     public function validateUserRole(Role $minimumRole, UserDomainObject $authUser): void
     {
+        $this->validateUserStatus($authUser);
+
+        $role = $this->getCurrentRole($authUser);
+
+        if ($minimumRole === Role::SUPERADMIN && $role !== Role::SUPERADMIN) {
+            throw new UnauthorizedException(__('You are not authorized to perform this action.'));
+        }
+
         if ($minimumRole === Role::ADMIN
-            && in_array($authUser->getCurrentAccountUser()->getRole(), [Role::SUPERADMIN->name, Role::ADMIN->name], true) === false
+            && in_array($role, [Role::SUPERADMIN, Role::ADMIN], true) === false
         ) {
             throw new UnauthorizedException(__('You are not authorized to perform this action.'));
         }
 
-        if ($minimumRole === Role::SUPERADMIN && $authUser->getCurrentAccountUser()->getRole() !== Role::SUPERADMIN->name) {
+        if ($minimumRole === Role::ORGANIZER && $role === null) {
+            throw new UnauthorizedException(__('You are not authorized to perform this action.'));
+        }
+    }
+
+    public function validateUserPermission(Permission $permission, UserDomainObject $authUser): void
+    {
+        $this->validateUserStatus($authUser);
+
+        $role = $this->getCurrentRole($authUser);
+
+        if ($role === null || !$role->hasPermission($permission)) {
             throw new UnauthorizedException(__('You are not authorized to perform this action.'));
         }
     }
@@ -56,7 +72,6 @@ readonly class IsAuthorizedService
         Role             $minimumRole
     ): void
     {
-        $this->validateUserStatus($authUser);
         $this->validateUserRole($minimumRole, $authUser);
 
         $repository = match ($entityType) {
@@ -111,7 +126,18 @@ readonly class IsAuthorizedService
         return false;
     }
 
-    private function validateUserStatus(UserDomainObject $authUser): void
+    private function getCurrentRole(UserDomainObject $authUser): ?Role
+    {
+        $role = $authUser->getCurrentAccountUser()?->getRole();
+
+        if ($role === null) {
+            return null;
+        }
+
+        return Role::tryFrom($role);
+    }
+
+    public function validateUserStatus(UserDomainObject $authUser): void
     {
         if ($authUser->getCurrentAccountUser()?->getStatus() !== UserStatus::ACTIVE->name) {
             // Log the user out if their account is not active. This can happen if a user is
