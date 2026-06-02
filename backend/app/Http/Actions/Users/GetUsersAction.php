@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace HiEvents\Http\Actions\Users;
 
 use HiEvents\DomainObjects\AccountUserDomainObject;
+use HiEvents\DomainObjects\AccountUserEventAssignmentDomainObject;
 use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Repository\Eloquent\Value\Relationship;
@@ -28,7 +29,11 @@ class GetUsersAction extends BaseAction
         return $this->resourceResponse(
             UserResource::class,
             $this->userRepository
-                ->loadRelation(new Relationship(domainObject: AccountUserDomainObject::class, name: 'currentAccountUser'))
+                ->loadRelation(new Relationship(
+                    domainObject: AccountUserDomainObject::class,
+                    nested: [new Relationship(AccountUserEventAssignmentDomainObject::class, name: 'eventAssignments')],
+                    name: 'currentAccountUser'
+                ))
                 ->findUsersByAccountId($this->getAuthenticatedAccountId()),
         );
     }

@@ -71,6 +71,7 @@ const EventLayout = () => {
     const canManageMessages = currentUserCan(me?.permissions, 'messages.manage');
     const canManageIntegrations = currentUserCan(me?.permissions, 'integrations.manage');
     const canManageCheckIn = currentUserCan(me?.permissions, 'check_in.manage');
+    const hasScopedEventAccess = ['ORGANIZER', 'REPORTING', 'CHECK_IN'].includes(me?.role ?? '');
     const {data: eventStats} = useGetEventStats(eventId, 'month', canViewReports || canViewOrders || canViewAttendees);
 
     const resendEmailConfirmationMutation = useResendEmailConfirmation();
@@ -91,7 +92,12 @@ const EventLayout = () => {
     }
 
     const navItems: NavItem[] = [
-        {link: '/manage/organizer/' + event?.organizer?.id, label: t`Organizer Dashboard`, icon: IconArrowLeft},
+        {
+            link: '/manage/organizer/' + event?.organizer?.id,
+            label: t`Organizer Dashboard`,
+            icon: IconArrowLeft,
+            showWhen: () => !hasScopedEventAccess,
+        },
 
         // 1. OVERVIEW
         {label: t`Overview`},

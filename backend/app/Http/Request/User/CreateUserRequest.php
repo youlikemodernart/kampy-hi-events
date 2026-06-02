@@ -16,6 +16,8 @@ class CreateUserRequest extends BaseRequest
             'first_name' => 'required|min:1',
             'last_name' => 'min:1|nullable',
             'role' => ['required', Rule::in(Role::getAssignableRoles())],
+            'event_ids' => ['array', 'nullable'],
+            'event_ids.*' => ['integer'],
             'email' => [
                 'required',
                 'email',

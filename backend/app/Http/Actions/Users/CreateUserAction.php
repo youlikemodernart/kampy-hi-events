@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace HiEvents\Http\Actions\Users;
 
 use HiEvents\DomainObjects\Enums\Role;
+use HiEvents\Exceptions\CannotUpdateResourceException;
 use HiEvents\Exceptions\ResourceConflictException;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Http\Request\User\CreateUserRequest;
@@ -35,12 +36,17 @@ class CreateUserAction extends BaseAction
             'invited_by' => $this->getAuthenticatedUser()->getId(),
             'account_id' => $this->getAuthenticatedAccountId(),
         ]);
+        $data['event_ids'] = $data['event_ids'] ?? [];
 
         try {
             $user = $this->createUserHandler->handle(CreateUserDTO::from($data));
         } catch (ResourceConflictException $e) {
             throw ValidationException::withMessages([
                 'email' => $e->getMessage(),
+            ]);
+        } catch (CannotUpdateResourceException $e) {
+            throw ValidationException::withMessages([
+                'event_ids' => $e->getMessage(),
             ]);
         }
 

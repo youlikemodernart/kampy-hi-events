@@ -8,6 +8,7 @@ use HiEvents\Http\Request\Event\CreateEventRequest;
 use HiEvents\Resources\Event\EventResource;
 use HiEvents\Services\Application\Handlers\Event\CreateEventHandler;
 use HiEvents\Services\Application\Handlers\Event\DTO\CreateEventDTO;
+use HiEvents\Services\Infrastructure\Authorization\IsAuthorizedService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -26,6 +27,7 @@ class CreateEventAction extends BaseAction
     public function __invoke(CreateEventRequest $request): JsonResponse
     {
         $authorisedUser = $this->getAuthenticatedUser();
+        app()->make(IsAuthorizedService::class)->validateAccountWideEventManagement($authorisedUser);
 
         $eventData = array_merge(
             $request->validated(),

@@ -30,6 +30,7 @@ class GetEventsAction extends BaseAction
                 'accountId' => $this->getAuthenticatedAccountId(),
                 'queryParams' => $this->getPaginationQueryParams($request),
             ]),
+            $this->getAuthenticatedUser(),
         );
 
         return $this->filterableResourceResponse(

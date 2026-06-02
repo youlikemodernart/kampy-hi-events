@@ -107,6 +107,29 @@ enum Role: string
         return in_array($permission, $this->getPermissions(), true);
     }
 
+    public function allowsEventAssignments(): bool
+    {
+        return in_array($this, [
+            self::ORGANIZER,
+            self::REPORTING,
+            self::CHECK_IN,
+        ], true);
+    }
+
+    public function requiresEventAssignments(): bool
+    {
+        return $this->allowsEventAssignments();
+    }
+
+    public function hasAccountWideEventAccess(): bool
+    {
+        return in_array($this, [
+            self::SUPERADMIN,
+            self::ADMIN,
+            self::FINANCE,
+        ], true);
+    }
+
     /**
      * @return array<string>
      */

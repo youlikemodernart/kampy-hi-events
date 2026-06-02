@@ -13,6 +13,7 @@ use HiEvents\Repository\Interfaces\AccountUserRepositoryInterface;
 use HiEvents\Repository\Interfaces\UserRepositoryInterface;
 use HiEvents\Services\Application\Handlers\User\DTO\UpdateUserDTO;
 use HiEvents\Services\Application\Handlers\User\UpdateUserHandler;
+use HiEvents\Services\Domain\Account\AccountUserEventAssignmentService;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Collection;
 use Mockery as m;
@@ -31,7 +32,8 @@ class UpdateUserHandlerTest extends TestCase
     {
         $userRepository = m::mock(UserRepositoryInterface::class);
         $accountUserRepository = m::mock(AccountUserRepositoryInterface::class);
-        $handler = $this->handler($userRepository, $accountUserRepository);
+        $assignmentService = m::mock(AccountUserEventAssignmentService::class);
+        $handler = $this->handler($userRepository, $accountUserRepository, $assignmentService);
 
         $accountUserRepository
             ->shouldReceive('findWhere')
@@ -47,6 +49,7 @@ class UpdateUserHandlerTest extends TestCase
 
         $userRepository->shouldNotReceive('updateWhere');
         $accountUserRepository->shouldNotReceive('updateWhere');
+        $assignmentService->shouldNotReceive('replaceAssignmentsForRole');
 
         $this->expectException(CannotUpdateResourceException::class);
 
@@ -57,7 +60,8 @@ class UpdateUserHandlerTest extends TestCase
     {
         $userRepository = m::mock(UserRepositoryInterface::class);
         $accountUserRepository = m::mock(AccountUserRepositoryInterface::class);
-        $handler = $this->handler($userRepository, $accountUserRepository);
+        $assignmentService = m::mock(AccountUserEventAssignmentService::class);
+        $handler = $this->handler($userRepository, $accountUserRepository, $assignmentService);
 
         $accountUserRepository
             ->shouldReceive('findWhere')
@@ -90,6 +94,12 @@ class UpdateUserHandlerTest extends TestCase
                 'id' => 77,
             ]);
 
+        $assignmentService
+            ->shouldReceive('replaceAssignmentsForRole')
+            ->once()
+            ->with(m::on(fn(AccountUserDomainObject $accountUser) => $accountUser->getId() === 77), Role::FINANCE, [], 123, 10)
+            ->andReturn(new Collection());
+
         $expectedUser = $this->user();
         $userRepository
             ->shouldReceive('findByIdAndAccountId')
@@ -103,6 +113,7 @@ class UpdateUserHandlerTest extends TestCase
     private function handler(
         UserRepositoryInterface $userRepository,
         AccountUserRepositoryInterface $accountUserRepository,
+        AccountUserEventAssignmentService $assignmentService,
     ): UpdateUserHandler
     {
         $databaseManager = m::mock(DatabaseManager::class);
@@ -115,6 +126,7 @@ class UpdateUserHandlerTest extends TestCase
             $userRepository,
             $logger,
             $accountUserRepository,
+            $assignmentService,
             $databaseManager,
         );
     }

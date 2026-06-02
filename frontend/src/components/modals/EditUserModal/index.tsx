@@ -1,7 +1,7 @@
 import {useForm} from "@mantine/form";
 import {GenericModalProps, User,} from "../../../types.ts";
 import {Modal} from "../../common/Modal";
-import {Alert, Button, Select, TextInput} from "@mantine/core";
+import {Alert, Button, MultiSelect, Select, TextInput} from "@mantine/core";
 import {useFormErrorResponseHandler} from "../../../hooks/useFormErrorResponseHandler.tsx";
 import {t, Trans} from "@lingui/macro";
 import {CustomSelect, ItemProps} from "../../common/CustomSelect";
@@ -11,6 +11,10 @@ import {UpdateUserRequest} from "../../../api/user.client.ts";
 import {useEditUser} from "../../../mutations/useEditUser.ts";
 import {NavLink} from "react-router";
 import {InputGroup} from "../../common/InputGroup";
+import {useGetEvents} from "../../../queries/useGetEvents.ts";
+
+const eventScopedRoles = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+const isEventScopedRole = (role?: string) => eventScopedRoles.includes(role ?? '');
 
 interface EditUserModalProps extends GenericModalProps {
     user: User;
@@ -19,6 +23,7 @@ interface EditUserModalProps extends GenericModalProps {
 export const EditUserModal = ({onClose, user}: EditUserModalProps) => {
     const ediMutation = useEditUser();
     const formErrorHandler = useFormErrorResponseHandler();
+    const eventsQuery = useGetEvents({perPage: 100, sortBy: 'start_date', sortDirection: 'asc'});
 
     const form = useForm<UpdateUserRequest>({
         initialValues: {
@@ -26,13 +31,28 @@ export const EditUserModal = ({onClose, user}: EditUserModalProps) => {
             last_name: user.last_name,
             status: String(user.status),
             role: String(user.role),
+            event_ids: (user.assigned_event_ids ?? [])
+                .filter(eventId => eventId !== undefined)
+                .map(eventId => String(eventId)),
+        },
+        validate: {
+            event_ids: (value, values) => isEventScopedRole(values.role) && (!value || value.length === 0)
+                ? t`Select at least one event`
+                : null,
         },
     });
+
+    const eventOptions = (eventsQuery.data?.data ?? [])
+        .filter(event => event.id !== undefined)
+        .map(event => ({value: String(event.id), label: event.title}));
 
     const handleCreate = (values: UpdateUserRequest) => {
         ediMutation.mutate({
             userId: user.id,
-            userData: values,
+            userData: {
+                ...values,
+                event_ids: isEventScopedRole(values.role) ? values.event_ids : [],
+            },
         }, {
             onSuccess: () => {
                 form.reset();
@@ -114,6 +134,19 @@ export const EditUserModal = ({onClose, user}: EditUserModalProps) => {
                         name={'role'}
                         disabled={user.is_account_owner}
                     />
+
+                    {isEventScopedRole(form.values.role) && (
+                        <MultiSelect
+                            required
+                            searchable
+                            disabled={user.is_account_owner}
+                            label={t`Assigned events`}
+                            description={t`This user will only see and operate on the selected events.`}
+                            placeholder={eventsQuery.isLoading ? t`Loading events...` : t`Select events`}
+                            data={eventOptions}
+                            {...form.getInputProps('event_ids')}
+                        />
+                    )}
 
                     {user.status !== 'INVITED' && (
                         <Select

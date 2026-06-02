@@ -6,6 +6,7 @@ use Exception;
 use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\DomainObjects\UserDomainObject;
 use HiEvents\Resources\BaseResource;
+use HiEvents\Services\Domain\Account\AccountUserEventAssignmentService;
 use Illuminate\Http\Request;
 
 /**
@@ -50,11 +51,31 @@ class UserResource extends BaseResource
                 'last_login_at' => $this->getCurrentAccountUser()?->getLastLoginAt(),
                 'status' => $this->getCurrentAccountUser()?->getStatus(),
                 'account_id' => $this->getCurrentAccountUser()?->getAccountId(),
+                'assigned_event_ids' => $this->getAssignedEventIds(),
             ]),
             $this->mergeWhen($this->getPendingEmail() !== null, [
                 'pending_email' => $this->getPendingEmail(),
             ]),
         ];
+    }
+
+    private function getAssignedEventIds(): array
+    {
+        $accountUser = $this->getCurrentAccountUser();
+
+        if ($accountUser === null) {
+            return [];
+        }
+
+        if ($accountUser->getEventAssignments() !== null) {
+            return $accountUser->getEventAssignments()
+                ->map(static fn($assignment) => $assignment->getEventId())
+                ->unique()
+                ->values()
+                ->all();
+        }
+
+        return app(AccountUserEventAssignmentService::class)->getAssignedEventIds($accountUser);
     }
 
     private function getCurrentRole(): ?Role

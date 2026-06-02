@@ -41,6 +41,7 @@ class UpdateUserAction extends BaseAction
                 'account_id' => $this->getAuthenticatedAccountId(),
                 'updated_by_user_id' => $authenticatedUser->getId(),
             ];
+        $userData['event_ids'] = $userData['event_ids'] ?? [];
 
         try {
             $user = $this->updateUserHandler->handle(UpdateUserDTO::fromArray($userData));

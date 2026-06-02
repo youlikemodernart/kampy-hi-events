@@ -1,17 +1,22 @@
 import {useForm} from "@mantine/form";
 import {GenericModalProps, InviteUserRequest,} from "../../../types.ts";
 import {Modal} from "../../common/Modal";
-import {Button, SimpleGrid, TextInput} from "@mantine/core";
+import {Button, MultiSelect, SimpleGrid, TextInput} from "@mantine/core";
 import {useFormErrorResponseHandler} from "../../../hooks/useFormErrorResponseHandler.tsx";
 import {t, Trans} from "@lingui/macro";
 import {useInviteUser} from "../../../mutations/useInviteUser.ts";
 import {CustomSelect, ItemProps} from "../../common/CustomSelect";
 import {IconUser, IconUserShield} from "@tabler/icons-react";
 import {showSuccess} from "../../../utilites/notifications.tsx";
+import {useGetEvents} from "../../../queries/useGetEvents.ts";
+
+const eventScopedRoles = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+const isEventScopedRole = (role?: string) => eventScopedRoles.includes(role ?? '');
 
 export const InviteUserModal = ({onClose}: GenericModalProps) => {
     const createMutation = useInviteUser();
     const formErrorHandler = useFormErrorResponseHandler();
+    const eventsQuery = useGetEvents({perPage: 100, sortBy: 'start_date', sortDirection: 'asc'});
 
     const form = useForm<InviteUserRequest>({
         initialValues: {
@@ -19,12 +24,25 @@ export const InviteUserModal = ({onClose}: GenericModalProps) => {
             first_name: '',
             last_name: '',
             role: 'ADMIN',
+            event_ids: [],
+        },
+        validate: {
+            event_ids: (value, values) => isEventScopedRole(values.role) && (!value || value.length === 0)
+                ? t`Select at least one event`
+                : null,
         },
     });
 
+    const eventOptions = (eventsQuery.data?.data ?? [])
+        .filter(event => event.id !== undefined)
+        .map(event => ({value: String(event.id), label: event.title}));
+
     const handleCreate = (values: InviteUserRequest) => {
         createMutation.mutate({
-            inviteUserData: values,
+            inviteUserData: {
+                ...values,
+                event_ids: isEventScopedRole(values.role) ? values.event_ids : [],
+            },
         }, {
             onSuccess: () => {
                 form.reset();
@@ -84,6 +102,18 @@ export const InviteUserModal = ({onClose}: GenericModalProps) => {
                     form={form}
                     name={'role'}
                 />
+
+                {isEventScopedRole(form.values.role) && (
+                    <MultiSelect
+                        required
+                        searchable
+                        label={t`Assigned events`}
+                        description={t`This user will only see and operate on the selected events.`}
+                        placeholder={eventsQuery.isLoading ? t`Loading events...` : t`Select events`}
+                        data={eventOptions}
+                        {...form.getInputProps('event_ids')}
+                    />
+                )}
 
                 <Button
                     fullWidth

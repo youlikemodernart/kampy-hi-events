@@ -19,15 +19,17 @@ use HiEvents\Repository\Interfaces\ImageRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrganizerRepositoryInterface;
 use HiEvents\Repository\Interfaces\TaxAndFeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\UserRepositoryInterface;
+use HiEvents\Services\Domain\Account\AccountUserEventAssignmentService;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Foundation\Application;
 
 readonly class IsAuthorizedService
 {
     public function __construct(
-        private Application                    $app,
-        private AccountUserRepositoryInterface $accountUserRepository,
-        private AuthManager                    $auth,
+        private Application                         $app,
+        private AccountUserRepositoryInterface      $accountUserRepository,
+        private AuthManager                         $auth,
+        private AccountUserEventAssignmentService   $accountUserEventAssignmentService,
     )
     {
     }
@@ -64,6 +66,22 @@ readonly class IsAuthorizedService
         }
     }
 
+    public function validateAccountWideEventManagement(UserDomainObject $authUser): void
+    {
+        $this->validateAccountWidePermission(Permission::EVENT_MANAGE, $authUser);
+    }
+
+    public function validateAccountWidePermission(Permission $permission, UserDomainObject $authUser): void
+    {
+        $this->validateUserPermission($permission, $authUser);
+
+        $role = $this->getCurrentRole($authUser);
+
+        if ($role === null || $role->requiresEventAssignments()) {
+            throw new UnauthorizedException(__('You are not authorized to perform this action.'));
+        }
+    }
+
     public function isActionAuthorized(
         int              $entityId,
         string           $entityType,
@@ -86,9 +104,9 @@ readonly class IsAuthorizedService
         $entity = $repository->findById($entityId);
 
         $result = match ($entityType) {
-            EventDomainObject::class,
+            EventDomainObject::class => $this->validateEvent($entity, $authUser, $authAccountId),
             ImageDomainObject::class,
-            OrganizerDomainObject::class => $entity?->getAccountId() === $authAccountId,
+            OrganizerDomainObject::class => $this->validateAccountWideEntity($entity, $authUser, $authAccountId),
             AccountDomainObject::class => $entity?->getId() === $authAccountId,
             UserDomainObject::class => $this->validateUserUpdate($entity, $authAccountId),
             TaxAndFeesDomainObject::class => $this->validateTax($entity, $authAccountId),
@@ -97,6 +115,44 @@ readonly class IsAuthorizedService
         if (!$result) {
             throw new UnauthorizedException();
         }
+    }
+
+    private function validateEvent(?EventDomainObject $event, UserDomainObject $authUser, int $authAccountId): bool
+    {
+        if ($event === null || $event->getAccountId() !== $authAccountId) {
+            return false;
+        }
+
+        $role = $this->getCurrentRole($authUser);
+        if ($role === null) {
+            return false;
+        }
+
+        if ($role->hasAccountWideEventAccess()) {
+            return true;
+        }
+
+        if (!$role->requiresEventAssignments()) {
+            return false;
+        }
+
+        $accountUser = $authUser->getCurrentAccountUser();
+        if ($accountUser === null) {
+            return false;
+        }
+
+        return $this->accountUserEventAssignmentService->isAssignedToEvent($accountUser, $event->getId());
+    }
+
+    private function validateAccountWideEntity(mixed $entity, UserDomainObject $authUser, int $authAccountId): bool
+    {
+        if ($entity === null || $entity->getAccountId() !== $authAccountId) {
+            return false;
+        }
+
+        $role = $this->getCurrentRole($authUser);
+
+        return $role !== null && !$role->requiresEventAssignments();
     }
 
     private function validateUserUpdate(?UserDomainObject $user, int $authAccountId): bool

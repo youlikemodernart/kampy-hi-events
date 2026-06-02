@@ -771,6 +771,37 @@ create index if not exists idx_account_users_user_id
 create index if not exists idx_account_users_role
     on account_users (role);
 
+create table if not exists account_user_event_assignments
+(
+    id                 bigint generated always as identity,
+    account_user_id    bigint                                            not null,
+    event_id           bigint                                            not null,
+    created_by_user_id bigint,
+    created_at         timestamp                                         not null,
+    updated_at         timestamp                                         not null,
+    deleted_at         timestamp,
+    primary key (id),
+    constraint account_user_event_assignments_account_user_id_fk
+        foreign key (account_user_id) references account_users
+            on delete cascade,
+    constraint account_user_event_assignments_event_id_fk
+        foreign key (event_id) references events
+            on delete cascade,
+    constraint account_user_event_assignments_created_by_user_id_fk
+        foreign key (created_by_user_id) references users
+            on delete set null
+);
+
+create index if not exists idx_account_user_event_assignments_account_user_id
+    on account_user_event_assignments (account_user_id);
+
+create index if not exists idx_account_user_event_assignments_event_id
+    on account_user_event_assignments (event_id);
+
+create unique index if not exists account_user_event_assignments_active_unique
+    on account_user_event_assignments (account_user_id, event_id)
+    where deleted_at is null;
+
 create view question_and_answer_views
         (question_id, event_id, belongs_to, question_type, first_name, last_name, attendee_id, order_id, title,
          answer)

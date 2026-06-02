@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace HiEvents\Repository\Eloquent;
 
 use HiEvents\DomainObjects\AccountUserDomainObject;
+use HiEvents\DomainObjects\AccountUserEventAssignmentDomainObject;
 use HiEvents\DomainObjects\UserDomainObject;
 use HiEvents\Models\AccountUser;
 use HiEvents\Models\User;
+use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -31,13 +33,19 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     public function findByIdAndAccountId(int $userId, int $accountId): UserDomainObject
     {
-        $accountUser = AccountUser::where('user_id', $userId)->where('account_id', $accountId)->first();
+        $accountUser = AccountUser::with('eventAssignments')
+            ->where('user_id', $userId)
+            ->where('account_id', $accountId)
+            ->first();
 
         if (!$accountUser) {
             throw new ResourceNotFoundException(__('User not found in this account'));
         }
 
+        $previousEagerLoads = $this->eagerLoads;
+        $this->eagerLoads = [new Relationship(AccountUserEventAssignmentDomainObject::class, name: 'eventAssignments')];
         $accountUser = $this->handleSingleResult($accountUser, AccountUserDomainObject::class);
+        $this->eagerLoads = $previousEagerLoads;
 
         try {
             /** @var UserDomainObject $user */

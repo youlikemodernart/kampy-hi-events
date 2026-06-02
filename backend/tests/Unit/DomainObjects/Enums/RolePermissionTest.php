@@ -69,6 +69,21 @@ class RolePermissionTest extends TestCase
         $this->assertFalse($role->hasPermission(Permission::EVENT_CONTENT_MANAGE));
     }
 
+    public function test_event_assignment_scope_helpers_match_ptw_launch_model(): void
+    {
+        foreach ([Role::ORGANIZER, Role::REPORTING, Role::CHECK_IN] as $role) {
+            $this->assertTrue($role->allowsEventAssignments());
+            $this->assertTrue($role->requiresEventAssignments());
+            $this->assertFalse($role->hasAccountWideEventAccess());
+        }
+
+        foreach ([Role::SUPERADMIN, Role::ADMIN, Role::FINANCE] as $role) {
+            $this->assertFalse($role->allowsEventAssignments());
+            $this->assertFalse($role->requiresEventAssignments());
+            $this->assertTrue($role->hasAccountWideEventAccess());
+        }
+    }
+
     public function test_admin_has_all_non_system_permissions_and_superadmin_has_every_permission(): void
     {
         $this->assertFalse(Role::ADMIN->hasPermission(Permission::SYSTEM_ADMIN));

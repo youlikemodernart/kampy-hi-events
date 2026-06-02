@@ -6,12 +6,14 @@ use HiEvents\DomainObjects\AccountDomainObject;
 use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\DomainObjects\Status\UserStatus;
 use HiEvents\DomainObjects\UserDomainObject;
+use HiEvents\Exceptions\CannotUpdateResourceException;
 use HiEvents\Exceptions\ResourceConflictException;
 use HiEvents\Exceptions\UnauthorizedException;
 use HiEvents\Repository\Interfaces\AccountRepositoryInterface;
 use HiEvents\Repository\Interfaces\UserRepositoryInterface;
 use HiEvents\Services\Application\Handlers\User\DTO\CreateUserDTO;
 use HiEvents\Services\Domain\Account\AccountUserAssociationService;
+use HiEvents\Services\Domain\Account\AccountUserEventAssignmentService;
 use HiEvents\Services\Domain\User\SendUserInvitationService;
 use Illuminate\Database\DatabaseManager;
 use Throwable;
@@ -21,14 +23,16 @@ readonly class CreateUserHandler
     public function __construct(
         private UserRepositoryInterface       $userRepository,
         private AccountRepositoryInterface    $accountRepository,
-        private SendUserInvitationService     $sendUserInvitationService,
-        private AccountUserAssociationService $accountUserAssociationService,
-        private DatabaseManager               $databaseManager,
+        private SendUserInvitationService          $sendUserInvitationService,
+        private AccountUserAssociationService      $accountUserAssociationService,
+        private AccountUserEventAssignmentService  $accountUserEventAssignmentService,
+        private DatabaseManager                    $databaseManager,
     )
     {
     }
 
     /**
+     * @throws CannotUpdateResourceException
      * @throws ResourceConflictException
      * @throws Throwable
      * @throws UnauthorizedException
@@ -48,13 +52,23 @@ readonly class CreateUserHandler
 
             $invitedUser = $existingUser ?? $this->createUser($userData, $authenticatedAccount);
 
-            $invitedUser->setCurrentAccountUser($this->accountUserAssociationService->associate(
+            $accountUser = $this->accountUserAssociationService->associate(
                 user: $invitedUser,
                 account: $authenticatedAccount,
                 role: $userData->role,
                 status: UserStatus::INVITED,
                 invitedByUserId: $userData->invited_by,
+            );
+
+            $accountUser->setEventAssignments($this->accountUserEventAssignmentService->replaceAssignmentsForRole(
+                accountUser: $accountUser,
+                role: $userData->role,
+                eventIds: $userData->event_ids,
+                accountId: $authenticatedAccount->getId(),
+                createdByUserId: $userData->invited_by,
             ));
+
+            $invitedUser->setCurrentAccountUser($accountUser);
 
             $this->sendUserInvitationService->sendInvitation($invitedUser, $authenticatedAccount->getId());
 

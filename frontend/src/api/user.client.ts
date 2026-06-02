@@ -18,6 +18,7 @@ export interface UpdateUserRequest {
     last_name: string;
     role: string;
     status: string;
+    event_ids?: string[];
 }
 
 export const userClient = {

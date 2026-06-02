@@ -9,6 +9,7 @@ use HiEvents\Repository\Eloquent\AccountConfigurationRepository;
 use HiEvents\Repository\Eloquent\AccountMessagingTierRepository;
 use HiEvents\Repository\Eloquent\AccountRepository;
 use HiEvents\Repository\Eloquent\AccountStripePlatformRepository;
+use HiEvents\Repository\Eloquent\AccountUserEventAssignmentRepository;
 use HiEvents\Repository\Eloquent\AccountUserRepository;
 use HiEvents\Repository\Eloquent\AccountVatSettingRepository;
 use HiEvents\Repository\Eloquent\AffiliateRepository;
@@ -56,6 +57,7 @@ use HiEvents\Repository\Interfaces\AccountConfigurationRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountMessagingTierRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountStripePlatformRepositoryInterface;
+use HiEvents\Repository\Interfaces\AccountUserEventAssignmentRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountUserRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountVatSettingRepositoryInterface;
 use HiEvents\Repository\Interfaces\AffiliateRepositoryInterface;
@@ -130,6 +132,7 @@ class RepositoryServiceProvider extends ServiceProvider
         EventSettingsRepositoryInterface::class => EventSettingsRepository::class,
         OrganizerRepositoryInterface::class => OrganizerRepository::class,
         AccountUserRepositoryInterface::class => AccountUserRepository::class,
+        AccountUserEventAssignmentRepositoryInterface::class => AccountUserEventAssignmentRepository::class,
         CapacityAssignmentRepositoryInterface::class => CapacityAssignmentRepository::class,
         StripeCustomerRepositoryInterface::class => StripeCustomerRepository::class,
         CheckInListRepositoryInterface::class => CheckInListRepository::class,

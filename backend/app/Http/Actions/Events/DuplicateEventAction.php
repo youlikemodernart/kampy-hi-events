@@ -8,6 +8,7 @@ use HiEvents\Http\Request\Event\DuplicateEventRequest;
 use HiEvents\Resources\Event\EventResource;
 use HiEvents\Services\Application\Handlers\Event\DuplicateEventHandler;
 use HiEvents\Services\Domain\Event\DTO\DuplicateEventDataDTO;
+use HiEvents\Services\Infrastructure\Authorization\IsAuthorizedService;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -23,6 +24,7 @@ class DuplicateEventAction extends BaseAction
     public function __invoke(int $eventId, DuplicateEventRequest $request): JsonResponse
     {
         $this->isActionAuthorized($eventId, EventDomainObject::class);
+        app()->make(IsAuthorizedService::class)->validateAccountWideEventManagement($this->getAuthenticatedUser());
 
         $event = $this->handler->handle(new DuplicateEventDataDTO(
             eventId: $eventId,

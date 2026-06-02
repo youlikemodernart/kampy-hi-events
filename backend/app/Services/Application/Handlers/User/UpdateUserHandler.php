@@ -10,6 +10,7 @@ use HiEvents\Exceptions\CannotUpdateResourceException;
 use HiEvents\Repository\Interfaces\AccountUserRepositoryInterface;
 use HiEvents\Repository\Interfaces\UserRepositoryInterface;
 use HiEvents\Services\Application\Handlers\User\DTO\UpdateUserDTO;
+use HiEvents\Services\Domain\Account\AccountUserEventAssignmentService;
 use Illuminate\Database\DatabaseManager;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -19,8 +20,9 @@ class UpdateUserHandler
     public function __construct(
         private readonly UserRepositoryInterface        $userRepository,
         private readonly LoggerInterface                $logger,
-        private readonly AccountUserRepositoryInterface $accountUserRepository,
-        private readonly DatabaseManager                $databaseManager,
+        private readonly AccountUserRepositoryInterface      $accountUserRepository,
+        private readonly AccountUserEventAssignmentService   $accountUserEventAssignmentService,
+        private readonly DatabaseManager                     $databaseManager,
     )
     {
     }
@@ -93,6 +95,16 @@ class UpdateUserHandler
                 'id' => $accountUser->getId(),
             ]
         );
+
+        $accountUser->setRole($updateUserData->role->name);
+        $accountUser->setStatus($updateUserData->status->name);
+        $accountUser->setEventAssignments($this->accountUserEventAssignmentService->replaceAssignmentsForRole(
+            accountUser: $accountUser,
+            role: $updateUserData->role,
+            eventIds: $updateUserData->event_ids,
+            accountId: $updateUserData->account_id,
+            createdByUserId: $updateUserData->updated_by_user_id,
+        ));
 
         $this->logger->info('User updated', [
             'id' => $updateUserData->id,
