@@ -27,6 +27,8 @@ interface Link {
     onClick?: (event: any) => void;
 }
 
+const EVENT_SCOPED_ROLES = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+
 export const GlobalMenu = () => {
     const {data: me} = useGetMe();
     const [aboutModalOpen, {open: openAboutModal, close: closeAboutModal}] = useDisclosure(false);
@@ -34,7 +36,7 @@ export const GlobalMenu = () => {
         open: openCreateOrganizerModal,
         close: closeCreateOrganizerModal
     }] = useDisclosure(false);
-
+    const hasEventScopedAccess = EVENT_SCOPED_ROLES.includes(me?.role ?? '');
 
     const links: Link[] = [
         {
@@ -76,7 +78,7 @@ export const GlobalMenu = () => {
         });
     }
 
-    if (currentUserCan(me?.permissions, 'organizer.manage')) {
+    if (currentUserCan(me?.permissions, 'organizer.manage') && !hasEventScopedAccess) {
         links.push({
             label: t`Create Organizer`,
             icon: IconPlus,
@@ -125,7 +127,7 @@ export const GlobalMenu = () => {
                 </Menu.Dropdown>
             </Menu>
             {aboutModalOpen && <AboutModal onClose={closeAboutModal}/>}
-            {createOrganizerModalOpen && <CreateOrganizerModal onClose={closeCreateOrganizerModal}/>}
+            {!hasEventScopedAccess && createOrganizerModalOpen && <CreateOrganizerModal onClose={closeCreateOrganizerModal}/>}
         </>
     );
 };

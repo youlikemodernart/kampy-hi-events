@@ -6,14 +6,15 @@ import {NoResultsSplash} from "../NoResultsSplash";
 interface NoEventsBlankSlateProps {
     eventsState?: 'upcoming' | 'ended' | 'archived' | string
     openCreateModal: () => void;
+    showCreateButton?: boolean;
 }
 
-export const NoEventsBlankSlate = ({eventsState, openCreateModal}: NoEventsBlankSlateProps) => {
+export const NoEventsBlankSlate = ({eventsState, openCreateModal, showCreateButton = true}: NoEventsBlankSlateProps) => {
     return (
         <NoResultsSplash
             heading={t`No events to show`}
             imageHref={'/blank-slate/events.svg'}
-            subHeading={(
+            subHeading={showCreateButton ? (
                 <>
                     <p>
                         {(eventsState === 'upcoming' || !eventsState) && t`Once you create an event, you'll see it here.`}
@@ -27,7 +28,7 @@ export const NoEventsBlankSlate = ({eventsState, openCreateModal}: NoEventsBlank
                         onClick={openCreateModal}>{t`Create Event`}
                     </Button>
                 </>
-            )}
+            ) : undefined}
         />
     );
 }

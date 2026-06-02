@@ -85,16 +85,18 @@ export const SwitchOrganizerModal: React.FC<SwitchOrganizerModalProps> = ({
                             </>
                         )}
 
-                        <button
-                            className={classes.createButton}
-                            onClick={() => {
-                                onClose();
-                                onCreateOrganizer?.();
-                            }}
-                        >
-                            <IconPlus size={18}/>
-                            <Trans>Create Organizer</Trans>
-                        </button>
+                        {onCreateOrganizer && (
+                            <button
+                                className={classes.createButton}
+                                onClick={() => {
+                                    onClose();
+                                    onCreateOrganizer();
+                                }}
+                            >
+                                <IconPlus size={18}/>
+                                <Trans>Create Organizer</Trans>
+                            </button>
+                        )}
 
                         {archivedOrganizers.length > 0 && (
                             <>

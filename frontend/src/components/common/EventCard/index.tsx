@@ -23,6 +23,8 @@ import {formatCurrency} from "../../../utilites/currency.ts";
 import {formatNumber} from "../../../utilites/helpers.ts";
 import {formatDateWithLocale, relativeDate} from "../../../utilites/dates.ts";
 import {Card} from "../Card";
+import {useGetMe} from "../../../queries/useGetMe.ts";
+import {currentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 const placeholderGradients = [
     'linear-gradient(135deg, var(--mantine-color-violet-5) 0%, var(--mantine-color-indigo-5) 100%)',
@@ -35,6 +37,8 @@ const placeholderGradients = [
     'linear-gradient(135deg, var(--mantine-color-cyan-5) 0%, var(--mantine-color-teal-5) 100%)',
 ];
 
+const EVENT_SCOPED_ROLES = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+
 interface EventCardProps {
     event: Event;
 }
@@ -44,6 +48,10 @@ export function EventCard({event}: EventCardProps) {
     const [isDuplicateModalOpen, duplicateModal] = useDisclosure(false);
     const [eventId, setEventId] = useState<IdParam>();
     const statusToggleMutation = useUpdateEventStatus();
+    const {data: me} = useGetMe();
+    const hasEventScopedAccess = EVENT_SCOPED_ROLES.includes(me?.role ?? '');
+    const canDuplicateEvent = currentUserCan(me?.permissions, 'event.manage') && !hasEventScopedAccess;
+    const canUpdateEventStatus = currentUserCan(me?.permissions, 'event.publish');
 
     const coverImage = event.images?.find(img => img.type === 'EVENT_COVER');
     const gradientIndex = event.id ? Number(event.id) % placeholderGradients.length : 0;
@@ -142,11 +150,13 @@ export function EventCard({event}: EventCardProps) {
                     label: t`Duplicate event`,
                     icon: <IconCopy size={14}/>,
                     onClick: handleDuplicate,
+                    visible: canDuplicateEvent,
                 },
                 {
                     label: event?.status === 'ARCHIVED' ? t`Restore event` : t`Archive event`,
                     icon: <IconArchive size={14}/>,
                     onClick: handleStatusToggle,
+                    visible: canUpdateEventStatus,
                 },
             ],
         },
@@ -228,13 +238,17 @@ export function EventCard({event}: EventCardProps) {
                                 )}
                             </div>
                             <div className={classes.footer}>
-                                <NavLink
-                                    to={`/manage/organizer/${event?.organizer?.id}`}
-                                    className={classes.organizer}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    {event?.organizer?.name}
-                                </NavLink>
+                                {hasEventScopedAccess ? (
+                                    <span className={classes.organizer}>{event?.organizer?.name}</span>
+                                ) : (
+                                    <NavLink
+                                        to={`/manage/organizer/${event?.organizer?.id}`}
+                                        className={classes.organizer}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {event?.organizer?.name}
+                                    </NavLink>
+                                )}
                                 {ticketAvailability && (
                                     <span className={`${classes.ticketStatus} ${classes[`ticket-${ticketAvailability.status}`]}`}>
                                         {ticketAvailability.text}

@@ -27,6 +27,10 @@ import {EventsDashboardStatusButtons} from "../../../common/EventsDashboardStatu
 import {NoEventsBlankSlate} from "../../../common/NoEventsBlankSlate";
 import {useState} from "react";
 import {getConfig} from "../../../../utilites/config.ts";
+import {useGetMe} from "../../../../queries/useGetMe.ts";
+import {currentUserCan} from "../../../../hooks/useIsCurrentUserAdmin.ts";
+
+const EVENT_SCOPED_ROLES = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
 
 const DashboardSkeleton = () => {
     return (
@@ -53,18 +57,24 @@ export function Dashboard() {
         isFetched: isEventsFetched,
         isFetching: isEventsFetching,
     } = useGetEvents(getEventQueryFilters(searchParams) as QueryFilters);
-    const organizersQuery = useGetOrganizers();
+    const {data: me, isSuccess: isMeSuccess} = useGetMe();
+    const hasEventScopedAccess = EVENT_SCOPED_ROLES.includes(me?.role ?? '');
+    const hasAccountWideOrganizerAccess = isMeSuccess && !hasEventScopedAccess;
+    const canCreateEvent = currentUserCan(me?.permissions, 'event.manage') && !hasEventScopedAccess;
+    const canCreateOrganizer = currentUserCan(me?.permissions, 'organizer.manage') && !hasEventScopedAccess;
+    const canShowCreateMenu = canCreateEvent || canCreateOrganizer;
+    const organizersQuery = useGetOrganizers({enabled: hasAccountWideOrganizerAccess});
     const pagination = eventData?.meta;
     const events = eventData?.data;
-    const organizers = organizersQuery?.data?.data;
+    const organizers = hasAccountWideOrganizerAccess ? organizersQuery?.data?.data : undefined;
 
     // If there are no organizers, redirect to the welcome page
-    if (organizersQuery.isFetched && organizers?.length === 0) {
+    if (hasAccountWideOrganizerAccess && organizersQuery.isFetched && organizers?.length === 0) {
         return <Navigate to={'/welcome'}/>
     }
 
     // If there's only one organizer, redirect to their dashboard
-    if (organizersQuery.isFetched && organizers?.length === 1) {
+    if (hasAccountWideOrganizerAccess && organizersQuery.isFetched && organizers?.length === 1) {
         return <Navigate to={'/manage/organizer/' + organizers[0].id}/>;
     }
 
@@ -89,7 +99,7 @@ export function Dashboard() {
                 </div>
 
                 {/* Organizer Navigation */}
-                {organizers && organizers.length === 1 ? (
+                {hasAccountWideOrganizerAccess && organizers && organizers.length === 1 ? (
                     <button
                         className={classes.organizerButton}
                         onClick={() => navigate(`/manage/organizer/${organizers[0].id}`)}
@@ -109,7 +119,7 @@ export function Dashboard() {
                         <span className={classes.organizerName}>{organizers[0].name}</span>
                         <IconArrowRight size={16} className={classes.arrowIcon}/>
                     </button>
-                ) : organizers && organizers.length > 1 ? (
+                ) : hasAccountWideOrganizerAccess && organizers && organizers.length > 1 ? (
                     <button
                         className={classes.organizerButton}
                         onClick={() => setOrganizerModalOpen(true)}
@@ -153,7 +163,7 @@ export function Dashboard() {
                     pagination={pagination}
                 />
             )}>
-                <>
+                {canShowCreateMenu && (
                     <Menu
                         transitionProps={{transition: 'pop-top-right'}}
                         position="bottom"
@@ -173,29 +183,33 @@ export function Dashboard() {
                             </Button>
                         </Menu.Target>
                         <Menu.Dropdown>
-                            <Menu.Item
-                                leftSection={
-                                    <IconCalendarPlus
-                                        stroke={1.5}
-                                    />
-                                }
-                                onClick={openCreateModal}
-                            >
-                                {t`Event`}
-                            </Menu.Item>
-                            <Menu.Item
-                                leftSection={
-                                    <IconUserPlus
-                                        stroke={1.5}
-                                    />
-                                }
-                                onClick={openCreateOrganizerModal}
-                            >
-                                {t`Organizer`}
-                            </Menu.Item>
+                            {canCreateEvent && (
+                                <Menu.Item
+                                    leftSection={
+                                        <IconCalendarPlus
+                                            stroke={1.5}
+                                        />
+                                    }
+                                    onClick={openCreateModal}
+                                >
+                                    {t`Event`}
+                                </Menu.Item>
+                            )}
+                            {canCreateOrganizer && (
+                                <Menu.Item
+                                    leftSection={
+                                        <IconUserPlus
+                                            stroke={1.5}
+                                        />
+                                    }
+                                    onClick={openCreateOrganizerModal}
+                                >
+                                    {t`Organizer`}
+                                </Menu.Item>
+                            )}
                         </Menu.Dropdown>
                     </Menu>
-                </>
+                )}
             </ToolBar>
 
             <EventsDashboardStatusButtons
@@ -204,7 +218,11 @@ export function Dashboard() {
             />
 
             {(events?.length === 0 && isEventsFetched)
-                && <NoEventsBlankSlate openCreateModal={openCreateModal} eventsState={eventsState}/>}
+                && <NoEventsBlankSlate
+                    openCreateModal={openCreateModal}
+                    eventsState={eventsState}
+                    showCreateButton={canCreateEvent}
+                />}
 
             <div>
                 {(isEventsFetching && !events) && <DashboardSkeleton/>}
@@ -220,16 +238,16 @@ export function Dashboard() {
                                total={Number(pagination?.last_page)}
                 />
             }
-            {createModalOpen && <CreateEventModal onClose={closeCreateModal}/>}
-            {createOrganizerModalOpen && <CreateOrganizerModal onClose={closeCreateOrganizerModal}/>}
+            {canCreateEvent && createModalOpen && <CreateEventModal onClose={closeCreateModal}/>}
+            {canCreateOrganizer && createOrganizerModalOpen && <CreateOrganizerModal onClose={closeCreateOrganizerModal}/>}
             {organizerModalOpen && (
                 <SwitchOrganizerModal
                     opened={organizerModalOpen}
                     onClose={() => setOrganizerModalOpen(false)}
-                    onCreateOrganizer={() => {
+                    onCreateOrganizer={canCreateOrganizer ? () => {
                         setOrganizerModalOpen(false);
                         openCreateOrganizerModal();
-                    }}
+                    } : undefined}
                     heading={t`Choose an Organizer`}
                     excludeCurrentOrganizer={false}
                 />

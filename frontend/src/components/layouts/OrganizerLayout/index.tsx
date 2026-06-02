@@ -273,9 +273,9 @@ const OrganizerLayout = () => {
                 <SwitchOrganizerModal
                     opened={switchOrganizerModalOpen}
                     onClose={closeSwitchModal}
-                    onCreateOrganizer={() => setShowCreateOrganizerModal(true)}
+                    onCreateOrganizer={canManageOrganizer ? () => setShowCreateOrganizerModal(true) : undefined}
                 />}
-            {showCreateOrganizerModal && (
+            {canManageOrganizer && showCreateOrganizerModal && (
                 <CreateOrganizerModal onClose={() => setShowCreateOrganizerModal(false)} />
             )}
             {organizer && shareModalOpen && (
