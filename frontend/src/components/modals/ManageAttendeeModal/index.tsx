@@ -12,7 +12,7 @@ import {IconEdit, IconNotebook, IconQuestionMark, IconReceipt, IconTicket, IconU
 import {LoadingMask} from "../../common/LoadingMask";
 import {AttendeeDetails} from "../../common/AttendeeDetails";
 import {OrderDetails} from "../../common/OrderDetails";
-import {QuestionList} from "../../common/QuestionAndAnswerList";
+import {QuestionAndAnswerList} from "../../common/QuestionAndAnswerList";
 import {AttendeeTicket} from "../../common/AttendeeTicket";
 import {getInitials} from "../../../utilites/helpers.ts";
 import {t} from "@lingui/macro";
@@ -35,7 +35,7 @@ interface ManageAttendeeModalProps extends GenericModalProps {
 export const ManageAttendeeModal = ({onClose, attendeeId}: ManageAttendeeModalProps) => {
     const {eventId} = useParams();
     const {data: attendee, refetch: refetchAttendee} = useGetAttendee(eventId, attendeeId);
-    const {data: order} = useGetOrder(eventId, attendee?.order_id);
+    const {data: order, refetch: refetchOrder} = useGetOrder(eventId, attendee?.order_id);
     const {data: event} = useGetEvent(eventId);
     const errorHandler = useFormErrorResponseHandler();
     const mutation = useUpdateAttendee();
@@ -70,7 +70,7 @@ export const ManageAttendeeModal = ({onClose, attendeeId}: ManageAttendeeModalPr
         if (!form.values.product_id) {
             return;
         }
-        let productPriceId = event?.product_categories
+        const productPriceId = event?.product_categories
             ?.flatMap(category => category.products)
             .find(product => String(product?.id) === String(form.values.product_id))?.prices?.[0]?.id;
 
@@ -102,7 +102,14 @@ export const ManageAttendeeModal = ({onClose, attendeeId}: ManageAttendeeModalPr
     };
 
     const fullName = `${attendee.first_name} ${attendee.last_name}`;
-    const hasQuestions = attendee.question_answers && attendee.question_answers.length > 0;
+    const orderQuestionAnswers = (order.question_answers || []).filter((qa) => qa.belongs_to === 'ORDER');
+    const attendeeQuestionAnswers = attendee.question_answers || [];
+    const combinedQuestionAnswers = [...orderQuestionAnswers, ...attendeeQuestionAnswers];
+    const hasQuestions = combinedQuestionAnswers.length > 0;
+    const refetchQuestionAnswers = () => {
+        void refetchAttendee();
+        void refetchOrder();
+    };
 
     const detailsTab = (
         <div>
@@ -182,11 +189,11 @@ export const ManageAttendeeModal = ({onClose, attendeeId}: ManageAttendeeModalPr
                     value: "questions",
                     icon: IconQuestionMark,
                     title: t`Questions & Answers`,
-                    count: hasQuestions ? attendee?.question_answers?.length : undefined,
+                    count: hasQuestions ? combinedQuestionAnswers.length : undefined,
                     content: hasQuestions ? (
-                        <QuestionList
-                            onEditAnswer={refetchAttendee}
-                            questions={attendee.question_answers as QuestionAnswer[]}
+                        <QuestionAndAnswerList
+                            onEditAnswer={refetchQuestionAnswers}
+                            questionAnswers={combinedQuestionAnswers as QuestionAnswer[]}
                         />
                     ) : (
                         <Text c="dimmed" ta="center" py="xl">
