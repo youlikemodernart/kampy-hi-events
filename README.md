@@ -28,6 +28,17 @@ Self-hosted or cloud. Your events, your brand, your data.
 
 <br>
 
+## Kampy modifications
+
+> [!IMPORTANT]
+> This repository is a Kampy-maintained modified version of Hi.Events, operated for
+> Kamp Love's Kampy ticketing path. Upstream base: Hi.Events v1.9.0-beta, commit
+> 34f3b6ae922956dddbdf7c2993edd6822d293269. Modification dates are recorded in the Git
+> history of this repository. Complete corresponding source for the running service:
+> https://github.com/youlikemodernart/kampy-hi-events. License: AGPL-3.0 with the
+> upstream Hi.Events additional terms (see LICENCE). The "Powered by Hi.Events"
+> attribution is retained unchanged. Notice added 2026-06-11.
+
 ## Why Hi.Events?
 
 Most ticketing platforms charge per-ticket fees and lock your data into their ecosystem. **Hi.Events is a modern,
