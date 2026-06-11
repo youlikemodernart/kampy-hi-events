@@ -170,7 +170,7 @@ class IsAuthorizedServiceTest extends TestCase
         );
     }
 
-    public function test_finance_keeps_account_wide_event_access_for_ptw_finance_setup(): void
+    public function test_finance_keeps_account_wide_event_access_for_finance_setup(): void
     {
         $assignmentService = m::mock(AccountUserEventAssignmentService::class);
         $assignmentService->shouldNotReceive('isAssignedToEvent');

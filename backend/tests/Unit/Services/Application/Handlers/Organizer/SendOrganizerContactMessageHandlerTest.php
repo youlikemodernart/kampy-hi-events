@@ -77,7 +77,7 @@ class SendOrganizerContactMessageHandlerTest extends TestCase
         $mailer
             ->shouldReceive('to')
             ->once()
-            ->with('organizer@example.test', 'PTW')
+            ->with('organizer@example.test', 'Kampy')
             ->andReturnSelf();
 
         $mailer
@@ -112,7 +112,7 @@ class SendOrganizerContactMessageHandlerTest extends TestCase
         $mailer
             ->shouldReceive('to')
             ->once()
-            ->with('organizer@example.test', 'PTW')
+            ->with('organizer@example.test', 'Kampy')
             ->andReturnSelf();
 
         $mailer
@@ -151,7 +151,7 @@ class SendOrganizerContactMessageHandlerTest extends TestCase
         return (new OrganizerDomainObject())
             ->setId(22)
             ->setAccountId(123)
-            ->setName('PTW')
+            ->setName('Kampy')
             ->setEmail('organizer@example.test')
             ->setTimezone('America/Phoenix')
             ->setStatus($status->value)

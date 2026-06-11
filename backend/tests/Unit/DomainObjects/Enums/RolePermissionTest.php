@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class RolePermissionTest extends TestCase
 {
-    public function test_assignable_roles_include_ptw_staff_presets_but_exclude_superadmin(): void
+    public function test_assignable_roles_include_staff_presets_but_exclude_superadmin(): void
     {
         $this->assertSame([
             Role::ADMIN->value,
@@ -69,7 +69,7 @@ class RolePermissionTest extends TestCase
         $this->assertFalse($role->hasPermission(Permission::EVENT_CONTENT_MANAGE));
     }
 
-    public function test_event_assignment_scope_helpers_match_ptw_launch_model(): void
+    public function test_event_assignment_scope_helpers_match_launch_model(): void
     {
         foreach ([Role::ORGANIZER, Role::REPORTING, Role::CHECK_IN] as $role) {
             $this->assertTrue($role->allowsEventAssignments());
