@@ -73,6 +73,14 @@ export const PoweredByFooter = (
         <div {...props} className={classNames(classes.poweredBy, props.className)}>
             <div className={classes.poweredByText}>
                 {footerContent}
+                {" "}&middot;{" "}
+                <a
+                    href="https://github.com/youlikemodernart/kampy-hi-events"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {t`Source`}
+                </a>
             </div>
         </div>
     );

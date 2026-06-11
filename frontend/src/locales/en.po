@@ -8037,6 +8037,7 @@ msgstr "Sorry for the inconvenience."
 msgid "Sorry, this promo code is not recognized"
 msgstr "Sorry, this promo code is not recognized"
 
+#: src/components/common/PoweredByFooter/index.tsx:82
 #: src/components/routes/admin/Attribution/index.tsx:106
 msgid "Source"
 msgstr "Source"

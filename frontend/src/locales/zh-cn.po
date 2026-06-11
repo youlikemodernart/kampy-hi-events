@@ -8033,6 +8033,7 @@ msgstr "对于给您带来的不便，我们深表歉意。"
 msgid "Sorry, this promo code is not recognized"
 msgstr "对不起，此优惠代码不可用"
 
+#: src/components/common/PoweredByFooter/index.tsx:82
 #: src/components/routes/admin/Attribution/index.tsx:106
 msgid "Source"
 msgstr "来源"
