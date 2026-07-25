@@ -9,6 +9,7 @@ class RefundOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'refund_request_id' => 'required|uuid',
             'amount' => 'required|numeric|gt:0',
             'notify_buyer' => 'required|boolean',
             'cancel_order' => 'required|boolean',

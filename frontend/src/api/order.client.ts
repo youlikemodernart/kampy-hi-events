@@ -51,6 +51,7 @@ export interface ProductFormPayload {
 }
 
 export interface RefundOrderPayload {
+    refund_request_id: string;
     amount: number;
     notify_buyer: boolean;
     cancel_order: boolean;

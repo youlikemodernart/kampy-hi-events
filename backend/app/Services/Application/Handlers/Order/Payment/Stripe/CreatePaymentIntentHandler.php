@@ -22,15 +22,19 @@ use HiEvents\Exceptions\UnauthorizedException;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\AccountRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
+use HiEvents\Repository\Interfaces\StripeDisputeRepositoryInterface;
 use HiEvents\Repository\Interfaces\StripePaymentsRepositoryInterface;
 use HiEvents\Services\Domain\Payment\Stripe\DTOs\CreatePaymentIntentRequestDTO;
 use HiEvents\Services\Domain\Payment\Stripe\DTOs\CreatePaymentIntentResponseDTO;
 use HiEvents\Services\Domain\Payment\Stripe\KampStripeMetadataService;
 use HiEvents\Services\Domain\Payment\Stripe\StripePaymentIntentCreationService;
+use HiEvents\Services\Domain\Payment\Stripe\StripeProviderObjectLockService;
 use HiEvents\Services\Infrastructure\Session\CheckoutSessionManagementService;
 use HiEvents\Services\Infrastructure\Stripe\StripeClientFactory;
 use HiEvents\Services\Infrastructure\Stripe\StripeConfigurationService;
 use HiEvents\Values\MoneyValue;
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
 use Stripe\Exception\ApiErrorException;
 use Throwable;
@@ -38,21 +42,20 @@ use Throwable;
 readonly class CreatePaymentIntentHandler
 {
     public function __construct(
-        private OrderRepositoryInterface           $orderRepository,
+        private OrderRepositoryInterface $orderRepository,
         private StripePaymentIntentCreationService $stripePaymentService,
-        private CheckoutSessionManagementService   $sessionIdentifierService,
-        private StripePaymentsRepositoryInterface  $stripePaymentsRepository,
-        private AccountRepositoryInterface         $accountRepository,
-        private StripeClientFactory                $stripeClientFactory,
-        private StripeConfigurationService         $stripeConfigurationService,
-        private KampStripeMetadataService           $kampStripeMetadataService,
-    )
-    {
-    }
+        private CheckoutSessionManagementService $sessionIdentifierService,
+        private StripePaymentsRepositoryInterface $stripePaymentsRepository,
+        private AccountRepositoryInterface $accountRepository,
+        private StripeClientFactory $stripeClientFactory,
+        private StripeConfigurationService $stripeConfigurationService,
+        private KampStripeMetadataService $kampStripeMetadataService,
+        private StripeDisputeRepositoryInterface $stripeDisputeRepository,
+        private DatabaseManager $databaseManager,
+        private StripeProviderObjectLockService $providerObjectLockService,
+    ) {}
 
     /**
-     * @param string $orderShortId
-     * @return CreatePaymentIntentResponseDTO
      * @throws CreatePaymentIntentFailedException
      * @throws MathException
      * @throws NumberFormatException
@@ -73,7 +76,7 @@ readonly class CreatePaymentIntentHandler
             ))
             ->findByShortId($orderShortId);
 
-        if (!$order || !$this->sessionIdentifierService->verifySession($order->getSessionId())) {
+        if (! $order || ! $this->sessionIdentifierService->verifySession($order->getSessionId())) {
             throw new UnauthorizedException(__('Sorry, we could not verify your session. Please create a new order.'));
         }
 
@@ -99,7 +102,7 @@ readonly class CreatePaymentIntentHandler
         $stripeAccountId = $account->getActiveStripeAccountId();
 
         // If no platform is configured, we can still process payments with regular Stripe keys
-        if (!$stripePlatform) {
+        if (! $stripePlatform) {
             $stripePlatform = null; // This will use default keys in StripeClientFactory
         }
 
@@ -115,7 +118,7 @@ readonly class CreatePaymentIntentHandler
         $description = __(':item_count item(s) for event: :event_name (Order :order_short_id)', [
             'event_name' => Str::limit($order->getEvent()?->getTitle() ?? __('Event'), 75),
             'order_short_id' => $orderShortId,
-            'item_count' => $order->getOrderItems()->sum(fn(OrderItemDomainObject $item) => $item->getQuantity()),
+            'item_count' => $order->getOrderItems()->sum(fn (OrderItemDomainObject $item) => $item->getQuantity()),
         ]);
         $paymentIntentRequest = CreatePaymentIntentRequestDTO::fromArray([
             'amount' => MoneyValue::fromFloat($order->getTotalGross(), $order->getCurrency()),
@@ -137,6 +140,14 @@ readonly class CreatePaymentIntentHandler
                 throw new KampStripeMetadataConfigurationException('existing_payment_context_mismatch');
             }
 
+            $this->databaseManager->transaction(function () use ($stripePayment): void {
+                $this->providerObjectLockService->acquirePaymentIdentity(
+                    $stripePayment->getPaymentIntentId(),
+                    $stripePayment->getChargeId(),
+                );
+                $this->linkPendingDisputes($stripePayment);
+            });
+
             return new CreatePaymentIntentResponseDTO(
                 paymentIntentId: $stripePayment->getPaymentIntentId(),
                 clientSecret: $this->stripePaymentService->retrieveValidatedPaymentIntentClientSecretWithClient(
@@ -157,17 +168,81 @@ readonly class CreatePaymentIntentHandler
 
         $applicationFeeData = $paymentIntent->applicationFeeData;
 
-        $this->stripePaymentsRepository->create([
-            StripePaymentDomainObjectAbstract::ORDER_ID => $order->getId(),
-            StripePaymentDomainObjectAbstract::PAYMENT_INTENT_ID => $paymentIntent->paymentIntentId,
-            StripePaymentDomainObjectAbstract::CONNECTED_ACCOUNT_ID => $stripeAccountId,
-            StripePaymentDomainObjectAbstract::APPLICATION_FEE_GROSS => $applicationFeeData?->grossApplicationFee?->toMinorUnit() ?? 0,
-            StripePaymentDomainObjectAbstract::APPLICATION_FEE_NET => $applicationFeeData?->netApplicationFee?->toMinorUnit() ?? 0,
-            StripePaymentDomainObjectAbstract::APPLICATION_FEE_VAT => $applicationFeeData?->applicationFeeVatAmount?->toMinorUnit() ?? 0,
-            StripePaymentDomainObjectAbstract::APPLICATION_FEE_VAT_RATE => $applicationFeeData?->applicationFeeVatRate,
-            StripePaymentDomainObjectAbstract::CURRENCY => strtoupper($order->getCurrency()),
-            StripePaymentDomainObjectAbstract::STRIPE_PLATFORM => $stripePlatform?->value,
-        ]);
+        try {
+            /** @var StripePaymentDomainObject $stripePayment */
+            $stripePayment = $this->databaseManager->transaction(function () use (
+                $order,
+                $paymentIntent,
+                $stripeAccountId,
+                $applicationFeeData,
+                $stripePlatform,
+            ): StripePaymentDomainObject {
+                $this->providerObjectLockService->acquirePaymentIdentity($paymentIntent->paymentIntentId);
+
+                /** @var StripePaymentDomainObject|null $existingPayment */
+                $existingPayment = $this->stripePaymentsRepository->findFirstWhere([
+                    StripePaymentDomainObjectAbstract::ORDER_ID => $order->getId(),
+                ]);
+                if ($existingPayment !== null) {
+                    $this->assertRecoveredPaymentMatches(
+                        $existingPayment,
+                        $paymentIntent->paymentIntentId,
+                        $stripeAccountId,
+                        $stripePlatform?->value,
+                    );
+                    $this->linkPendingDisputes($existingPayment);
+
+                    return $existingPayment;
+                }
+
+                /** @var StripePaymentDomainObject $stripePayment */
+                $stripePayment = $this->stripePaymentsRepository->create([
+                    StripePaymentDomainObjectAbstract::ORDER_ID => $order->getId(),
+                    StripePaymentDomainObjectAbstract::PAYMENT_INTENT_ID => $paymentIntent->paymentIntentId,
+                    StripePaymentDomainObjectAbstract::CONNECTED_ACCOUNT_ID => $stripeAccountId,
+                    StripePaymentDomainObjectAbstract::APPLICATION_FEE_GROSS => $applicationFeeData?->grossApplicationFee?->toMinorUnit() ?? 0,
+                    StripePaymentDomainObjectAbstract::APPLICATION_FEE_NET => $applicationFeeData?->netApplicationFee?->toMinorUnit() ?? 0,
+                    StripePaymentDomainObjectAbstract::APPLICATION_FEE_VAT => $applicationFeeData?->applicationFeeVatAmount?->toMinorUnit() ?? 0,
+                    StripePaymentDomainObjectAbstract::APPLICATION_FEE_VAT_RATE => $applicationFeeData?->applicationFeeVatRate,
+                    StripePaymentDomainObjectAbstract::CURRENCY => strtoupper($order->getCurrency()),
+                    StripePaymentDomainObjectAbstract::STRIPE_PLATFORM => $stripePlatform?->value,
+                ]);
+
+                $this->linkPendingDisputes($stripePayment);
+
+                return $stripePayment;
+            });
+        } catch (QueryException $exception) {
+            /** @var StripePaymentDomainObject|null $stripePayment */
+            $stripePayment = $this->databaseManager->transaction(function () use (
+                $order,
+                $paymentIntent,
+                $stripeAccountId,
+                $stripePlatform,
+            ): ?StripePaymentDomainObject {
+                $this->providerObjectLockService->acquirePaymentIdentity($paymentIntent->paymentIntentId);
+                /** @var StripePaymentDomainObject|null $recoveredPayment */
+                $recoveredPayment = $this->stripePaymentsRepository->findFirstWhere([
+                    StripePaymentDomainObjectAbstract::ORDER_ID => $order->getId(),
+                ]);
+                if ($recoveredPayment === null) {
+                    return null;
+                }
+
+                $this->assertRecoveredPaymentMatches(
+                    $recoveredPayment,
+                    $paymentIntent->paymentIntentId,
+                    $stripeAccountId,
+                    $stripePlatform?->value,
+                );
+                $this->linkPendingDisputes($recoveredPayment);
+
+                return $recoveredPayment;
+            });
+            if ($stripePayment === null) {
+                throw $exception;
+            }
+        }
 
         return new CreatePaymentIntentResponseDTO(
             paymentIntentId: $paymentIntent->paymentIntentId,
@@ -176,6 +251,32 @@ readonly class CreatePaymentIntentHandler
             applicationFeeData: $paymentIntent->applicationFeeData,
             stripePlatform: $stripePlatform,
             publicKey: $publicKey,
+        );
+    }
+
+    private function assertRecoveredPaymentMatches(
+        StripePaymentDomainObject $stripePayment,
+        string $paymentIntentId,
+        ?string $stripeAccountId,
+        ?string $stripePlatform,
+    ): void {
+        if ($stripePayment->getPaymentIntentId() !== $paymentIntentId
+            || $stripePayment->getConnectedAccountId() !== $stripeAccountId
+            || $stripePayment->getStripePlatform() !== $stripePlatform) {
+            throw new ResourceConflictException(
+                __('A different Stripe payment is already associated with this order.')
+            );
+        }
+    }
+
+    private function linkPendingDisputes(StripePaymentDomainObject $stripePayment): void
+    {
+        $this->stripeDisputeRepository->linkPendingToPayment(
+            orderId: $stripePayment->getOrderId(),
+            stripePaymentId: $stripePayment->getId(),
+            paymentIntentId: $stripePayment->getPaymentIntentId(),
+            chargeId: $stripePayment->getChargeId(),
+            stripeAccountId: $stripePayment->getConnectedAccountId(),
         );
     }
 }

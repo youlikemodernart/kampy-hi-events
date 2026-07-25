@@ -312,7 +312,76 @@ Stripe payment tracking.
 - `last_error` - JSON error details
 - `platform` - Stripe platform used
 
+`order_id` and `payment_intent_id` are independently unique so concurrent first-create recovery converges on one local payment.
+
 **Model**: `app/Models/StripePayment.php`
+
+#### stripe_refund_requests
+Durable organizer refund request identity, committed before the Stripe API call. Raw provider payloads and messages are never stored.
+
+**Key Fields**:
+- `request_id` - Client-generated UUID, unique across requests
+- `order_id`, `stripe_payment_id`, `payment_intent_id`, `stripe_account_id` - Immutable local and provider context
+- `amount_minor`, `currency`, `notify_buyer`, `cancel_order`, `refund_application_fee` - Immutable request semantics
+- `status` - CREATED, PROVIDER_ACCEPTED, SUCCEEDED, or FAILED
+- `provider_refund_id`, `provider_status` - Unique provider result and lifecycle state
+- `attempts`, `last_attempted_at`, `last_error_class` - Retry evidence without provider messages
+- `provider_accepted_at`, `cancel_applied_at`, `notification_claimed_at`, `notification_sent_at` - Replay-safe side-effect guards
+
+A reused request UUID must carry the same immutable payload. Separate UUIDs allow intentional equal partial refunds after the prior refund leaves pending state. Stripe receives the same provider idempotency key for every retry.
+
+**Model**: `app/Models/StripeRefundRequest.php`
+
+#### order_refunds
+Provider-confirmed refund results used by existing totals and reports. The `(payment_provider, refund_id)` pair is unique. Pending organizer intent remains isolated in `stripe_refund_requests`.
+
+#### stripe_webhook_events
+Durable Stripe event identity and processing state. Raw provider payloads are never stored.
+
+**Key Fields**:
+- `event_id` - Unique Stripe event identity
+- `event_type`, `stripe_account_id` - Sanitized routing metadata
+- `status` - PROCESSING, HANDLED, or FAILED
+- `claim_token` - Per-attempt ownership token that prevents stale-worker finalization
+- `attempts`, `claimed_at`, `handled_at` - Retry and stale-claim control
+- `last_error_class` - Exception class only
+
+Active claims return a retryable HTTP conflict rather than acknowledging completion. Handled event identities remain permanent.
+
+**Model**: `app/Models/StripeWebhookEvent.php`
+
+#### stripe_disputes
+Durable Stripe dispute lifecycle joined to the local payment and order when available.
+
+**Key Fields**:
+- `dispute_id` - Unique Stripe dispute identity
+- `order_id`, `stripe_payment_id` - Nullable local joins
+- `payment_intent_id`, `charge_id`, `stripe_account_id` - Provider joins
+- `amount_minor`, `currency`, `status`, `reason` - Financial lifecycle state
+- `balance_transaction_ids` - Sanitized provider joins for authoritative balance and fee readback
+- `evidence_due_at`, `closed_at`, `provider_created_at` - Provider timing
+- `last_event_id`, `last_event_type`, `last_event_created_at` - Out-of-order event protection
+
+Detached disputes are linked to local payments under account-scoped PaymentIntent and charge identities. PostgreSQL transaction advisory locks serialize payment creation, payment success, and dispute persistence across webhook delivery races.
+
+**Model**: `app/Models/StripeDispute.php`
+
+#### stripe_webhook_reconciliations
+Durable, payload-free evidence for Stripe webhook events that cannot yet join to a local payment or that are intentionally ignored to protect paid terminal state.
+
+**Key Fields**:
+- `event_id`, `event_type`, `stripe_account_id` - Durable event and account context
+- `provider_object_type`, `provider_object_id` - Per-object identity; one charge-refunded event may track multiple refunds
+- `payment_intent_id`, `charge_id`, `refund_id` - Sanitized provider joins
+- `order_id`, `stripe_payment_id` - Nullable local joins populated on successful replay
+- `reason_code` - Missing-local or paid-terminal audit reason
+- `status` - PENDING, RESOLVED, or MANUAL_REVIEW
+- `attempts`, `first_seen_at`, `last_seen_at` - Retry evidence
+- `resolved_at`, `manual_review_at`, `last_error_class` - Resolution and bounded error-class evidence
+
+Missing-local deliveries return a retryable response. A scheduled local-only job moves unresolved rows to manual review after the configured 72-hour application aging window. No raw provider payload or message is stored.
+
+**Model**: `app/Models/StripeWebhookReconciliation.php`
 
 #### invoices
 Invoice generation for orders.
@@ -732,3 +801,23 @@ erDiagram
 - [Architecture Overview](architecture-overview.md)
 - [Repository Pattern](repository-pattern.md)
 - [Domain-Driven Design](domain-driven-design.md)
+
+## Order Effect Transactional Outbox
+
+#### order_effect_outbox
+Durable, payload-free delivery ledger for order statistics, order-details email, and outgoing order webhooks.
+
+**Key Fields**:
+- `delivery_id` - Stable opaque delivery identity retained across retries
+- `business_key` - Unique order/transition/effect identity
+- `order_id` - Foreign key to the authoritative order
+- `effect_type` - `STATISTICS`, `EMAIL`, or `WEBHOOK`
+- `transition_key` - Stable local business transition identifier
+- `domain_event_type`, `email_kind` - Optional allowlisted routing identifiers
+- `status` - `PENDING`, `PROCESSING`, `RETRYABLE`, `DELIVERED`, or `MANUAL_REVIEW`
+- `attempts`, `available_at`, `claimed_at`, `claim_token` - Retry and token-fenced claim state
+- `delivered_at`, `manual_review_at`, `last_error_class` - Sanitized terminal evidence
+
+Rows contain identifiers only. PostgreSQL workers claim with `FOR UPDATE SKIP LOCKED`; stale processing claims are recoverable. Statistics updates and delivered-state transition share one database transaction. Email and outgoing webhook delivery are at-least-once.
+
+**Migration**: `database/migrations/2026_07_25_000005_create_order_effect_outbox_table.php`

@@ -27,6 +27,7 @@ use HiEvents\Repository\Eloquent\InvoiceRepository;
 use HiEvents\Repository\Eloquent\MessageRepository;
 use HiEvents\Repository\Eloquent\OrderApplicationFeeRepository;
 use HiEvents\Repository\Eloquent\OrderAuditLogRepository;
+use HiEvents\Repository\Eloquent\OrderEffectOutboxRepository;
 use HiEvents\Repository\Eloquent\OrderItemRepository;
 use HiEvents\Repository\Eloquent\OrderPaymentPlatformFeeRepository;
 use HiEvents\Repository\Eloquent\OrderRefundRepository;
@@ -44,8 +45,12 @@ use HiEvents\Repository\Eloquent\QuestionAndAnswerViewRepository;
 use HiEvents\Repository\Eloquent\QuestionAnswerRepository;
 use HiEvents\Repository\Eloquent\QuestionRepository;
 use HiEvents\Repository\Eloquent\StripeCustomerRepository;
+use HiEvents\Repository\Eloquent\StripeDisputeRepository;
 use HiEvents\Repository\Eloquent\StripePaymentsRepository;
 use HiEvents\Repository\Eloquent\StripePayoutsRepository;
+use HiEvents\Repository\Eloquent\StripeRefundRequestRepository;
+use HiEvents\Repository\Eloquent\StripeWebhookEventRepository;
+use HiEvents\Repository\Eloquent\StripeWebhookReconciliationRepository;
 use HiEvents\Repository\Eloquent\TaxAndFeeRepository;
 use HiEvents\Repository\Eloquent\TicketLookupTokenRepository;
 use HiEvents\Repository\Eloquent\UserRepository;
@@ -75,6 +80,7 @@ use HiEvents\Repository\Interfaces\InvoiceRepositoryInterface;
 use HiEvents\Repository\Interfaces\MessageRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderApplicationFeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderAuditLogRepositoryInterface;
+use HiEvents\Repository\Interfaces\OrderEffectOutboxRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderItemRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderPaymentPlatformFeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderRefundRepositoryInterface;
@@ -92,8 +98,12 @@ use HiEvents\Repository\Interfaces\QuestionAndAnswerViewRepositoryInterface;
 use HiEvents\Repository\Interfaces\QuestionAnswerRepositoryInterface;
 use HiEvents\Repository\Interfaces\QuestionRepositoryInterface;
 use HiEvents\Repository\Interfaces\StripeCustomerRepositoryInterface;
+use HiEvents\Repository\Interfaces\StripeDisputeRepositoryInterface;
 use HiEvents\Repository\Interfaces\StripePaymentsRepositoryInterface;
 use HiEvents\Repository\Interfaces\StripePayoutsRepositoryInterface;
+use HiEvents\Repository\Interfaces\StripeRefundRequestRepositoryInterface;
+use HiEvents\Repository\Interfaces\StripeWebhookEventRepositoryInterface;
+use HiEvents\Repository\Interfaces\StripeWebhookReconciliationRepositoryInterface;
 use HiEvents\Repository\Interfaces\TaxAndFeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\TicketLookupTokenRepositoryInterface;
 use HiEvents\Repository\Interfaces\UserRepositoryInterface;
@@ -120,6 +130,7 @@ class RepositoryServiceProvider extends ServiceProvider
         QuestionRepositoryInterface::class => QuestionRepository::class,
         QuestionAnswerRepositoryInterface::class => QuestionAnswerRepository::class,
         StripePaymentsRepositoryInterface::class => StripePaymentsRepository::class,
+        StripeDisputeRepositoryInterface::class => StripeDisputeRepository::class,
         PromoCodeRepositoryInterface::class => PromoCodeRepository::class,
         MessageRepositoryInterface::class => MessageRepository::class,
         PasswordResetTokenRepositoryInterface::class => PasswordResetTokenRepository::class,
@@ -143,9 +154,13 @@ class RepositoryServiceProvider extends ServiceProvider
         WebhookRepositoryInterface::class => WebhookRepository::class,
         WebhookLogRepositoryInterface::class => WebhookLogRepository::class,
         OrderApplicationFeeRepositoryInterface::class => OrderApplicationFeeRepository::class,
+        OrderEffectOutboxRepositoryInterface::class => OrderEffectOutboxRepository::class,
         OrderAuditLogRepositoryInterface::class => OrderAuditLogRepository::class,
         OrderPaymentPlatformFeeRepositoryInterface::class => OrderPaymentPlatformFeeRepository::class,
         StripePayoutsRepositoryInterface::class => StripePayoutsRepository::class,
+        StripeRefundRequestRepositoryInterface::class => StripeRefundRequestRepository::class,
+        StripeWebhookEventRepositoryInterface::class => StripeWebhookEventRepository::class,
+        StripeWebhookReconciliationRepositoryInterface::class => StripeWebhookReconciliationRepository::class,
         AccountConfigurationRepositoryInterface::class => AccountConfigurationRepository::class,
         QuestionAndAnswerViewRepositoryInterface::class => QuestionAndAnswerViewRepository::class,
         OutgoingMessageRepositoryInterface::class => OutgoingMessageRepository::class,

@@ -22,6 +22,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseManager;
 use Mockery;
 use Psr\Log\LoggerInterface;
+use Stripe\Customer;
 use Stripe\PaymentIntent;
 use Stripe\StripeClient;
 use Tests\TestCase;
@@ -36,6 +37,14 @@ class PaymentIntentServiceDouble
     public function retrieve(string $id, array $params, array $options): PaymentIntent
     {
         return new PaymentIntent;
+    }
+}
+
+class CustomerServiceDouble
+{
+    public function create(array $params, array $opts): Customer
+    {
+        return new Customer;
     }
 }
 
@@ -94,6 +103,7 @@ class StripePaymentIntentCreationServiceTest extends TestCase
             ->setId(27)
             ->setEventId(3)
             ->setShortId('order_test_001')
+            ->setPublicId('ord_public_invented_001')
             ->setCurrency('USD')
             ->setTotalBeforeAdditions(101.90)
             ->setTotalFee(12.00)
@@ -144,13 +154,18 @@ class StripePaymentIntentCreationServiceTest extends TestCase
             ->setStripeAccountId('acct_connectedfixture');
     }
 
-    private function stripeClient(object $paymentIntentService): StripeClient
+    private function stripeClient(object $paymentIntentService, ?object $customerService = null): StripeClient
     {
         $stripeClient = new class('sk_test_invented_fixture') extends StripeClient
         {
             public mixed $paymentIntents;
+
+            public mixed $customers;
         };
         $stripeClient->paymentIntents = $paymentIntentService;
+        if ($customerService !== null) {
+            $stripeClient->customers = $customerService;
+        }
 
         return $stripeClient;
     }
@@ -216,7 +231,10 @@ class StripePaymentIntentCreationServiceTest extends TestCase
                         && ! in_array('invented@example.invalid', $metadata, true)
                         && $params['description'] === 'Kamp | gcu | 2026-fall | gcu-kamp-fall-2026 | order:hi_order_order_test_001';
                 }),
-                ['stripe_account' => 'acct_connectedfixture'],
+                [
+                    'stripe_account' => 'acct_connectedfixture',
+                    'idempotency_key' => 'hie:payment-intent:v1:'.hash('sha256', 'ord_public_invented_001'),
+                ],
             )
             ->willReturn(PaymentIntent::constructFrom([
                 'id' => 'pi_invented_fixture',
@@ -256,6 +274,67 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $this->assertSame('pi_invented_fixture', $response->paymentIntentId);
         $this->assertSame('acct_connectedfixture', $response->accountId);
         $this->assertSame($applicationFee, $response->applicationFeeData);
+    }
+
+    public function test_customer_creation_uses_a_stable_order_key_before_payment_intent_creation(): void
+    {
+        $request = $this->request();
+        $config = $this->config();
+
+        $customers = $this->createMock(CustomerServiceDouble::class);
+        $customers->expects($this->once())
+            ->method('create')
+            ->with(
+                $this->callback(static fn (array $params): bool => $params['email'] === 'invented@example.invalid'),
+                [
+                    'stripe_account' => 'acct_connectedfixture',
+                    'idempotency_key' => 'hie:customer:v1:'.hash('sha256', 'ord_public_invented_001'),
+                ],
+            )
+            ->willReturn(Customer::constructFrom([
+                'id' => 'cus_invented_fixture',
+                'name' => 'Invented Buyer',
+                'email' => 'invented@example.invalid',
+            ]));
+
+        $paymentIntents = $this->createMock(PaymentIntentServiceDouble::class);
+        $paymentIntents->expects($this->once())
+            ->method('create')
+            ->willReturn(PaymentIntent::constructFrom([
+                'id' => 'pi_invented_fixture',
+                'client_secret' => 'pi_invented_fixture_secret',
+            ]));
+
+        $customerRepository = $this->createMock(StripeCustomerRepositoryInterface::class);
+        $customerRepository->expects($this->once())
+            ->method('findFirstWhere')
+            ->willReturn(null);
+        $customerRepository->expects($this->once())
+            ->method('create')
+            ->willReturn($this->existingCustomer());
+
+        $databaseManager = Mockery::mock(DatabaseManager::class);
+        $databaseManager->shouldReceive('beginTransaction')->once();
+        $databaseManager->shouldReceive('commit')->once();
+        $databaseManager->shouldReceive('rollBack')->never();
+
+        $feeService = $this->createMock(OrderApplicationFeeCalculationService::class);
+        $feeService->expects($this->once())
+            ->method('calculateApplicationFee')
+            ->willReturn(new ApplicationFeeValuesDTO(
+                grossApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
+                netApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
+            ));
+
+        $this->service(
+            $config,
+            $customerRepository,
+            $databaseManager,
+            $feeService,
+        )->createPaymentIntentWithClient(
+            $this->stripeClient($paymentIntents, $customers),
+            $request,
+        );
     }
 
     public function test_rejects_application_fee_amount_that_does_not_match_ticket_quantity(): void

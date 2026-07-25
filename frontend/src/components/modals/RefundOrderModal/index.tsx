@@ -3,7 +3,7 @@ import {GenericModalProps, IdParam, Order} from "../../../types.ts";
 import {useForm, UseFormReturnType} from "@mantine/form";
 import {useParams} from "react-router";
 import {useGetOrder} from "../../../queries/useGetOrder.ts";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 import {Currency} from "../../common/Currency";
 import {useRefundOrder} from "../../../mutations/useRefundOrder.ts";
 import {RefundOrderPayload} from "../../../api/order.client.ts";
@@ -18,12 +18,15 @@ interface RefundOrderModalProps extends GenericModalProps {
     orderId: IdParam;
 }
 
+type RefundOrderFormValues = Omit<RefundOrderPayload, 'refund_request_id'>;
+
 export const RefundOrderModal = ({onClose, orderId}: RefundOrderModalProps) => {
     const {eventId} = useParams();
     const {data: order} = useGetOrder(eventId, orderId);
     const mutation = useRefundOrder();
     const formErrorResponseHandler = useFormErrorResponseHandler();
-    const form = useForm({
+    const refundRequest = useRef<{ id: string; fingerprint: string } | null>(null);
+    const form = useForm<RefundOrderFormValues>({
         initialValues: {
             amount: 0,
             notify_buyer: false,
@@ -44,28 +47,44 @@ export const RefundOrderModal = ({onClose, orderId}: RefundOrderModalProps) => {
         return <LoadingOverlay visible/>;
     }
 
-    const handleSubmit = (values: RefundOrderPayload) => mutation.mutate({
+    const handleSubmit = (values: RefundOrderFormValues) => {
+        const fingerprint = JSON.stringify([
+            Number(values.amount).toFixed(2),
+            values.notify_buyer,
+            values.cancel_order,
+        ]);
+        if (refundRequest.current?.fingerprint !== fingerprint) {
+            refundRequest.current = {
+                id: crypto.randomUUID(),
+                fingerprint,
+            };
+        }
+
+        mutation.mutate({
             eventId: eventId,
             orderId: orderId,
             refundData: {
+                refund_request_id: refundRequest.current.id,
                 amount: values.amount,
                 notify_buyer: values.notify_buyer,
                 cancel_order: values.cancel_order,
             },
         },
+
         {
             onSuccess: () => {
                 showSuccess(t`Your refund is processing.`)
+                refundRequest.current = null;
                 form.reset();
                 onClose();
             },
             onError: (error) => {
                 formErrorResponseHandler(form, error);
             }
-        }
-    );
+        });
+    };
 
-    const modalForm = ({order, form}: { order: Order, form: UseFormReturnType<RefundOrderPayload> }) => {
+    const modalForm = ({order, form}: { order: Order, form: UseFormReturnType<RefundOrderFormValues> }) => {
         const remainingAmount = order.total_gross - order.total_refunded;
         const isPartialRefund = form.values.amount < remainingAmount;
 

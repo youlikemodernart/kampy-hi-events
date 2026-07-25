@@ -11,13 +11,13 @@ use HiEvents\DomainObjects\WebhookDomainObject;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\AttendeeCheckInRepositoryInterface;
 use HiEvents\Repository\Interfaces\AttendeeRepositoryInterface;
+use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Repository\Interfaces\ProductRepositoryInterface;
 use HiEvents\Repository\Interfaces\WebhookRepositoryInterface;
-use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Resources\Attendee\AttendeeResource;
-use HiEvents\Resources\Event\EventResource;
 use HiEvents\Resources\CheckInList\AttendeeCheckInResource;
+use HiEvents\Resources\Event\EventResource;
 use HiEvents\Resources\Order\OrderResource;
 use HiEvents\Resources\Product\ProductResource;
 use HiEvents\Services\Infrastructure\DomainEvents\Enums\DomainEventType;
@@ -28,16 +28,14 @@ use Spatie\WebhookServer\WebhookCall;
 class WebhookDispatchService
 {
     public function __construct(
-        private readonly LoggerInterface                    $logger,
-        private readonly WebhookRepositoryInterface         $webhookRepository,
-        private readonly OrderRepositoryInterface           $orderRepository,
-        private readonly ProductRepositoryInterface         $productRepository,
-        private readonly AttendeeRepositoryInterface        $attendeeRepository,
+        private readonly LoggerInterface $logger,
+        private readonly WebhookRepositoryInterface $webhookRepository,
+        private readonly OrderRepositoryInterface $orderRepository,
+        private readonly ProductRepositoryInterface $productRepository,
+        private readonly AttendeeRepositoryInterface $attendeeRepository,
         private readonly AttendeeCheckInRepositoryInterface $attendeeCheckInRepository,
-        private readonly EventRepositoryInterface           $eventRepository,
-    )
-    {
-    }
+        private readonly EventRepositoryInterface $eventRepository,
+    ) {}
 
     public function dispatchEventWebhook(DomainEventType $eventType, int $eventId): void
     {
@@ -50,8 +48,11 @@ class WebhookDispatchService
         );
     }
 
-    public function dispatchAttendeeWebhook(DomainEventType $eventType, int $attendeeId): void
-    {
+    public function dispatchAttendeeWebhook(
+        DomainEventType $eventType,
+        int $attendeeId,
+        ?string $deliveryId = null,
+    ): void {
         $attendee = $this->attendeeRepository
             ->loadRelation(new Relationship(
                 domainObject: QuestionAndAnswerViewDomainObject::class,
@@ -63,6 +64,7 @@ class WebhookDispatchService
             eventType: $eventType,
             payload: new AttendeeResource($attendee),
             eventId: $attendee->getEventId(),
+            deliveryId: $deliveryId,
         );
     }
 
@@ -98,19 +100,22 @@ class WebhookDispatchService
         );
     }
 
-    public function dispatchOrderWebhook(DomainEventType $eventType, int $orderId): void
-    {
+    public function dispatchOrderWebhook(
+        DomainEventType $eventType,
+        int $orderId,
+        ?string $deliveryId = null,
+    ): void {
         $order = $this->orderRepository
             ->loadRelation(OrderItemDomainObject::class)
             ->loadRelation(new Relationship(
-                    domainObject: AttendeeDomainObject::class,
-                    nested: [
-                        new Relationship(
-                            domainObject: QuestionAndAnswerViewDomainObject::class,
-                            name: 'question_and_answer_views',
-                        ),
-                    ],
-                    name: 'attendees')
+                domainObject: AttendeeDomainObject::class,
+                nested: [
+                    new Relationship(
+                        domainObject: QuestionAndAnswerViewDomainObject::class,
+                        name: 'question_and_answer_views',
+                    ),
+                ],
+                name: 'attendees')
             )
             ->loadRelation(QuestionAndAnswerViewDomainObject::class)
             ->findById($orderId);
@@ -121,6 +126,9 @@ class WebhookDispatchService
                 $this->dispatchAttendeeWebhook(
                     eventType: DomainEventType::ATTENDEE_CREATED,
                     attendeeId: $attendee->getId(),
+                    deliveryId: $deliveryId === null
+                        ? null
+                        : $this->childDeliveryId($deliveryId, 'attendee', $attendee->getId()),
                 );
             }
         }
@@ -131,6 +139,9 @@ class WebhookDispatchService
                 $this->dispatchAttendeeWebhook(
                     eventType: DomainEventType::ATTENDEE_CANCELLED,
                     attendeeId: $attendee->getId(),
+                    deliveryId: $deliveryId === null
+                        ? null
+                        : $this->childDeliveryId($deliveryId, 'attendee', $attendee->getId()),
                 );
             }
         }
@@ -139,13 +150,18 @@ class WebhookDispatchService
             $eventType,
             new OrderResource($order),
             $order->getEventId(),
+            $deliveryId === null ? null : $this->childDeliveryId($deliveryId, 'order', $orderId),
         );
     }
 
-    private function dispatchWebhook(DomainEventType $eventType, JsonResource $payload, int $eventId): void
-    {
+    private function dispatchWebhook(
+        DomainEventType $eventType,
+        JsonResource $payload,
+        int $eventId,
+        ?string $deliveryId = null,
+    ): void {
         $webhooks = $this->webhookRepository->findEnabledByEventId($eventId)
-            ->filter(fn(WebhookDomainObject $webhook) => in_array($eventType->value, $webhook->getEventTypes(), true));
+            ->filter(fn (WebhookDomainObject $webhook) => in_array($eventType->value, $webhook->getEventTypes(), true));
 
         foreach ($webhooks as $webhook) {
             $this->logger->info("Dispatching webhook for event ID: $eventId and webhook ID: {$webhook->getId()}");
@@ -155,15 +171,22 @@ class WebhookDispatchService
                 ->payload([
                     'event_type' => $eventType->value,
                     'event_sent_at' => now()->toIso8601String(),
-                    'payload' => $payload->resolve()
+                    ...($deliveryId === null ? [] : ['delivery_id' => $deliveryId]),
+                    'payload' => $payload->resolve(),
                 ])
                 ->useSecret($webhook->getSecret())
                 ->meta([
                     'webhook_id' => $webhook->getId(),
                     'event_id' => $eventId,
                     'event_type' => $eventType->name,
+                    ...($deliveryId === null ? [] : ['delivery_id' => $deliveryId]),
                 ])
                 ->dispatchSync();
         }
+    }
+
+    private function childDeliveryId(string $deliveryId, string $resourceType, int $resourceId): string
+    {
+        return 'oef_'.substr(hash('sha256', $deliveryId.':'.$resourceType.':'.$resourceId), 0, 40);
     }
 }

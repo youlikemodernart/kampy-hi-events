@@ -3,14 +3,18 @@
 namespace HiEvents\Services\Application\Handlers\Order\Payment\Stripe;
 
 use HiEvents\Exceptions\CannotAcceptPaymentException;
+use HiEvents\Exceptions\Stripe\StripeLocalPaymentNotFoundException;
+use HiEvents\Repository\Interfaces\StripeWebhookEventRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Order\Payment\Stripe\DTO\StripeWebhookDTO;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\AccountUpdateHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\ChargeRefundUpdatedHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\ChargeSucceededHandler;
+use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\DisputeUpdatedHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PaymentIntentFailedHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PaymentIntentSucceededHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PayoutPaidHandler;
-use Illuminate\Cache\Repository;
+use HiEvents\Services\Infrastructure\Stripe\StripeConfigurationService;
+use HiEvents\Services\Infrastructure\Stripe\StripeConnectWebhookContract;
 use Illuminate\Log\Logger;
 use JsonException;
 use Stripe\Charge;
@@ -19,36 +23,21 @@ use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 use Throwable;
 use UnexpectedValueException;
-use HiEvents\Services\Infrastructure\Stripe\StripeConfigurationService;
 
 class IncomingWebhookHandler
 {
-    private static array $validEvents = [
-        Event::PAYMENT_INTENT_SUCCEEDED,
-        Event::PAYMENT_INTENT_PAYMENT_FAILED,
-        Event::ACCOUNT_UPDATED,
-        Event::REFUND_UPDATED,
-        Event::REFUND_CREATED,
-        Event::CHARGE_REFUNDED,
-        Event::CHARGE_SUCCEEDED,
-        Event::CHARGE_UPDATED,
-        Event::PAYOUT_PAID,
-        Event::PAYOUT_UPDATED,
-    ];
-
     public function __construct(
-        private readonly ChargeRefundUpdatedHandler    $refundEventHandlerService,
-        private readonly ChargeSucceededHandler        $chargeSucceededHandler,
+        private readonly ChargeRefundUpdatedHandler $refundEventHandlerService,
+        private readonly ChargeSucceededHandler $chargeSucceededHandler,
+        private readonly DisputeUpdatedHandler $disputeUpdatedHandler,
         private readonly PaymentIntentSucceededHandler $paymentIntentSucceededHandler,
-        private readonly PaymentIntentFailedHandler    $paymentIntentFailedHandler,
-        private readonly AccountUpdateHandler          $accountUpdateHandler,
-        private readonly PayoutPaidHandler             $payoutPaidHandler,
-        private readonly Logger                        $logger,
-        private readonly Repository                    $cache,
-        private readonly StripeConfigurationService    $stripeConfigurationService,
-    )
-    {
-    }
+        private readonly PaymentIntentFailedHandler $paymentIntentFailedHandler,
+        private readonly AccountUpdateHandler $accountUpdateHandler,
+        private readonly PayoutPaidHandler $payoutPaidHandler,
+        private readonly Logger $logger,
+        private readonly StripeWebhookEventRepositoryInterface $webhookEventRepository,
+        private readonly StripeConfigurationService $stripeConfigurationService,
+    ) {}
 
     /**
      * @throws SignatureVerificationException
@@ -60,7 +49,7 @@ class IncomingWebhookHandler
         try {
             $event = $this->constructEventWithValidPlatform($webhookDTO);
 
-            if (!in_array($event->type, self::$validEvents, true)) {
+            if (! in_array($event->type, StripeConnectWebhookContract::EVENT_TYPES, true)) {
                 $this->logger->debug(__('Received a :event Stripe event, which has no handler', [
                     'event' => $event->type,
                 ]), [
@@ -71,71 +60,109 @@ class IncomingWebhookHandler
                 return;
             }
 
-            if ($this->hasEventBeenHandled($event)) {
-                $this->logger->debug('Stripe event already handled', [
+            $claimToken = $this->webhookEventRepository->claim($event->id, $event->type, $event->account);
+
+            if ($claimToken === null) {
+                $this->logger->debug('Stripe event already handled or currently processing', [
                     'event_id' => $event->id,
-                    'type' => $event->type,
-                    'data' => $event->data->object->toArray(),
+                    'event_type' => $event->type,
+                    'stripe_account_id' => $event->account,
                 ]);
 
                 return;
             }
 
-            $this->logger->debug('Stripe event received: ' . $event->type, $event->data->object->toArray());
+            $this->logger->debug('Stripe event received', [
+                'event_id' => $event->id,
+                'event_type' => $event->type,
+                'stripe_account_id' => $event->account,
+                'object_id' => $event->data->object->id ?? null,
+                'object_type' => $event->data->object->object ?? null,
+            ]);
 
-            switch ($event->type) {
-                case Event::PAYMENT_INTENT_SUCCEEDED:
-                    $this->paymentIntentSucceededHandler->handleEvent($event->data->object);
-                    break;
-                case Event::PAYMENT_INTENT_PAYMENT_FAILED:
-                    $this->paymentIntentFailedHandler->handleEvent($event->data->object);
-                    break;
-                case Event::CHARGE_SUCCEEDED:
-                case Event::CHARGE_UPDATED:
-                    $this->chargeSucceededHandler->handleEvent($event->data->object);
-                    break;
-                case Event::REFUND_UPDATED:
-                case Event::REFUND_CREATED:
-                    $this->refundEventHandlerService->handleEvent($event->data->object);
-                    break;
-                case Event::CHARGE_REFUNDED:
-                    $this->handleChargeRefunded($event->data->object);
-                    break;
-                case Event::ACCOUNT_UPDATED:
-                    $this->accountUpdateHandler->handleEvent($event->data->object);
-                    break;
-                case Event::PAYOUT_PAID:
-                case Event::PAYOUT_UPDATED:
-                    $this->payoutPaidHandler->handleEvent($event->data->object, $event->account);
-                    break;
+            try {
+                switch ($event->type) {
+                    case Event::PAYMENT_INTENT_SUCCEEDED:
+                        $this->paymentIntentSucceededHandler->handleEvent($event->data->object);
+                        break;
+                    case Event::PAYMENT_INTENT_PAYMENT_FAILED:
+                        $this->paymentIntentFailedHandler->handleEvent(
+                            $event->data->object,
+                            $event->account,
+                            $event->id,
+                            $event->type,
+                        );
+                        break;
+                    case Event::CHARGE_SUCCEEDED:
+                    case Event::CHARGE_UPDATED:
+                        $this->chargeSucceededHandler->handleEvent($event->data->object);
+                        break;
+                    case Event::REFUND_UPDATED:
+                    case Event::REFUND_CREATED:
+                        $this->refundEventHandlerService->handleEvent(
+                            $event->data->object,
+                            $event->account,
+                            $event->id,
+                            $event->type,
+                        );
+                        break;
+                    case Event::CHARGE_REFUNDED:
+                        $this->handleChargeRefunded(
+                            $event->data->object,
+                            $event->account,
+                            $event->id,
+                            $event->type,
+                        );
+                        break;
+                    case Event::CHARGE_DISPUTE_CREATED:
+                    case Event::CHARGE_DISPUTE_UPDATED:
+                    case Event::CHARGE_DISPUTE_CLOSED:
+                        $this->disputeUpdatedHandler->handleEvent(
+                            $event->data->object,
+                            $event->account,
+                            $event->id,
+                            $event->type,
+                            $event->created,
+                        );
+                        break;
+                    case Event::ACCOUNT_UPDATED:
+                        $this->accountUpdateHandler->handleEvent($event->data->object);
+                        break;
+                    case Event::PAYOUT_PAID:
+                    case Event::PAYOUT_UPDATED:
+                        $this->payoutPaidHandler->handleEvent($event->data->object, $event->account);
+                        break;
+                }
+
+                $this->webhookEventRepository->markHandled($event->id, $claimToken);
+                $this->logger->info('Stripe event marked as handled', [
+                    'event_id' => $event->id,
+                    'event_type' => $event->type,
+                ]);
+            } catch (Throwable $exception) {
+                try {
+                    $this->webhookEventRepository->markFailed($event->id, $claimToken, $exception::class);
+                } catch (Throwable $trackingException) {
+                    $this->logger->critical('Failed to persist Stripe webhook failure state', [
+                        'event_id' => $event->id,
+                        'event_type' => $event->type,
+                        'exception_class' => $trackingException::class,
+                    ]);
+                }
+
+                throw $exception;
             }
-
-            $this->markEventAsHandled($event);
         } catch (CannotAcceptPaymentException $exception) {
-            $this->logger->error(
-                'Cannot accept payment: ' . $exception->getMessage(), [
-                    'payload' => $webhookDTO->payload,
-                ]
-            );
+            $this->logSanitizedFailure('Cannot accept payment from Stripe webhook', $exception);
             throw $exception;
         } catch (SignatureVerificationException $exception) {
-            $this->logger->error(
-                'Unable to verify Stripe signature: ' . $exception->getMessage(), [
-                    'payload' => $webhookDTO->payload,
-                ]
-            );
+            $this->logSanitizedFailure('Unable to verify Stripe webhook signature', $exception);
             throw $exception;
         } catch (UnexpectedValueException $exception) {
-            $this->logger->error(
-                'Unexpected value in Stripe payload: ' . $exception->getMessage(), [
-                    'payload' => $webhookDTO->payload,
-                ]
-            );
+            $this->logSanitizedFailure('Unexpected value in Stripe webhook', $exception);
             throw $exception;
         } catch (Throwable $exception) {
-            $this->logger->error('Unhandled Stripe error: ' . $exception->getMessage(), [
-                'payload' => $webhookDTO->payload,
-            ]);
+            $this->logSanitizedFailure('Unhandled Stripe webhook error', $exception);
             throw $exception;
         }
     }
@@ -147,7 +174,7 @@ class IncomingWebhookHandler
 
         foreach ($webhookSecrets as $platform => $webhookSecret) {
             try {
-                if (!$webhookSecret) {
+                if (! $webhookSecret) {
                     continue;
                 }
 
@@ -157,7 +184,7 @@ class IncomingWebhookHandler
                     $webhookSecret
                 );
 
-                $this->logger->debug('Webhook validated with platform: ' . $platform, [
+                $this->logger->debug('Webhook validated with platform: '.$platform, [
                     'event_id' => $event->id,
                     'platform' => $platform,
                 ]);
@@ -165,6 +192,7 @@ class IncomingWebhookHandler
                 return $event;
             } catch (SignatureVerificationException $exception) {
                 $lastException = $exception;
+
                 continue;
             }
         }
@@ -172,26 +200,39 @@ class IncomingWebhookHandler
         throw $lastException ?? new SignatureVerificationException(__('Unable to verify Stripe signature with any platform'));
     }
 
-    private function hasEventBeenHandled(Event $event): bool
-    {
-        return $this->cache->has('stripe_event_' . $event->id);
-    }
-
-    private function handleChargeRefunded(Charge $charge): void
-    {
+    private function handleChargeRefunded(
+        Charge $charge,
+        ?string $stripeAccountId,
+        string $eventId,
+        string $eventType,
+    ): void {
         $refunds = $charge->refunds->data ?? [];
 
+        $missingLocalPayment = null;
+
         foreach ($refunds as $refund) {
-            $this->refundEventHandlerService->handleEvent($refund);
+            try {
+                $this->refundEventHandlerService->handleEvent(
+                    $refund,
+                    $stripeAccountId,
+                    $eventId,
+                    $eventType,
+                    $charge->id,
+                );
+            } catch (StripeLocalPaymentNotFoundException $exception) {
+                $missingLocalPayment ??= $exception;
+            }
+        }
+
+        if ($missingLocalPayment !== null) {
+            throw $missingLocalPayment;
         }
     }
 
-    private function markEventAsHandled(Event $event): void
+    private function logSanitizedFailure(string $message, Throwable $exception): void
     {
-        $this->logger->info('Marking Stripe event as handled', [
-            'event_id' => $event->id,
-            'type' => $event->type,
+        $this->logger->error($message, [
+            'exception_class' => $exception::class,
         ]);
-        $this->cache->put('stripe_event_' . $event->id, true, now()->addMinutes(60));
     }
 }

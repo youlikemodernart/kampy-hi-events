@@ -4,6 +4,7 @@ namespace HiEvents\Http\Actions\Orders\Payment;
 
 use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\Exceptions\RefundNotPossibleException;
+use HiEvents\Exceptions\Stripe\StripeRefundRequestConflictException;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Http\Request\Order\RefundOrderRequest;
 use HiEvents\Resources\Order\OrderResource;
@@ -16,9 +17,7 @@ use Throwable;
 
 class RefundOrderAction extends BaseAction
 {
-    public function __construct(private readonly RefundOrderHandler     $refundOrderHandler)
-    {
-    }
+    public function __construct(private readonly RefundOrderHandler $refundOrderHandler) {}
 
     /**
      * @throws Throwable
@@ -35,11 +34,17 @@ class RefundOrderAction extends BaseAction
                     'order_id' => $orderId,
                 ]))
             );
-        } catch (ApiErrorException|RefundNotPossibleException $exception) {
+        } catch (StripeRefundRequestConflictException $exception) {
             throw ValidationException::withMessages([
-                'amount' => $exception instanceof ApiErrorException
-                    ? 'Stripe error: ' . $exception->getMessage()
-                    : $exception->getMessage(),
+                'refund_request_id' => $exception->getMessage(),
+            ]);
+        } catch (ApiErrorException $exception) {
+            throw ValidationException::withMessages([
+                'amount' => __('The payment provider could not process this refund. Retry the same request.'),
+            ]);
+        } catch (RefundNotPossibleException $exception) {
+            throw ValidationException::withMessages([
+                'amount' => $exception->getMessage(),
             ]);
         }
 

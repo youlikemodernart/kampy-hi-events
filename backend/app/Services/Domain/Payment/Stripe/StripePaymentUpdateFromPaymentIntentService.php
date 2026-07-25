@@ -10,15 +10,15 @@ readonly class StripePaymentUpdateFromPaymentIntentService
 {
     public function __construct(
         private StripePaymentsRepository $stripePaymentsRepository,
-    )
-    {
-    }
+    ) {}
 
     public function updateStripePaymentInfo(PaymentIntent $paymentIntent, StripePaymentDomainObjectAbstract $stripePayment): void
     {
         $this->stripePaymentsRepository->updateWhere(
             attributes: [
-                StripePaymentDomainObjectAbstract::LAST_ERROR => $paymentIntent?->last_payment_error?->toArray(),
+                StripePaymentDomainObjectAbstract::LAST_ERROR => StripeProviderErrorSanitizer::sanitize(
+                    $paymentIntent->last_payment_error,
+                ),
                 StripePaymentDomainObjectAbstract::AMOUNT_RECEIVED => $paymentIntent->amount_received,
                 StripePaymentDomainObjectAbstract::PAYMENT_METHOD_ID => is_string($paymentIntent->payment_method)
                     ? $paymentIntent->payment_method

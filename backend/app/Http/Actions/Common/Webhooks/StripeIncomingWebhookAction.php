@@ -2,6 +2,8 @@
 
 namespace HiEvents\Http\Actions\Common\Webhooks;
 
+use HiEvents\Exceptions\Stripe\StripeLocalPaymentNotFoundException;
+use HiEvents\Exceptions\StripeWebhookEventClaimBusyException;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Http\ResponseCodes;
 use HiEvents\Services\Application\Handlers\Order\Payment\Stripe\DTO\StripeWebhookDTO;
@@ -12,26 +14,26 @@ use Throwable;
 
 class StripeIncomingWebhookAction extends BaseAction
 {
+    public function __construct(
+        private readonly IncomingWebhookHandler $handler,
+    ) {}
+
     public function __invoke(Request $request): Response
     {
         try {
-            $headerSignature = $request->server('HTTP_STRIPE_SIGNATURE');
-            $payload = $request->getContent();
-
-            dispatch(static function (IncomingWebhookHandler $handler) use ($headerSignature, $payload) {
-                $handler->handle(new StripeWebhookDTO(
-                    headerSignature: $headerSignature,
-                    payload: $payload,
-                ));
-            })->catch(function (Throwable $exception) use ($payload) {
-                logger()->error(__('Failed to handle incoming Stripe webhook'), [
-                    'exception' => $exception,
-                    'payload' => $payload,
-                ]);
-            });
-
+            $this->handler->handle(new StripeWebhookDTO(
+                headerSignature: $request->server('HTTP_STRIPE_SIGNATURE'),
+                payload: $request->getContent(),
+            ));
+        } catch (StripeWebhookEventClaimBusyException) {
+            return $this->noContentResponse(ResponseCodes::HTTP_CONFLICT);
+        } catch (StripeLocalPaymentNotFoundException) {
+            return $this->noContentResponse(ResponseCodes::HTTP_SERVICE_UNAVAILABLE);
         } catch (Throwable $exception) {
-            logger()?->error($exception->getMessage(), $exception->getTrace());
+            logger()?->error('Failed to process incoming Stripe webhook', [
+                'exception_class' => $exception::class,
+            ]);
+
             return $this->noContentResponse(ResponseCodes::HTTP_BAD_REQUEST);
         }
 

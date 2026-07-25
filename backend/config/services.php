@@ -48,6 +48,21 @@ return [
 
         // Primary platform for new organizers
         'primary_platform' => env('STRIPE_PRIMARY_PLATFORM'),
+
+        // Required in SaaS mode before connected-account refunds: retain or return
+        'connect_refund_application_fee_policy' => env('STRIPE_CONNECT_REFUND_APPLICATION_FEE_POLICY'),
+
+        // Canonical provisioning contract for connected-account webhook endpoints
+        'connect_webhook_path' => \HiEvents\Services\Infrastructure\Stripe\StripeConnectWebhookContract::PATH,
+        'connect_webhook_events' => \HiEvents\Services\Infrastructure\Stripe\StripeConnectWebhookContract::EVENT_TYPES,
+
+        // Local-only missing-payment reconciliation aging policy
+        'webhook_reconciliation_grace_hours' => env('STRIPE_WEBHOOK_RECONCILIATION_GRACE_HOURS', 72),
+        'webhook_reconciliation_batch_size' => env('STRIPE_WEBHOOK_RECONCILIATION_BATCH_SIZE', 100),
+    ],
+    'order_effect_outbox' => [
+        'batch_size' => env('ORDER_EFFECT_OUTBOX_BATCH_SIZE', 25),
+        'max_attempts' => env('ORDER_EFFECT_OUTBOX_MAX_ATTEMPTS', 10),
     ],
     'kamp_stripe_metadata' => [
         'enabled' => env('KAMP_STRIPE_METADATA_ENABLED', false),
