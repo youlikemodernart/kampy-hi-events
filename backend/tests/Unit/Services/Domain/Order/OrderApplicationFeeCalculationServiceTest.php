@@ -174,4 +174,20 @@ class OrderApplicationFeeCalculationServiceTest extends TestCase
 
         $this->assertEquals(12.20, $fee->grossApplicationFee->toFloat());
     }
+
+    public function testKampFixedSixPerPaidTicketWithZeroPercentage(): void
+    {
+        $this->config->method('get')->willReturn(true);
+
+        $order = $this->createOrderWithItems([
+            $this->createItem(50.95, 2),
+            $this->createItem(0.00, 1),
+        ]);
+        $account = $this->createAccountConfig(6.00, 0.00, 'USD');
+
+        $fee = $this->service->calculateApplicationFee($account, $order);
+
+        $this->assertSame(12.00, $fee->grossApplicationFee->toFloat());
+        $this->assertSame(12.00, $fee->netApplicationFee->toFloat());
+    }
 }

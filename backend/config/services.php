@@ -49,6 +49,11 @@ return [
         // Primary platform for new organizers
         'primary_platform' => env('STRIPE_PRIMARY_PLATFORM'),
     ],
+    'kamp_stripe_metadata' => [
+        'enabled' => env('KAMP_STRIPE_METADATA_ENABLED', false),
+        'source_namespace' => env('KAMP_STRIPE_SOURCE_NAMESPACE'),
+        'event_map' => env('KAMP_STRIPE_EVENT_MAP', '{}'),
+    ],
     'open_exchange_rates' => [
         'app_id' => env('OPEN_EXCHANGE_RATES_APP_ID'),
     ],

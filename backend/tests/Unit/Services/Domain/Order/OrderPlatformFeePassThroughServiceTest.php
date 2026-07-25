@@ -343,4 +343,20 @@ class OrderPlatformFeePassThroughServiceTest extends TestCase
 
         $this->assertEquals(0.0, $platformFee);
     }
+
+    public function testKampBuyerPassThroughAddsExactlySixPerTicketAtZeroPercentage(): void
+    {
+        $this->config->method('get')->willReturn(true);
+
+        $account = $this->createAccountConfig(6.00, 0.00, 'USD');
+        $eventSettings = $this->createEventSettings(true);
+
+        $singleFee = $this->service->calculatePlatformFee($account, $eventSettings, 50.95, 1, 'USD');
+        $twoTicketFee = $this->service->calculatePlatformFee($account, $eventSettings, 101.90, 2, 'USD');
+
+        $this->assertSame(6.00, $singleFee);
+        $this->assertSame(56.95, 50.95 + $singleFee);
+        $this->assertSame(12.00, $twoTicketFee);
+        $this->assertSame(113.90, 101.90 + $twoTicketFee);
+    }
 }

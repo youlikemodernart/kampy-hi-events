@@ -178,6 +178,7 @@ class OrderItemProcessingService
     {
         $rollUp['fees'] ??= [];
         $rollUp['fees'][] = [
+            'id' => OrderPlatformFeePassThroughService::PLATFORM_FEE_ID,
             'name' => OrderPlatformFeePassThroughService::getPlatformFeeName(),
             'rate' => $platformFee,
             'type' => TaxCalculationType::FIXED->name,

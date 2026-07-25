@@ -4,6 +4,7 @@ namespace HiEvents\Services\Domain\Payment\Stripe;
 
 use HiEvents\DomainObjects\StripeCustomerDomainObject;
 use HiEvents\Exceptions\Stripe\CreatePaymentIntentFailedException;
+use HiEvents\Exceptions\Stripe\KampStripeMetadataConfigurationException;
 use HiEvents\Repository\Interfaces\StripeCustomerRepositoryInterface;
 use HiEvents\Services\Domain\Order\DTO\ApplicationFeeValuesDTO;
 use HiEvents\Services\Domain\Order\OrderApplicationFeeCalculationService;
@@ -24,6 +25,7 @@ class StripePaymentIntentCreationService
         private readonly StripeCustomerRepositoryInterface     $stripeCustomerRepository,
         private readonly DatabaseManager                       $databaseManager,
         private readonly OrderApplicationFeeCalculationService $orderApplicationFeeCalculationService,
+        private readonly KampStripeMetadataService             $kampStripeMetadataService,
     )
     {
     }
@@ -56,6 +58,70 @@ class StripePaymentIntentCreationService
 
     /**
      * @throws CreatePaymentIntentFailedException
+     */
+    public function retrieveValidatedPaymentIntentClientSecretWithClient(
+        StripeClient $stripeClient,
+        string $paymentIntentId,
+        CreatePaymentIntentRequestDTO $paymentIntentDTO,
+    ): string {
+        $kampMetadata = $this->kampStripeMetadataService->build($paymentIntentDTO);
+        if ($kampMetadata === null) {
+            return $this->retrievePaymentIntentClientSecretWithClient(
+                $stripeClient,
+                $paymentIntentId,
+                $paymentIntentDTO->stripeAccountId,
+            );
+        }
+
+        $accountConfiguration = $paymentIntentDTO->account->getConfiguration();
+        $applicationFee = $this->orderApplicationFeeCalculationService->calculateApplicationFee(
+            accountConfiguration: $accountConfiguration,
+            order: $paymentIntentDTO->order,
+            vatSettings: $paymentIntentDTO->vatSettings,
+        );
+        $this->assertKampApplicationFee($applicationFee, $accountConfiguration?->getBypassApplicationFees() ?? false, $kampMetadata->ticketQuantity);
+
+        try {
+            $paymentIntent = $stripeClient->paymentIntents->retrieve(
+                $paymentIntentId,
+                [],
+                $this->getStripeAccountData($paymentIntentDTO),
+            );
+        } catch (ApiErrorException $exception) {
+            $this->logger->error('Stripe payment intent retrieval failed', [
+                'exception' => $exception,
+                'paymentIntentId' => $paymentIntentId,
+                'orderId' => $paymentIntentDTO->order->getId(),
+                'eventId' => $paymentIntentDTO->order->getEventId(),
+            ]);
+
+            throw new CreatePaymentIntentFailedException(
+                __('There was an error communicating with the payment provider. Please try again later.')
+            );
+        }
+
+        $actualMetadata = method_exists($paymentIntent->metadata, 'toArray')
+            ? $paymentIntent->metadata->toArray()
+            : (array) $paymentIntent->metadata;
+        $expectedMetadata = $kampMetadata->metadata;
+        ksort($actualMetadata);
+        ksort($expectedMetadata);
+
+        if ($paymentIntent->amount !== $paymentIntentDTO->amount->toMinorUnit()
+            || strtolower((string) $paymentIntent->currency) !== strtolower($paymentIntentDTO->currencyCode)
+            || $paymentIntent->application_fee_amount !== (int) round(KampStripeMetadataService::FIXED_APPLICATION_FEE * 100 * $kampMetadata->ticketQuantity)
+            || $actualMetadata !== $expectedMetadata
+            || $paymentIntent->description !== $kampMetadata->description
+            || ! is_string($paymentIntent->client_secret)
+            || $paymentIntent->client_secret === '') {
+            throw new KampStripeMetadataConfigurationException('existing_payment_intent_contract_mismatch');
+        }
+
+        return $paymentIntent->client_secret;
+    }
+
+    /**
+     * @throws CreatePaymentIntentFailedException
      * @throws ApiErrorException|Throwable
      */
     public function createPaymentIntentWithClient(
@@ -74,22 +140,33 @@ class StripePaymentIntentCreationService
                 order: $paymentIntentDTO->order,
                 vatSettings: $paymentIntentDTO->vatSettings,
             );
+            $kampMetadata = $this->kampStripeMetadataService->build($paymentIntentDTO);
+
+            if ($kampMetadata !== null) {
+                $this->assertKampApplicationFee($applicationFee, $bypassApplicationFees, $kampMetadata->ticketQuantity);
+            }
+
+            $metadata = $kampMetadata?->metadata
+                ?? $this->getPaymentIntentMetadata($paymentIntentDTO, $applicationFee);
+            $description = $kampMetadata?->description ?? $paymentIntentDTO->description;
 
             $paymentIntent = $stripeClient->paymentIntents->create([
                 'amount' => $paymentIntentDTO->amount->toMinorUnit(),
                 'currency' => $paymentIntentDTO->currencyCode,
                 'customer' => $this->upsertStripeCustomerWithClient($stripeClient, $paymentIntentDTO)->getStripeCustomerId(),
-                'metadata' => $this->getPaymentIntentMetadata($paymentIntentDTO, $applicationFee),
+                'metadata' => $metadata,
                 'automatic_payment_methods' => [
                     'enabled' => true,
                 ],
-                ...($paymentIntentDTO->description ? ['description' => $paymentIntentDTO->description] : []),
+                ...($description ? ['description' => $description] : []),
                 ...($applicationFee && !$bypassApplicationFees ? ['application_fee_amount' => $applicationFee->grossApplicationFee->toMinorUnit()] : []),
             ], $this->getStripeAccountData($paymentIntentDTO));
 
             $this->logger->debug('Stripe payment intent created', [
                 'paymentIntentId' => $paymentIntent->id,
-                'paymentIntentDTO' => $paymentIntentDTO->toArray(['account']),
+                'orderId' => $paymentIntentDTO->order->getId(),
+                'eventId' => $paymentIntentDTO->order->getEventId(),
+                'stripeAccountId' => $paymentIntentDTO->stripeAccountId,
             ]);
 
             $this->databaseManager->commit();
@@ -100,10 +177,22 @@ class StripePaymentIntentCreationService
                 accountId: $paymentIntentDTO->stripeAccountId,
                 applicationFeeData: $applicationFee,
             );
+        } catch (KampStripeMetadataConfigurationException $exception) {
+            $this->logger->error('Kamp Stripe metadata configuration failed', [
+                'reason' => $exception->getReason(),
+                'orderId' => $paymentIntentDTO->order->getId(),
+                'eventId' => $paymentIntentDTO->order->getEventId(),
+            ]);
+
+            $this->databaseManager->rollBack();
+
+            throw $exception;
         } catch (ApiErrorException $exception) {
-            $this->logger->error("Stripe payment intent creation failed: {$exception->getMessage()}", [
+            $this->logger->error('Stripe payment intent creation failed', [
                 'exception' => $exception,
-                'paymentIntentDTO' => $paymentIntentDTO->toArray(['account']),
+                'orderId' => $paymentIntentDTO->order->getId(),
+                'eventId' => $paymentIntentDTO->order->getEventId(),
+                'stripeAccountId' => $paymentIntentDTO->stripeAccountId,
             ]);
 
             $this->databaseManager->rollBack();
@@ -131,7 +220,10 @@ class StripePaymentIntentCreationService
             $this->logger->error(
                 'Stripe Connect account not found for the event organizer, payment intent creation failed.
                 You will need to connect your Stripe account to receive payments.',
-                ['paymentIntentDTO' => $paymentIntentDTO->toArray(['account'])]
+                [
+                    'orderId' => $paymentIntentDTO->order->getId(),
+                    'eventId' => $paymentIntentDTO->order->getEventId(),
+                ]
             );
 
             throw new CreatePaymentIntentFailedException(
@@ -204,6 +296,21 @@ class StripePaymentIntentCreationService
         ]);
 
         return $customer;
+    }
+
+    private function assertKampApplicationFee(
+        ?ApplicationFeeValuesDTO $applicationFee,
+        bool $bypassApplicationFees,
+        int $ticketQuantity,
+    ): void {
+        $expectedApplicationFee = (int) round(
+            KampStripeMetadataService::FIXED_APPLICATION_FEE * 100 * $ticketQuantity
+        );
+        if ($applicationFee === null
+            || $bypassApplicationFees
+            || $applicationFee->grossApplicationFee->toMinorUnit() !== $expectedApplicationFee) {
+            throw new KampStripeMetadataConfigurationException('application_fee_amount_mismatch');
+        }
     }
 
     private function getPaymentIntentMetadata(

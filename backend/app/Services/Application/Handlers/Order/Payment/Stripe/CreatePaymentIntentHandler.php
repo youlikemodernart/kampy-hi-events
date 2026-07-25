@@ -10,12 +10,14 @@ use HiEvents\DomainObjects\AccountConfigurationDomainObject;
 use HiEvents\DomainObjects\AccountStripePlatformDomainObject;
 use HiEvents\DomainObjects\AccountVatSettingDomainObject;
 use HiEvents\DomainObjects\EventDomainObject;
+use HiEvents\DomainObjects\EventSettingDomainObject;
 use HiEvents\DomainObjects\Generated\StripePaymentDomainObjectAbstract;
 use HiEvents\DomainObjects\OrderItemDomainObject;
 use HiEvents\DomainObjects\Status\OrderStatus;
 use HiEvents\DomainObjects\StripePaymentDomainObject;
 use HiEvents\Exceptions\ResourceConflictException;
 use HiEvents\Exceptions\Stripe\CreatePaymentIntentFailedException;
+use HiEvents\Exceptions\Stripe\KampStripeMetadataConfigurationException;
 use HiEvents\Exceptions\UnauthorizedException;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\AccountRepositoryInterface;
@@ -23,6 +25,7 @@ use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Repository\Interfaces\StripePaymentsRepositoryInterface;
 use HiEvents\Services\Domain\Payment\Stripe\DTOs\CreatePaymentIntentRequestDTO;
 use HiEvents\Services\Domain\Payment\Stripe\DTOs\CreatePaymentIntentResponseDTO;
+use HiEvents\Services\Domain\Payment\Stripe\KampStripeMetadataService;
 use HiEvents\Services\Domain\Payment\Stripe\StripePaymentIntentCreationService;
 use HiEvents\Services\Infrastructure\Session\CheckoutSessionManagementService;
 use HiEvents\Services\Infrastructure\Stripe\StripeClientFactory;
@@ -42,6 +45,7 @@ readonly class CreatePaymentIntentHandler
         private AccountRepositoryInterface         $accountRepository,
         private StripeClientFactory                $stripeClientFactory,
         private StripeConfigurationService         $stripeConfigurationService,
+        private KampStripeMetadataService           $kampStripeMetadataService,
     )
     {
     }
@@ -62,7 +66,11 @@ readonly class CreatePaymentIntentHandler
         $order = $this->orderRepository
             ->loadRelation(new Relationship(OrderItemDomainObject::class))
             ->loadRelation(new Relationship(StripePaymentDomainObject::class, name: 'stripe_payment'))
-            ->loadRelation(new Relationship(EventDomainObject::class, name: 'event'))
+            ->loadRelation(new Relationship(
+                EventDomainObject::class,
+                nested: [new Relationship(EventSettingDomainObject::class, name: 'event_settings')],
+                name: 'event',
+            ))
             ->findByShortId($orderShortId);
 
         if (!$order || !$this->sessionIdentifierService->verifySession($order->getSessionId())) {
@@ -97,15 +105,44 @@ readonly class CreatePaymentIntentHandler
 
         $stripeClient = $this->stripeClientFactory->createForPlatform($stripePlatform);
         $publicKey = $this->stripeConfigurationService->getPublicKey($stripePlatform);
+        $stripeEnvironment = $this->kampStripeMetadataService->isEnabled()
+            ? $this->kampStripeMetadataService->resolveStripeEnvironment(
+                $publicKey,
+                $this->stripeConfigurationService->getSecretKey($stripePlatform),
+            )
+            : null;
 
-        // If we already have a Stripe session then re-fetch the client secret
+        $description = __(':item_count item(s) for event: :event_name (Order :order_short_id)', [
+            'event_name' => Str::limit($order->getEvent()?->getTitle() ?? __('Event'), 75),
+            'order_short_id' => $orderShortId,
+            'item_count' => $order->getOrderItems()->sum(fn(OrderItemDomainObject $item) => $item->getQuantity()),
+        ]);
+        $paymentIntentRequest = CreatePaymentIntentRequestDTO::fromArray([
+            'amount' => MoneyValue::fromFloat($order->getTotalGross(), $order->getCurrency()),
+            'currencyCode' => $order->getCurrency(),
+            'account' => $account,
+            'order' => $order,
+            'stripeAccountId' => $stripeAccountId,
+            'vatSettings' => $account->getAccountVatSetting(),
+            'description' => Str::limit($description, 997),
+            'stripeEnvironment' => $stripeEnvironment,
+        ]);
+
+        // Existing intents must satisfy the same enabled Kamp contract before reuse.
         if ($order->getStripePayment() !== null) {
+            $stripePayment = $order->getStripePayment();
+            if ($this->kampStripeMetadataService->isEnabled()
+                && ($stripePayment->getConnectedAccountId() !== $stripeAccountId
+                    || $stripePayment->getStripePlatform() !== $stripePlatform?->value)) {
+                throw new KampStripeMetadataConfigurationException('existing_payment_context_mismatch');
+            }
+
             return new CreatePaymentIntentResponseDTO(
-                paymentIntentId: $order->getStripePayment()->getPaymentIntentId(),
-                clientSecret: $this->stripePaymentService->retrievePaymentIntentClientSecretWithClient(
+                paymentIntentId: $stripePayment->getPaymentIntentId(),
+                clientSecret: $this->stripePaymentService->retrieveValidatedPaymentIntentClientSecretWithClient(
                     $stripeClient,
-                    $order->getStripePayment()->getPaymentIntentId(),
-                    $stripeAccountId
+                    $stripePayment->getPaymentIntentId(),
+                    $paymentIntentRequest,
                 ),
                 accountId: $stripeAccountId,
                 stripePlatform: $stripePlatform,
@@ -113,23 +150,9 @@ readonly class CreatePaymentIntentHandler
             );
         }
 
-        $description = __(':item_count item(s) for event: :event_name (Order :order_short_id)', [
-            'event_name' => Str::limit($order->getEvent()?->getTitle() ?? __('Event'), 75),
-            'order_short_id' => $orderShortId,
-            'item_count' => $order->getOrderItems()->sum(fn(OrderItemDomainObject $item) => $item->getQuantity()),
-        ]);
-
         $paymentIntent = $this->stripePaymentService->createPaymentIntentWithClient(
             $stripeClient,
-            CreatePaymentIntentRequestDTO::fromArray([
-                'amount' => MoneyValue::fromFloat($order->getTotalGross(), $order->getCurrency()),
-                'currencyCode' => $order->getCurrency(),
-                'account' => $account,
-                'order' => $order,
-                'stripeAccountId' => $stripeAccountId,
-                'vatSettings' => $account->getAccountVatSetting(),
-                'description' => Str::limit($description, 997),
-            ])
+            $paymentIntentRequest,
         );
 
         $applicationFeeData = $paymentIntent->applicationFeeData;
