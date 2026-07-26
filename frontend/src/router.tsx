@@ -359,6 +359,13 @@ export const router: RouteObject[] = [
                 },
             },
             {
+                path: "financial-report",
+                async lazy() {
+                    const FinancialReport = await import("./components/routes/event/Reports/FinancialReport");
+                    return { Component: FinancialReport.default };
+                },
+            },
+            {
                 path: "report/:reportType",
                 async lazy() {
                     const ReportLayout = await import("./components/routes/event/Reports/ReportLayout");

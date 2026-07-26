@@ -61,6 +61,8 @@ use HiEvents\Http\Actions\Events\UpdateEventAction;
 use HiEvents\Http\Actions\Events\DeleteEventAction;
 use HiEvents\Http\Actions\Events\GetEventDeletionStatusAction;
 use HiEvents\Http\Actions\Events\UpdateEventStatusAction;
+use HiEvents\Http\Actions\Financial\ExportFinancialReportAction;
+use HiEvents\Http\Actions\Financial\GetFinancialReportAction;
 use HiEvents\Http\Actions\EventSettings\EditEventSettingsAction;
 use HiEvents\Http\Actions\EventSettings\GetEventSettingsAction;
 use HiEvents\Http\Actions\EventSettings\GetPlatformFeePreviewAction;
@@ -434,6 +436,8 @@ $router->middleware(['auth:api', 'route.permission'])->group(
 
         // Reports
         $router->get('/events/{event_id}/reports/{report_type}', GetReportAction::class);
+        $router->get('/events/{event_id}/financial-report', GetFinancialReportAction::class);
+        $router->get('/events/{event_id}/financial-report/export', ExportFinancialReportAction::class);
 
         // Waitlist
         $router->get('/events/{event_id}/waitlist', GetWaitlistEntriesAction::class);

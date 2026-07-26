@@ -13,12 +13,12 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: Poedit 3.8\n"
 
-#: src/components/layouts/Event/index.tsx:209
+#: src/components/layouts/Event/index.tsx:211
 #: src/components/layouts/OrganizerLayout/index.tsx:225
 msgid "- Click to Publish"
 msgstr "- Kliknij, aby opublikować"
 
-#: src/components/layouts/Event/index.tsx:211
+#: src/components/layouts/Event/index.tsx:213
 #: src/components/layouts/OrganizerLayout/index.tsx:227
 msgid "- Click to Unpublish"
 msgstr "- Kliknij, aby cofnąć publikację"
@@ -59,6 +59,10 @@ msgstr "{0} Aktywne webhooki"
 #: src/components/routes/product-widget/SelectProducts/index.tsx:495
 msgid "{0} available"
 msgstr "{0} dostępne"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:121
+#~ msgid "{0} cents"
+#~ msgstr ""
 
 #: src/components/modals/CreateTaxOrFeeModal/index.tsx:36
 msgid "{0} created successfully"
@@ -101,6 +105,10 @@ msgstr "{days} dni, {hours} godzin, {minutes} minut i {seconds} sekund"
 #: src/components/common/WebhookTable/index.tsx:79
 msgid "{eventCount} events"
 msgstr "{eventCount} wydarzeń"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:122
+msgid "{formattedValue} cents"
+msgstr ""
 
 #: src/components/common/Countdown/index.tsx:70
 msgid "{hours} hours, {minutes} minutes, and {seconds} seconds"
@@ -575,6 +583,10 @@ msgstr "Linia adresu 2"
 msgid "Address Line 2"
 msgstr "Linia adresu 2"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:268
+msgid "Adjustment timing"
+msgstr ""
+
 #: src/components/layouts/Admin/index.tsx:12
 #: src/components/modals/EditUserModal/index.tsx:69
 #: src/components/modals/InviteUserModal/index.tsx:59
@@ -626,7 +638,7 @@ msgstr "Sprzedaż partnerska nie będzie śledzona. To dezaktywuje partnera."
 msgid "Affiliate updated successfully"
 msgstr "Partner zaktualizowany pomyślnie"
 
-#: src/components/layouts/Event/index.tsx:131
+#: src/components/layouts/Event/index.tsx:133
 #: src/components/modals/DuplicateEventModal/index.tsx:33
 #: src/components/routes/event/Affiliates/index.tsx:63
 msgid "Affiliates"
@@ -681,6 +693,10 @@ msgstr "Wszystkie zadania w kolejce do ponowienia"
 msgid "All Products"
 msgstr "Wszystkie produkty"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:228
+msgid "All required sources are current and publishable."
+msgstr ""
+
 #: src/components/routes/event/SoldOutWaitlist/index.tsx:64
 msgid "All Statuses"
 msgstr ""
@@ -688,6 +704,10 @@ msgstr ""
 #: src/components/routes/events/Dashboard/index.tsx:83
 msgid "All Upcoming Events"
 msgstr "Wszystkie nadchodzące wydarzenia"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:302
+msgid "Allocation base"
+msgstr ""
 
 #: src/components/routes/event/Settings/Sections/PaymentSettings/index.tsx:157
 msgid "Allow attendees associated with unpaid orders to check in"
@@ -724,11 +744,11 @@ msgstr "Prawie gotowe! Czekamy tylko na przetworzenie Twojej płatności. To pow
 msgid "Already have an account? <0>{0}</0>"
 msgstr "Masz już konto? <0>{0}</0>"
 
-#: src/components/modals/RefundOrderModal/index.tsx:85
+#: src/components/modals/RefundOrderModal/index.tsx:104
 msgid "Already Refunded"
 msgstr "Już zwrócone"
 
-#: src/components/modals/RefundOrderModal/index.tsx:131
+#: src/components/modals/RefundOrderModal/index.tsx:150
 msgid "Also cancel this order"
 msgstr "Również anuluj to zamówienie"
 
@@ -747,6 +767,7 @@ msgstr "Niesamowite, Wydarzenie, Słowa kluczowe..."
 
 #: src/components/common/OrdersTable/index.tsx:348
 #: src/components/forms/TaxAndFeeForm/index.tsx:71
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:329
 #: src/components/routes/product-widget/SelectProducts/Prices/Tiered/index.tsx:36
 msgid "Amount"
 msgstr "Kwota"
@@ -794,6 +815,10 @@ msgstr "Wszystkie zapytania od posiadaczy produktów będą wysyłane na ten adr
 #: src/components/common/WidgetEditor/index.tsx:216
 msgid "Appearance"
 msgstr "Wygląd"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:290
+msgid "Application fees"
+msgstr ""
 
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:176
 msgid "Application Fees Configuration"
@@ -920,12 +945,12 @@ msgstr "Czy na pewno chcesz usunąć ten webhook?"
 msgid "Are you sure you want to leave?"
 msgstr "Czy na pewno chcesz wyjść?"
 
-#: src/components/layouts/Event/index.tsx:171
+#: src/components/layouts/Event/index.tsx:173
 #: src/components/routes/event/EventDashboard/index.tsx:81
 msgid "Are you sure you want to make this event draft? This will make the event invisible to the public"
 msgstr "Czy na pewno chcesz zrobić to wydarzenie szkicem? To sprawi, że wydarzenie będzie niewidoczne dla publiczności"
 
-#: src/components/layouts/Event/index.tsx:172
+#: src/components/layouts/Event/index.tsx:174
 #: src/components/routes/event/EventDashboard/index.tsx:82
 msgid "Are you sure you want to make this event public? This will make the event visible to the public"
 msgstr "Czy na pewno chcesz opublikować to wydarzenie? To sprawi, że wydarzenie będzie widoczne dla publiczności"
@@ -997,6 +1022,10 @@ msgstr "Czy jesteś zarejestrowany na VAT w UE?"
 #: src/constants/eventCategories.ts:11
 msgid "Art"
 msgstr "Sztuka"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:248
+msgid "As of"
+msgstr ""
 
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/VatSettings/index.tsx:34
 msgid "As your business is based in Ireland, Irish VAT at 23% applies automatically to all platform fees."
@@ -1123,7 +1152,7 @@ msgstr "Bilet uczestnika nie jest uwzględniony na tej liście"
 #: src/components/common/EventCard/index.tsx:264
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:382
 #: src/components/common/StatBoxes/index.tsx:45
-#: src/components/layouts/Event/index.tsx:135
+#: src/components/layouts/Event/index.tsx:137
 #: src/components/modals/ManageOrderModal/index.tsx:126
 #: src/components/routes/admin/Messages/index.tsx:90
 #: src/components/routes/admin/Messages/index.tsx:139
@@ -1192,7 +1221,7 @@ msgstr "Automatycznie dopasuj wysokość widgetu na podstawie zawartości. Gdy w
 msgid "Available"
 msgstr "Dostępne"
 
-#: src/components/modals/RefundOrderModal/index.tsx:92
+#: src/components/modals/RefundOrderModal/index.tsx:111
 msgid "Available to Refund"
 msgstr "Dostępne do zwrotu"
 
@@ -1409,7 +1438,7 @@ msgstr ""
 msgid "Cancel"
 msgstr "Anuluj"
 
-#: src/components/modals/RefundOrderModal/index.tsx:132
+#: src/components/modals/RefundOrderModal/index.tsx:151
 msgid "Cancel all products and release them back to the pool"
 msgstr "Anuluj wszystkie produkty i zwolnij je z powrotem do puli"
 
@@ -1475,7 +1504,7 @@ msgstr "Przypisanie pojemności usunięte pomyślnie"
 msgid "Capacity Assignments"
 msgstr "Przypisania pojemności"
 
-#: src/components/layouts/Event/index.tsx:139
+#: src/components/layouts/Event/index.tsx:141
 msgid "Capacity Management"
 msgstr "Zarządzanie pojemnością"
 
@@ -1578,7 +1607,7 @@ msgstr "Lista odpraw nie znaleziona"
 msgid "Check-in Lists"
 msgstr "Listy odpraw"
 
-#: src/components/layouts/Event/index.tsx:136
+#: src/components/layouts/Event/index.tsx:138
 #: src/components/modals/DuplicateEventModal/index.tsx:29
 #: src/components/routes/event/CheckInLists/index.tsx:34
 msgid "Check-In Lists"
@@ -1704,7 +1733,7 @@ msgstr "zamknij"
 #: src/components/common/CookieConsentBanner/index.tsx:37
 #: src/components/modals/JoinWaitlistModal/index.tsx:103
 #: src/components/modals/JoinWaitlistModal/index.tsx:130
-#: src/components/modals/RefundOrderModal/index.tsx:169
+#: src/components/modals/RefundOrderModal/index.tsx:188
 #: src/components/routes/product-widget/SelectProducts/index.tsx:617
 msgid "Close"
 msgstr "Zamknij"
@@ -1945,7 +1974,7 @@ msgstr "Potwierdź hasło"
 msgid "Confirm Password"
 msgstr "Potwierdź hasło"
 
-#: src/components/layouts/Event/index.tsx:274
+#: src/components/layouts/Event/index.tsx:276
 msgid "Confirm your email to access all features."
 msgstr "Potwierdź swój e-mail, aby uzyskać dostęp do wszystkich funkcji."
 
@@ -2025,6 +2054,10 @@ msgstr "Połącz swoje konto Stripe, aby rozpocząć przyjmowanie płatności."
 #: src/components/routes/event/GettingStarted/index.tsx:155
 msgid "Connect your Stripe account to start receiving payments."
 msgstr "Połącz swoje konto Stripe, aby rozpocząć otrzymywanie płatności."
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:291
+msgid "Connected net"
+msgstr ""
 
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:392
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:629
@@ -2415,6 +2448,10 @@ msgstr "Etykieta CTA jest wymagana"
 msgid "Currency"
 msgstr "Waluta"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:212
+msgid "Current known position"
+msgstr ""
+
 #: src/components/routes/profile/ManageProfile/index.tsx:228
 msgid "Current Password"
 msgstr "Aktualne hasło"
@@ -2422,6 +2459,10 @@ msgstr "Aktualne hasło"
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:164
 msgid "Current payment processor"
 msgstr "Aktualny procesor płatności"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:320
+msgid "Current position components"
+msgstr ""
 
 #: src/components/modals/EditAccountVatSettingsModal/index.tsx:156
 msgid "Current VAT number is validated"
@@ -2470,11 +2511,20 @@ msgstr "Niestandardowy szablon"
 msgid "Customer"
 msgstr "Klient"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:279
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:288
+msgid "Customer charges"
+msgstr ""
+
 #: src/components/common/OrdersTable/index.tsx:159
 msgid "Customer link copied to clipboard"
 msgstr ""
 
-#: src/components/modals/RefundOrderModal/index.tsx:125
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:250
+msgid "Customer ticket price"
+msgstr ""
+
+#: src/components/modals/RefundOrderModal/index.tsx:144
 msgid "Customer will receive an email confirming the refund"
 msgstr "Klient otrzyma e-mail potwierdzający zwrot"
 
@@ -2542,6 +2592,18 @@ msgstr "Dostosuj swoją stronę wydarzenia, aby pasowała do Twojej marki i styl
 #: src/components/routes/organizer/OrganizerHomepageDesigner/index.tsx:174
 msgid "Customize your organizer page appearance"
 msgstr "Dostosuj wygląd strony organizatora"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:215
+msgid "Cutoff"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:480
+msgid "Cutoff with timezone offset"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:474
+msgid "Cycle ID"
+msgstr ""
 
 #: src/components/routes/organizer/Reports/index.tsx:18
 msgid "Daily revenue, taxes, fees, and refunds across all events"
@@ -2785,6 +2847,10 @@ msgstr "Darowizna"
 msgid "Donation / Pay what you'd like product"
 msgstr "Darowizna / Produkt zapłać ile chcesz"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:298
+msgid "Donations"
+msgstr ""
+
 #: src/components/modals/CheckInListSuccessModal/index.tsx:59
 #: src/components/modals/CreateOrganizerWebhookModal/index.tsx:72
 #: src/components/modals/CreateWebhookModal/index.tsx:72
@@ -2797,6 +2863,7 @@ msgid "Download .ics"
 msgstr "Pobierz .ics"
 
 #: src/components/common/DownloadCsvButton/index.tsx:48
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:455
 msgid "Download CSV"
 msgstr "Pobierz CSV"
 
@@ -2812,7 +2879,7 @@ msgstr "Pobierz fakturę"
 msgid "Download QR Code"
 msgstr "Pobierz kod QR"
 
-#: src/components/routes/event/Reports/index.tsx:38
+#: src/components/routes/event/Reports/index.tsx:45
 msgid "Download sales, attendee, and financial reports for all completed orders."
 msgstr "Pobierz raporty sprzedaży, uczestników i finansowe dla wszystkich zakończonych zamówień."
 
@@ -2822,7 +2889,7 @@ msgid "Downloading Invoice"
 msgstr "Pobieranie faktury"
 
 #: src/components/common/EventCard/index.tsx:93
-#: src/components/layouts/Event/index.tsx:208
+#: src/components/layouts/Event/index.tsx:210
 #: src/components/layouts/OrganizerLayout/index.tsx:224
 msgid "Draft"
 msgstr "Wersja robocza"
@@ -3020,6 +3087,10 @@ msgstr "Edytor"
 msgid "Education"
 msgstr "Edukacja"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:261
+msgid "Effective at"
+msgstr ""
+
 #: src/components/forms/TaxAndFeeForm/index.tsx:74
 msgid "eg. 2.50 for $2.50"
 msgstr "np. 2.50 za 2.50 USD"
@@ -3035,6 +3106,10 @@ msgstr "Niepowodzenia kwalifikacji"
 #: src/components/common/CheckInStatusModal/index.tsx:162
 msgid "Eligible Check-In Lists"
 msgstr "Kwalifikujące się listy zameldowań"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:277
+msgid "Eligible transactions"
+msgstr ""
 
 #: src/components/common/AttendeeDetails/index.tsx:22
 #: src/components/common/OrderDetails/index.tsx:31
@@ -3219,6 +3294,14 @@ msgstr "Angielski"
 msgid "Enter a subject and body to see the preview"
 msgstr "Wprowadź temat i treść, aby zobaczyć podgląd"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:407
+msgid "Enter a valid cycle ID."
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:399
+msgid "Enter a valid university ID."
+msgstr ""
+
 #: src/components/forms/AffiliateForm/index.tsx:91
 msgid "Enter affiliate email (optional)"
 msgstr "Wprowadź e-mail partnera (opcjonalne)"
@@ -3261,6 +3344,10 @@ msgstr "Wprowadź nazwisko"
 #: src/components/routes/auth/ResetPassword/index.tsx:65
 msgid "Enter new password"
 msgstr "Wprowadź nowe hasło"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:463
+msgid "Enter the authorized university, cycle, and cutoff. The same exact scope is used for the report and CSV export."
+msgstr ""
 
 #: src/components/modals/EditAccountVatSettingsModal/index.tsx:124
 msgid "Enter the VAT number including country code"
@@ -3465,7 +3552,7 @@ msgstr "Wydarzenie niedostępne"
 msgid "Event organizer name"
 msgstr "Nazwa organizatora wydarzenia"
 
-#: src/components/layouts/Event/index.tsx:263
+#: src/components/layouts/Event/index.tsx:265
 msgid "Event Page"
 msgstr "Strona wydarzenia"
 
@@ -3473,14 +3560,14 @@ msgstr "Strona wydarzenia"
 msgid "Event restored successfully"
 msgstr "Wydarzenie zostało pomyślnie przywrócone"
 
-#: src/components/layouts/Event/index.tsx:121
+#: src/components/layouts/Event/index.tsx:123
 #: src/components/routes/event/Settings/index.tsx:159
 msgid "Event Settings"
 msgstr "Ustawienia wydarzenia"
 
 #: src/components/common/EventCard/index.tsx:79
 #: src/components/common/StatusToggle/index.tsx:63
-#: src/components/layouts/Event/index.tsx:187
+#: src/components/layouts/Event/index.tsx:189
 #: src/components/routes/event/EventDashboard/index.tsx:96
 #: src/components/routes/event/GettingStarted/index.tsx:68
 msgid "Event status update failed. Please try again later"
@@ -3488,7 +3575,7 @@ msgstr "Aktualizacja statusu wydarzenia nie powiodła się. Spróbuj ponownie p�
 
 #: src/components/common/EventCard/index.tsx:76
 #: src/components/common/StatusToggle/index.tsx:55
-#: src/components/layouts/Event/index.tsx:183
+#: src/components/layouts/Event/index.tsx:185
 #: src/components/routes/event/EventDashboard/index.tsx:93
 #: src/components/routes/event/GettingStarted/index.tsx:65
 msgid "Event status updated"
@@ -3946,6 +4033,23 @@ msgstr "Filtry ({activeFilterCount})"
 msgid "Finance"
 msgstr ""
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:447
+#: src/components/routes/event/Reports/index.tsx:35
+msgid "Financial Report"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:433
+msgid "Financial report CSV is unavailable."
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:185
+msgid "Financial report data unavailable"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:178
+msgid "Financial report unavailable"
+msgstr ""
+
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:214
 msgid "Finish Setup"
 msgstr "Zakończ konfigurację"
@@ -4090,6 +4194,10 @@ msgstr "Darmowy produkt, nie wymaga informacji o płatności"
 msgid "French"
 msgstr "Francuski"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:353
+msgid "Freshness"
+msgstr ""
+
 #: src/components/modals/EditUserModal/index.tsx:71
 #: src/components/modals/InviteUserModal/index.tsx:61
 msgid "Full access to team, account settings, billing, events, orders, reports, and check-in."
@@ -4099,9 +4207,21 @@ msgstr ""
 msgid "Full event duration"
 msgstr "Pełny czas trwania wydarzenia"
 
-#: src/components/modals/RefundOrderModal/index.tsx:109
+#: src/components/modals/RefundOrderModal/index.tsx:128
 msgid "Full refund"
 msgstr "Pełny zwrot"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:264
+msgid "Fundraising allocation"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:252
+msgid "Fundraising goal"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:314
+msgid "Fundraising gross"
+msgstr ""
 
 #: src/components/forms/ProductForm/index.tsx:145
 msgid "General"
@@ -4181,6 +4301,10 @@ msgstr "Dobra czytelność"
 msgid "Google Calendar"
 msgstr "Kalendarz Google"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:303
+msgid "Gross raised"
+msgstr ""
+
 #: src/components/common/EventCard/index.tsx:267
 msgid "Gross revenue"
 msgstr "Przychód brutto"
@@ -4200,7 +4324,7 @@ msgstr "Sprzedaż brutto"
 msgid "Gross Sales"
 msgstr "Sprzedaż brutto"
 
-#: src/components/layouts/Event/index.tsx:134
+#: src/components/layouts/Event/index.tsx:136
 msgid "Guest Management"
 msgstr "Zarządzanie gośćmi"
 
@@ -4350,7 +4474,7 @@ msgstr "Wyróżnione produkty będą miały inny kolor tła, aby wyróżnić si�
 msgid "Homepage Design"
 msgstr "Projekt strony głównej"
 
-#: src/components/layouts/Event/index.tsx:122
+#: src/components/layouts/Event/index.tsx:124
 #: src/components/layouts/OrganizerLayout/index.tsx:101
 msgid "Homepage Designer"
 msgstr "Projektant strony głównej"
@@ -4467,6 +4591,10 @@ msgstr "URL obrazu"
 msgid "Images"
 msgstr "Obrazy"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:292
+msgid "Immediate adjustments"
+msgstr ""
+
 #: src/components/common/AdminAccountsTable/index.tsx:133
 #: src/components/common/AdminUsersTable/index.tsx:84
 #: src/components/common/AdminUsersTable/index.tsx:96
@@ -4568,7 +4696,7 @@ msgstr "Instagram"
 msgid "Instant Payouts"
 msgstr "Natychmiastowe wypłaty"
 
-#: src/components/layouts/Event/index.tsx:142
+#: src/components/layouts/Event/index.tsx:144
 #: src/components/layouts/OrganizerLayout/index.tsx:103
 msgid "Integrations"
 msgstr "Integracje"
@@ -4733,6 +4861,10 @@ msgstr "Po prostu kliknij przycisk poniżej, aby ponownie połączyć swoje kont
 msgid "Just looking for your tickets?"
 msgstr "Szukasz tylko swoich biletów?"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:280
+msgid "Kamp net settlement"
+msgstr ""
+
 #: src/components/routes/product-widget/CollectInformation/index.tsx:567
 msgid "Keep me updated on news and events from {0}"
 msgstr "Informuj mnie o nowościach i wydarzeniach od {0}"
@@ -4878,7 +5010,7 @@ msgid "List event publicly"
 msgstr ""
 
 #: src/components/common/EventCard/index.tsx:96
-#: src/components/layouts/Event/index.tsx:210
+#: src/components/layouts/Event/index.tsx:212
 #: src/components/layouts/OrganizerLayout/index.tsx:226
 msgid "Live"
 msgstr "Na żywo"
@@ -4892,9 +5024,17 @@ msgstr "NA ŻYWO"
 msgid "Live Events"
 msgstr "Wydarzenia na żywo"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:487
+msgid "Load report"
+msgstr ""
+
 #: src/components/modals/EditUserModal/index.tsx:145
 #: src/components/modals/InviteUserModal/index.tsx:112
 msgid "Loading events..."
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:498
+msgid "Loading financial report"
 msgstr ""
 
 #: src/components/routes/event/TicketDesigner/TicketPreview.tsx:34
@@ -5146,7 +5286,7 @@ msgid "Message Sent"
 msgstr "Wiadomość wysłana"
 
 #: src/components/layouts/Admin/index.tsx:18
-#: src/components/layouts/Event/index.tsx:137
+#: src/components/layouts/Event/index.tsx:139
 #: src/components/routes/event/messages.tsx:225
 msgid "Messages"
 msgstr "Wiadomości"
@@ -5179,6 +5319,10 @@ msgstr "Różne"
 #: src/components/routes/event/Settings/Sections/MiscSettings/index.tsx:72
 msgid "Miscellaneous Settings"
 msgstr "Ustawienia różne"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:235
+msgid "Missing or unpublishable sources"
+msgstr ""
 
 #: src/components/layouts/AuthLayout/index.tsx:51
 msgid "Mobile Optimized"
@@ -5305,6 +5449,7 @@ msgstr "Życie nocne"
 
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:250
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:277
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:148
 msgid "No"
 msgstr "Nie"
 
@@ -5421,6 +5566,10 @@ msgstr "Brak nieudanych zadań"
 msgid "No filters available"
 msgstr "Brak dostępnych filtrów"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:179
+msgid "No financial report is configured for this event and scope."
+msgstr ""
+
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:86
 msgid "No impact on your current or past transactions"
 msgstr "Brak wpływu na Twoje obecne lub przeszłe transakcje"
@@ -5514,6 +5663,10 @@ msgstr "Brak produktów jeszcze"
 msgid "No Promo Codes to show"
 msgstr "Brak kodów promocyjnych do wyświetlenia"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:322
+msgid "No publishable components are available."
+msgstr ""
+
 #: src/components/modals/ManageAttendeeModal/index.tsx:200
 msgid "No questions answered by this attendee."
 msgstr "Żadne pytania nie zostały odpowiedzi przez tego uczestnika."
@@ -5529,6 +5682,10 @@ msgstr "Brak ostatnich rejestracji kont"
 #: src/components/modals/MessageRecipientsModal/index.tsx:54
 msgid "No recipients found"
 msgstr "Nie znaleziono odbiorców"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:493
+msgid "No report request is made until all three scope values are valid. Access is still checked by the server."
+msgstr ""
 
 #: src/components/common/OrganizerWebhookTable/index.tsx:174
 #: src/components/common/WebhookTable/index.tsx:174
@@ -5607,6 +5764,10 @@ msgstr "Firmy lub osoby fizyczne niezarejestrowane w VAT: obowiązuje irlandzki 
 #: src/components/routes/product-widget/CollectInformation/index.tsx:499
 msgid "None"
 msgstr "Żaden"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:239
+msgid "None listed"
+msgstr ""
 
 #: src/components/common/ProductPriceAvailability/index.tsx:37
 #: src/components/common/ProductPriceAvailability/index.tsx:66
@@ -6010,7 +6171,7 @@ msgid "Order timeout"
 msgstr "Limit czasu zamówienia"
 
 #: src/components/common/Editor/Controls/InsertLiquidVariableControl.tsx:22
-#: src/components/modals/RefundOrderModal/index.tsx:78
+#: src/components/modals/RefundOrderModal/index.tsx:97
 msgid "Order Total"
 msgstr "Suma zamówienia"
 
@@ -6031,7 +6192,7 @@ msgid "Order was cancelled"
 msgstr "Zamówienie zostało anulowane"
 
 #: src/components/layouts/Admin/index.tsx:17
-#: src/components/layouts/Event/index.tsx:129
+#: src/components/layouts/Event/index.tsx:131
 #: src/components/routes/admin/Attribution/index.tsx:138
 #: src/components/routes/admin/Orders/index.tsx:44
 #: src/components/routes/event/orders.tsx:115
@@ -6224,7 +6385,7 @@ msgstr "Opłacony produkt"
 msgid "Paid, free, tiered pricing, and donation-based tickets"
 msgstr "Bilety opłacone, bezpłatne, wielopoziomowe i oparte na darowiznach"
 
-#: src/components/modals/RefundOrderModal/index.tsx:109
+#: src/components/modals/RefundOrderModal/index.tsx:128
 msgid "Partial refund"
 msgstr "Częściowy zwrot"
 
@@ -6475,6 +6636,26 @@ msgstr "Pinterest"
 msgid "Place this in the <head> of your website."
 msgstr "Umieść to w <head> swojej strony internetowej."
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:246
+msgid "Plan"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:254
+msgid "Planned gross income"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:251
+msgid "Planned ticket proceeds"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:249
+msgid "Planned ticket quantity"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:253
+msgid "Planned university allocation"
+msgstr ""
+
 #: src/components/common/PoweredByFooter/index.tsx:48
 msgid "Planning an event?"
 msgstr "Planujesz wydarzenie?"
@@ -6618,6 +6799,22 @@ msgstr "Poczekaj, przygotowujemy Twoją fakturę..."
 msgid "Please wait while we prepare your orders for export..."
 msgstr "Poczekaj, przygotowujemy Twoje zamówienia do eksportu..."
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:258
+msgid "Policy"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:355
+msgid "Policy publishable"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:275
+msgid "Policy validation"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:260
+msgid "Policy version"
+msgstr ""
+
 #: src/components/common/LanguageSwitcher/index.tsx:40
 msgid "Polish"
 msgstr "Polski"
@@ -6660,8 +6857,8 @@ msgstr "Podgląd"
 msgid "Preview checkout form"
 msgstr "Podgląd formularza płatności"
 
-#: src/components/layouts/Event/index.tsx:256
-#: src/components/layouts/Event/index.tsx:260
+#: src/components/layouts/Event/index.tsx:258
+#: src/components/layouts/Event/index.tsx:262
 msgid "Preview Event page"
 msgstr "Podgląd strony wydarzenia"
 
@@ -6726,9 +6923,13 @@ msgstr "Drukuj do PDF"
 msgid "Privacy Policy"
 msgstr "Polityka prywatności"
 
-#: src/components/modals/RefundOrderModal/index.tsx:150
+#: src/components/modals/RefundOrderModal/index.tsx:169
 msgid "Process Refund"
 msgstr "Przetwórz zwrot"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:267
+msgid "Processing fee confirmation"
+msgstr ""
 
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:373
 msgid "Processing order"
@@ -6842,7 +7043,7 @@ msgstr "Strona kodu promocyjnego"
 msgid "Promo code usage and discount breakdown"
 msgstr "Użycie kodu promocyjnego i podział rabatów"
 
-#: src/components/layouts/Event/index.tsx:130
+#: src/components/layouts/Event/index.tsx:132
 #: src/components/modals/DuplicateEventModal/index.tsx:27
 #: src/components/routes/event/promo-codes.tsx:33
 msgid "Promo Codes"
@@ -6878,6 +7079,10 @@ msgstr "Opublikuj"
 #: src/components/routes/event/EventDashboard/index.tsx:203
 msgid "Publish Event"
 msgstr "Opublikuj wydarzenie"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:223
+msgid "Publishable"
+msgstr ""
 
 #: src/components/common/WaitlistStats/index.tsx:14
 #: src/components/common/WaitlistTable/index.tsx:26
@@ -6961,6 +7166,14 @@ msgstr ""
 msgid "Read-only access to event data, orders, attendees, reports, and exports."
 msgstr ""
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:446
+msgid "Read-only financial position with explicit source and policy withholding."
+msgstr ""
+
+#: src/components/routes/event/Reports/index.tsx:36
+msgid "Read-only position, policy status, and source evidence"
+msgstr ""
+
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:224
 msgid "Ready to upgrade? This takes only a few minutes."
 msgstr "Gotowy do aktualizacji? To zajmuje tylko kilka minut."
@@ -7010,6 +7223,11 @@ msgstr "Odbiorcy"
 msgid "Recipients are available after the message is sent"
 msgstr "Odbiorcy są dostępni po wysłaniu wiadomości"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:276
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:301
+msgid "Recognized revenue"
+msgstr ""
+
 #: src/components/routes/event/EventDashboard/index.tsx:143
 msgid "Reconnect Stripe →"
 msgstr "Połącz ponownie Stripe →"
@@ -7035,7 +7253,7 @@ msgstr "Konta poleceń"
 msgid "Refresh Preview"
 msgstr "Odśwież podgląd"
 
-#: src/components/modals/RefundOrderModal/index.tsx:107
+#: src/components/modals/RefundOrderModal/index.tsx:126
 msgid "Refund amount"
 msgstr "Kwota zwrotu"
 
@@ -7051,7 +7269,7 @@ msgstr "Zwrot nie powiódł się"
 msgid "Refund order"
 msgstr "Zwróć zamówienie"
 
-#: src/components/modals/RefundOrderModal/index.tsx:198
+#: src/components/modals/RefundOrderModal/index.tsx:217
 msgid "Refund Order {0}"
 msgstr "Zwróć zamówienie {0}"
 
@@ -7071,6 +7289,7 @@ msgstr "Status zwrotu"
 #: src/components/common/OrderSummary/index.tsx:80
 #: src/components/common/StatBoxes/index.tsx:57
 #: src/components/routes/event/orders.tsx:29
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:304
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:70
 msgid "Refunded"
 msgstr "Zwrócony"
@@ -7093,7 +7312,7 @@ msgid "Register"
 msgstr "Zarejestruj się"
 
 #: src/components/common/QuestionsTable/index.tsx:412
-#: src/components/layouts/Event/index.tsx:124
+#: src/components/layouts/Event/index.tsx:126
 msgid "Registration Questions"
 msgstr "Pytania rejestracyjne"
 
@@ -7112,9 +7331,21 @@ msgstr "usuń"
 msgid "Remove"
 msgstr "Usuń"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:231
+msgid "Report completeness is withheld."
+msgstr ""
+
 #: src/components/routes/organizer/Reports/ReportLayout/index.tsx:26
 msgid "Report not found"
 msgstr "Raport nie znaleziony"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:461
+msgid "Report scope"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:492
+msgid "Report scope required"
+msgstr ""
 
 #: src/components/modals/EditUserModal/index.tsx:87
 #: src/components/modals/InviteUserModal/index.tsx:77
@@ -7124,7 +7355,7 @@ msgstr ""
 
 #: src/components/layouts/Event/index.tsx:113
 #: src/components/layouts/OrganizerLayout/index.tsx:90
-#: src/components/routes/event/Reports/index.tsx:39
+#: src/components/routes/event/Reports/index.tsx:46
 #: src/components/routes/organizer/Reports/index.tsx:51
 msgid "Reports"
 msgstr "Raporty"
@@ -7153,7 +7384,7 @@ msgstr "Wyślij ponownie potwierdzenie"
 msgid "Resend Confirmation Email"
 msgstr "Wyślij ponownie email potwierdzenia"
 
-#: src/components/layouts/Event/index.tsx:276
+#: src/components/layouts/Event/index.tsx:278
 msgid "Resend email"
 msgstr "Wyślij ponownie email"
 
@@ -7274,12 +7505,20 @@ msgstr "Przychody"
 msgid "Revenue Summary"
 msgstr "Podsumowanie przychodów"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:223
+msgid "Review required"
+msgstr ""
+
 #: src/components/routes/account/ManageAccount/sections/Users/index.tsx:152
 msgid "Revoke invitation"
 msgstr "Cofnij zaproszenie"
 
 #: src/components/common/WaitlistTable/index.tsx:78
 msgid "Revoke Offer"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:481
+msgid "RFC 3339, including seconds and offset"
 msgstr ""
 
 #: src/components/modals/EditUserModal/index.tsx:131
@@ -7689,6 +7928,10 @@ msgstr "Wybierz..."
 msgid "Selected"
 msgstr "Wybrane"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:354
+msgid "Selection"
+msgstr ""
+
 #: src/components/forms/ProductForm/index.tsx:515
 msgid "Selling fast 🔥"
 msgstr "Szybko się sprzedaje 🔥"
@@ -7735,7 +7978,7 @@ msgstr "Wyślij potwierdzenie zamówienia i email biletu"
 msgid "Send real-time order and attendee data to your external systems."
 msgstr "Wysyłaj w czasie rzeczywistym dane o zamówieniach i uczestnikach do swoich zewnętrznych systemów."
 
-#: src/components/modals/RefundOrderModal/index.tsx:124
+#: src/components/modals/RefundOrderModal/index.tsx:143
 msgid "Send refund notification email"
 msgstr "Wyślij email powiadomienia o zwrocie"
 
@@ -7848,7 +8091,11 @@ msgstr "Ustawienie zaktualizowane"
 msgid "Settings"
 msgstr "Ustawienia"
 
-#: src/components/layouts/Event/index.tsx:120
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:293
+msgid "Settlement after adjustments"
+msgstr ""
+
+#: src/components/layouts/Event/index.tsx:122
 msgid "Setup & Design"
 msgstr "Konfiguracja i projekt"
 
@@ -7866,8 +8113,8 @@ msgstr "Udostępnij"
 msgid "Share Affiliate Link"
 msgstr "Udostępnij link partnera"
 
-#: src/components/layouts/Event/index.tsx:226
-#: src/components/layouts/Event/index.tsx:232
+#: src/components/layouts/Event/index.tsx:228
+#: src/components/layouts/Event/index.tsx:234
 #: src/components/modals/EventLiveCelebrationModal/index.tsx:102
 #: src/components/modals/EventLiveCelebrationModal/index.tsx:131
 msgid "Share Event"
@@ -8035,8 +8282,24 @@ msgstr "Przepraszamy, ten kod promocyjny nie jest rozpoznany"
 
 #: src/components/common/PoweredByFooter/index.tsx:82
 #: src/components/routes/admin/Attribution/index.tsx:106
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:328
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:351
 msgid "Source"
 msgstr "Źródło"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:356
+msgid "Source as of"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:346
+msgid "Source evidence"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:281
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:294
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:306
+msgid "Source freshness"
+msgstr ""
 
 #: src/components/common/LanguageSwitcher/index.tsx:20
 msgid "Spanish"
@@ -8107,6 +8370,10 @@ msgstr "Statystyki są oparte na dacie utworzenia konta"
 #: src/components/routes/admin/Messages/index.tsx:120
 #: src/components/routes/admin/Messages/index.tsx:167
 #: src/components/routes/admin/Messages/index.tsx:293
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:274
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:287
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:300
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:352
 #: src/components/routes/event/Reports/PromoCodesReport/index.tsx:88
 #: src/components/routes/organizer/Reports/EventsPerformanceReport/index.tsx:62
 msgid "Status"
@@ -8145,6 +8412,14 @@ msgstr "Identyfikator płatności Stripe"
 #: src/components/routes/product-widget/Payment/PaymentMethods/Stripe/index.tsx:50
 msgid "Stripe payments are not enabled for this event."
 msgstr "Płatności Stripe nie są włączone dla tego wydarzenia."
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:289
+msgid "Stripe processing fees"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:285
+msgid "Stripe settlement"
+msgstr ""
 
 #: src/components/common/StripeConnectButton/index.tsx:69
 msgid "Stripe setup is already complete."
@@ -8530,6 +8805,10 @@ msgstr "Waluta, w której zdefiniowana jest stała opłata. Zostanie przeliczona
 msgid "The currency of the order"
 msgstr "Waluta zamówienia"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:230
+msgid "The current position is incomplete. Unavailable sources remain withheld."
+msgstr ""
+
 #: src/components/routes/account/ManageAccount/sections/AccountSettings/index.tsx:75
 #: src/components/routes/organizer/Settings/Sections/BasicSettings/index.tsx:118
 msgid "The default currency for your events."
@@ -8612,6 +8891,14 @@ msgstr "Podstawowy kolor marki używany na przyciskach i podświetleniach"
 msgid "The quick brown fox jumps over the lazy dog."
 msgstr "Szybki brązowy lis przeskakuje nad leniwym psem."
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:186
+msgid "The report cannot be loaded safely right now. Please try again later."
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:192
+msgid "The report request failed. Please try again."
+msgstr ""
+
 #: src/components/modals/SendMessageModal/index.tsx:172
 msgid "The scheduled time is required"
 msgstr "Zaplanowany czas jest wymagany"
@@ -8651,7 +8938,7 @@ msgstr "Brak dostępnych produktów dla tego wydarzenia"
 msgid "There are no products available in this category"
 msgstr "Brak dostępnych produktów w tej kategorii"
 
-#: src/components/modals/RefundOrderModal/index.tsx:181
+#: src/components/modals/RefundOrderModal/index.tsx:200
 msgid "There is a refund pending. Please wait for it to complete before requesting another refund."
 msgstr "Zwrot jest w toku. Proszę czekać na jego zakończenie przed złożeniem nowego żądania zwrotu."
 
@@ -8776,7 +9063,7 @@ msgstr "Ta nazwa jest widoczna dla użytkowników końcowych"
 msgid "This order has already been paid."
 msgstr "To zamówienie zostało już opłacone."
 
-#: src/components/modals/RefundOrderModal/index.tsx:185
+#: src/components/modals/RefundOrderModal/index.tsx:204
 msgid "This order has already been refunded."
 msgstr "To zamówienie zostało już zwrócone."
 
@@ -8892,13 +9179,17 @@ msgstr "Projektowanie biletów"
 msgid "Ticket design saved successfully"
 msgstr "Projekt biletów został pomyślnie zapisany"
 
-#: src/components/layouts/Event/index.tsx:123
+#: src/components/layouts/Event/index.tsx:125
 msgid "Ticket Designer"
 msgstr "Projektant biletów"
 
 #: src/components/common/AttendeeTable/index.tsx:75
 msgid "Ticket email has been resent to attendee"
 msgstr "E-mail z biletem został ponownie wysłany do uczestnika"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:263
+msgid "Ticket fixed deduction"
+msgstr ""
 
 #: src/components/routes/product-widget/PrintProduct/index.tsx:42
 msgid "Ticket for"
@@ -8953,9 +9244,22 @@ msgstr "Cena biletu"
 msgid "Ticket Price"
 msgstr "Cena biletu"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:313
+msgid "Ticket proceeds"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:278
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:312
+msgid "Ticket quantity"
+msgstr ""
+
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:501
 msgid "Ticket resent successfully"
 msgstr "Bilet został pomyślnie ponownie wysłany"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:262
+msgid "Ticket revenue basis"
+msgstr ""
 
 #: src/components/common/AttendeeTicket/index.tsx:99
 #: src/components/routes/event/attendees.tsx:66
@@ -8966,7 +9270,7 @@ msgstr "Typ biletu"
 msgid "Ticket URL"
 msgstr "URL biletu"
 
-#: src/components/layouts/Event/index.tsx:127
+#: src/components/layouts/Event/index.tsx:129
 msgid "Ticketing & Sales"
 msgstr "Ticketing i sprzedaż"
 
@@ -8974,11 +9278,12 @@ msgstr "Ticketing i sprzedaż"
 msgid "tickets"
 msgstr "bilety"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:272
 #: src/components/routes/my-tickets/index.tsx:84
 msgid "Tickets"
 msgstr "Bilety"
 
-#: src/components/layouts/Event/index.tsx:128
+#: src/components/layouts/Event/index.tsx:130
 #: src/components/routes/event/products.tsx:48
 msgid "Tickets & Products"
 msgstr "Bilety i produkty"
@@ -9255,6 +9560,10 @@ msgstr "Nie można pobrać uczestnika"
 msgid "Unable to join waitlist"
 msgstr "Nie udało się dołączyć do listy oczekujących"
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:191
+msgid "Unable to load financial report"
+msgstr ""
+
 #: src/components/modals/EditQuestionModal/index.tsx:84
 msgid "Unable to update question. Please check the your details"
 msgstr "Nie można zaktualizować pytania. Proszę sprawdzić swoje dane"
@@ -9275,6 +9584,10 @@ msgstr "Unikalna referencja zamówienia"
 #: src/components/routes/organizer/Settings/Sections/AddressSettings/index.tsx:111
 msgid "United States"
 msgstr "Stany Zjednoczone"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:468
+msgid "University ID"
+msgstr ""
 
 #: src/components/common/MessageList/index.tsx:44
 #: src/components/common/MessageList/index.tsx:49
@@ -9425,6 +9738,10 @@ msgstr ""
 msgid "Use order details for all attendees. Attendee names and emails will match the buyer's information."
 msgstr ""
 
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:411
+msgid "Use RFC 3339 with an explicit offset, such as 2026-08-31T23:59:59-07:00."
+msgstr ""
+
 #: src/components/common/QuestionsTable/index.tsx:389
 msgid "Use the buyer's details for all attendees"
 msgstr ""
@@ -9482,6 +9799,14 @@ msgstr ""
 
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/VatSettings/VatSettingsForm.tsx:71
 msgid "Validating your VAT number..."
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:305
+msgid "Validation required"
+msgstr ""
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:310
+msgid "Variances"
 msgstr ""
 
 #: src/components/forms/TaxAndFeeForm/index.tsx:62
@@ -9592,7 +9917,7 @@ msgstr ""
 msgid "Verify Email"
 msgstr ""
 
-#: src/components/layouts/Event/index.tsx:273
+#: src/components/layouts/Event/index.tsx:275
 msgid "Verify your email"
 msgstr ""
 
@@ -9732,7 +10057,7 @@ msgstr "Oczekuje"
 msgid "Waiting for payment"
 msgstr "Oczekiwanie na płatność"
 
-#: src/components/layouts/Event/index.tsx:138
+#: src/components/layouts/Event/index.tsx:140
 #: src/components/routes/event/Settings/index.tsx:76
 #: src/components/routes/event/Settings/Sections/WaitlistSettings/index.tsx:51
 #: src/components/routes/event/SoldOutWaitlist/index.tsx:49
@@ -9876,7 +10201,7 @@ msgstr "Webhook nie będzie wysyłał powiadomień"
 msgid "Webhook will send notifications"
 msgstr "Webhook będzie wysyłał powiadomienia"
 
-#: src/components/layouts/Event/index.tsx:144
+#: src/components/layouts/Event/index.tsx:146
 #: src/components/layouts/OrganizerLayout/index.tsx:104
 #: src/components/modals/DuplicateEventModal/index.tsx:32
 #: src/components/routes/event/Webhooks/index.tsx:32
@@ -10068,7 +10393,7 @@ msgstr "Kto organizuje to wydarzenie?"
 msgid "Who should be asked this question?"
 msgstr "Kto powinien zostać zapytany o to pytanie?"
 
-#: src/components/layouts/Event/index.tsx:143
+#: src/components/layouts/Event/index.tsx:145
 msgid "Widget Embed"
 msgstr "Osadzanie widgetu"
 
@@ -10079,6 +10404,15 @@ msgstr "Podgląd widgetu"
 #: src/components/common/WidgetEditor/index.tsx:160
 msgid "Widget Settings"
 msgstr "Ustawienia widgetu"
+
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:118
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:127
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:137
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:145
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:236
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:265
+msgid "Withheld"
+msgstr ""
 
 #: src/components/modals/CreateAttendeeModal/index.tsx:207
 msgid "Working"
@@ -10120,6 +10454,7 @@ msgstr "Od początku roku"
 
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:250
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:277
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:148
 msgid "Yes"
 msgstr "Tak"
 
@@ -10147,7 +10482,7 @@ msgstr "Zmieniasz swój e-mail na <0>{0}</0>."
 msgid "You are impersonating <0>{0}</0> ({1})"
 msgstr "Podszywa się pod <0>{0}</0> ({1})"
 
-#: src/components/modals/RefundOrderModal/index.tsx:139
+#: src/components/modals/RefundOrderModal/index.tsx:158
 msgid "You are issuing a partial refund. The customer will be refunded {0} {1}."
 msgstr "Wystawiasz częściowy zwrot. Klient otrzyma zwrot {0} {1}."
 
@@ -10193,7 +10528,7 @@ msgstr "Nie możesz usunąć tej warstwy cenowej, ponieważ istnieją już produ
 msgid "You cannot edit the role or status of the account owner."
 msgstr "Nie możesz edytować roli lub statusu właściciela konta."
 
-#: src/components/modals/RefundOrderModal/index.tsx:176
+#: src/components/modals/RefundOrderModal/index.tsx:195
 msgid "You cannot refund a manually created order."
 msgstr "Nie możesz zwrócić ręcznie utworzonego zamówienia."
 
@@ -10430,7 +10765,7 @@ msgstr "Twoja płatność nie powiodła się. Proszę spróbować ponownie."
 msgid "Your Plan"
 msgstr "Twój plan"
 
-#: src/components/modals/RefundOrderModal/index.tsx:58
+#: src/components/modals/RefundOrderModal/index.tsx:76
 msgid "Your refund is processing."
 msgstr "Zwrot jest procesowany."
 

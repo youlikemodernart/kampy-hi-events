@@ -29,6 +29,13 @@ const Reports = () => {
             title: t`Promo Codes Report`,
             description: t`Promo code usage and discount breakdown`,
             icon: <Avatar size={40} color={'#634fc0'}><IconReportMoney/></Avatar>
+        },
+        {
+            id: 'financial_report',
+            title: t`Financial Report`,
+            description: t`Read-only position, policy status, and source evidence`,
+            icon: <Avatar size={40} color={'#2b8a3e'}><IconReportMoney/></Avatar>,
+            path: `/manage/event/${eventId}/financial-report`,
         }
     ];
 
@@ -40,7 +47,11 @@ const Reports = () => {
             </PageTitle>
 
             {reports.map((report) => (
-                <UnstyledButton component={Link} key={report.id} to={`/manage/event/${eventId}/report/${report.id}`}>
+                <UnstyledButton
+                    component={Link}
+                    key={report.id}
+                    to={report.path ?? `/manage/event/${eventId}/report/${report.id}`}
+                >
                     <Card className={classes.reportType}>
                         <div className={classes.icon}>
                             {report.icon}

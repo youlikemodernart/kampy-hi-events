@@ -14,6 +14,8 @@ use HiEvents\Http\Actions\Events\GetEventAction;
 use HiEvents\Http\Actions\Events\UpdateEventStatusAction;
 use HiEvents\Http\Actions\EventSettings\GetEventSettingsAction;
 use HiEvents\Http\Actions\EventSettings\GetPlatformFeePreviewAction;
+use HiEvents\Http\Actions\Financial\ExportFinancialReportAction;
+use HiEvents\Http\Actions\Financial\GetFinancialReportAction;
 use HiEvents\Http\Actions\Messages\SendMessageAction;
 use HiEvents\Http\Actions\CheckInLists\GetCheckInListAction;
 use HiEvents\Http\Actions\CheckInLists\GetCheckInListsAction;
@@ -33,7 +35,7 @@ class RoutePermissionRegistryTest extends TestCase
         $routeActionClasses = $this->getAuthenticatedAndAdminRouteActionClasses();
         $registryActionClasses = $this->getRegistryActionClasses();
 
-        $this->assertCount(175, $routeActionClasses);
+        $this->assertCount(177, $routeActionClasses);
         $this->assertSame([], array_values(array_diff($routeActionClasses, $registryActionClasses)));
         $this->assertSame([], array_values(array_diff($registryActionClasses, $routeActionClasses)));
     }
@@ -49,6 +51,8 @@ class RoutePermissionRegistryTest extends TestCase
         $this->assertSame(Permission::ORDERS_REFUND, RoutePermissionRegistry::permissionForAction(RefundOrderAction::class));
         $this->assertSame(Permission::MESSAGES_MANAGE, RoutePermissionRegistry::permissionForAction(SendMessageAction::class));
         $this->assertSame(Permission::CHECK_IN_MANAGE, RoutePermissionRegistry::permissionForAction(CheckInAttendeeAction::class));
+        $this->assertSame(Permission::REPORTS_VIEW, RoutePermissionRegistry::permissionForAction(GetFinancialReportAction::class));
+        $this->assertSame(Permission::REPORTS_EXPORT, RoutePermissionRegistry::permissionForAction(ExportFinancialReportAction::class));
     }
 
     public function test_check_in_staff_is_denied_from_event_setup_read_surfaces(): void

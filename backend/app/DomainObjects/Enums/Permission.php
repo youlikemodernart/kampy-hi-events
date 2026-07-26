@@ -32,6 +32,7 @@ enum Permission: string
 
     case REPORTS_VIEW = 'reports.view';
     case REPORTS_EXPORT = 'reports.export';
+    case FINANCIAL_RECONCILIATION_VIEW = 'financial.reconciliation.view';
 
     case MESSAGES_MANAGE = 'messages.manage';
     case INTEGRATIONS_MANAGE = 'integrations.manage';

@@ -86,9 +86,11 @@ final class RoutePermissionRegistry
             self::ACTION . 'Organizers\\Stats\\GetOrganizerStatsAction',
             self::ACTION . 'Events\\Stats\\GetEventStatsAction',
             self::ACTION . 'Reports\\GetReportAction',
-            self::ACTION . 'Reports\\GetOrganizerReportAction' => Permission::REPORTS_VIEW,
+            self::ACTION . 'Reports\\GetOrganizerReportAction',
+            self::ACTION . 'Financial\\GetFinancialReportAction' => Permission::REPORTS_VIEW,
 
             self::ACTION . 'Reports\\ExportOrganizerReportAction',
+            self::ACTION . 'Financial\\ExportFinancialReportAction',
             self::ACTION . 'Questions\\ExportQuestionAnswersAction',
             self::ACTION . 'Attendees\\ExportAttendeesAction',
             self::ACTION . 'Orders\\ExportOrdersAction',

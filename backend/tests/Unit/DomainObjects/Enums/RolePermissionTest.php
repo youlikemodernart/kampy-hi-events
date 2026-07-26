@@ -29,6 +29,7 @@ class RolePermissionTest extends TestCase
         $this->assertTrue($role->hasPermission(Permission::ORDERS_MANAGE));
         $this->assertTrue($role->hasPermission(Permission::ORDERS_REFUND));
         $this->assertTrue($role->hasPermission(Permission::REPORTS_EXPORT));
+        $this->assertTrue($role->hasPermission(Permission::FINANCIAL_RECONCILIATION_VIEW));
 
         $this->assertTrue($role->hasPermission(Permission::EVENT_CONTENT_VIEW));
 
@@ -49,6 +50,7 @@ class RolePermissionTest extends TestCase
         $this->assertTrue($role->hasPermission(Permission::REPORTS_VIEW));
         $this->assertTrue($role->hasPermission(Permission::REPORTS_EXPORT));
 
+        $this->assertFalse($role->hasPermission(Permission::FINANCIAL_RECONCILIATION_VIEW));
         $this->assertFalse($role->hasPermission(Permission::ORDERS_MANAGE));
         $this->assertFalse($role->hasPermission(Permission::ORDERS_REFUND));
         $this->assertFalse($role->hasPermission(Permission::EVENT_CONTENT_MANAGE));
@@ -66,6 +68,7 @@ class RolePermissionTest extends TestCase
         $this->assertFalse($role->hasPermission(Permission::ATTENDEES_VIEW));
         $this->assertFalse($role->hasPermission(Permission::ORDERS_VIEW));
         $this->assertFalse($role->hasPermission(Permission::REPORTS_VIEW));
+        $this->assertFalse($role->hasPermission(Permission::FINANCIAL_RECONCILIATION_VIEW));
         $this->assertFalse($role->hasPermission(Permission::EVENT_CONTENT_MANAGE));
     }
 
@@ -75,6 +78,7 @@ class RolePermissionTest extends TestCase
             $this->assertTrue($role->allowsEventAssignments());
             $this->assertTrue($role->requiresEventAssignments());
             $this->assertFalse($role->hasAccountWideEventAccess());
+            $this->assertFalse($role->hasPermission(Permission::FINANCIAL_RECONCILIATION_VIEW));
         }
 
         foreach ([Role::SUPERADMIN, Role::ADMIN, Role::FINANCE] as $role) {

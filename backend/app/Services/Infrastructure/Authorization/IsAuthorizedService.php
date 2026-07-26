@@ -104,7 +104,7 @@ readonly class IsAuthorizedService
         $entity = $repository->findById($entityId);
 
         $result = match ($entityType) {
-            EventDomainObject::class => $this->validateEvent($entity, $authUser, $authAccountId),
+            EventDomainObject::class => $this->canAccessEvent($entity, $authUser, $authAccountId),
             ImageDomainObject::class,
             OrganizerDomainObject::class => $this->validateAccountWideEntity($entity, $authUser, $authAccountId),
             AccountDomainObject::class => $entity?->getId() === $authAccountId,
@@ -117,7 +117,19 @@ readonly class IsAuthorizedService
         }
     }
 
-    private function validateEvent(?EventDomainObject $event, UserDomainObject $authUser, int $authAccountId): bool
+    public function validateEventAccess(
+        EventDomainObject $event,
+        UserDomainObject $authUser,
+        int $authAccountId,
+    ): void {
+        $this->validateUserRole(Role::ORGANIZER, $authUser);
+
+        if (!$this->canAccessEvent($event, $authUser, $authAccountId)) {
+            throw new UnauthorizedException();
+        }
+    }
+
+    private function canAccessEvent(?EventDomainObject $event, UserDomainObject $authUser, int $authAccountId): bool
     {
         if ($event === null || $event->getAccountId() !== $authAccountId) {
             return false;

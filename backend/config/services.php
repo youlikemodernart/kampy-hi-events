@@ -69,6 +69,9 @@ return [
         'source_namespace' => env('KAMP_STRIPE_SOURCE_NAMESPACE'),
         'event_map' => env('KAMP_STRIPE_EVENT_MAP', '{}'),
     ],
+    'kamp_financial_reports' => [
+        'bindings_json' => (string) env('KAMP_FINANCIAL_REPORT_BINDINGS', '[]'),
+    ],
     'open_exchange_rates' => [
         'app_id' => env('OPEN_EXCHANGE_RATES_APP_ID'),
     ],

@@ -112,7 +112,9 @@ const EventLayout = () => {
             link: 'reports',
             label: t`Reports`,
             icon: IconChartPie,
-            isActive: (isActive) => isActive || location.pathname.includes('/report/'),
+            isActive: (isActive) => isActive
+                || location.pathname.includes('/report/')
+                || location.pathname.includes('/financial-report'),
             showWhen: () => canViewReports,
         },
 

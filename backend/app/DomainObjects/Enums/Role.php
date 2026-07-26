@@ -80,6 +80,7 @@ enum Role: string
                 Permission::ORDERS_REFUND,
                 Permission::REPORTS_VIEW,
                 Permission::REPORTS_EXPORT,
+                Permission::FINANCIAL_RECONCILIATION_VIEW,
             ],
             self::REPORTING => [
                 Permission::AUTHENTICATED,
