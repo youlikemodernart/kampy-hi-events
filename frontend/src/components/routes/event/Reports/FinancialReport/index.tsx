@@ -451,6 +451,7 @@ const FinancialReportPage = () => {
                         leftSection={<IconDownload size={16}/>}
                         onClick={handleExport}
                         loading={downloadPending}
+                        mih={44}
                     >
                         {t`Download CSV`}
                     </Button>
@@ -468,12 +469,14 @@ const FinancialReportPage = () => {
                             label={t`University ID`}
                             maxLength={128}
                             required
+                            styles={{input: {minHeight: 44}}}
                             {...form.getInputProps('university_id')}
                         />
                         <TextInput
                             label={t`Cycle ID`}
                             maxLength={128}
                             required
+                            styles={{input: {minHeight: 44}}}
                             {...form.getInputProps('cycle_id')}
                         />
                         <TextInput
@@ -481,10 +484,11 @@ const FinancialReportPage = () => {
                             description={t`RFC 3339, including seconds and offset`}
                             placeholder="2026-08-31T23:59:59-07:00"
                             required
+                            styles={{input: {minHeight: 44}}}
                             {...form.getInputProps('cutoff_at')}
                         />
                     </SimpleGrid>
-                    <Button type="submit" mt="md">{t`Load report`}</Button>
+                    <Button type="submit" mt="md" mih={44}>{t`Load report`}</Button>
                 </form>
             </Paper>
 

@@ -2597,11 +2597,11 @@ msgstr "Personalizza l'aspetto della pagina del tuo organizzatore"
 msgid "Cutoff"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:480
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:483
 msgid "Cutoff with timezone offset"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:474
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:476
 msgid "Cycle ID"
 msgstr ""
 
@@ -2863,7 +2863,7 @@ msgid "Download .ics"
 msgstr "Scarica .ics"
 
 #: src/components/common/DownloadCsvButton/index.tsx:48
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:455
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:456
 msgid "Download CSV"
 msgstr "Scarica CSV"
 
@@ -3347,7 +3347,7 @@ msgstr "Inserisci cognome"
 msgid "Enter new password"
 msgstr "Inserisci la nuova password"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:463
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:464
 msgid "Enter the authorized university, cycle, and cutoff. The same exact scope is used for the report and CSV export."
 msgstr ""
 
@@ -5026,7 +5026,7 @@ msgstr "LIVE"
 msgid "Live Events"
 msgstr "Eventi in Diretta"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:487
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:491
 msgid "Load report"
 msgstr ""
 
@@ -5035,7 +5035,7 @@ msgstr ""
 msgid "Loading events..."
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:498
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:502
 msgid "Loading financial report"
 msgstr ""
 
@@ -5685,7 +5685,7 @@ msgstr "Nessuna iscrizione recente"
 msgid "No recipients found"
 msgstr "Nessun destinatario trovato"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:493
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:497
 msgid "No report request is made until all three scope values are valid. Access is still checked by the server."
 msgstr ""
 
@@ -7343,11 +7343,11 @@ msgstr ""
 msgid "Report not found"
 msgstr "Report non trovato"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:461
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:462
 msgid "Report scope"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:492
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:496
 msgid "Report scope required"
 msgstr ""
 
@@ -7521,7 +7521,7 @@ msgstr "Revoca invito"
 msgid "Revoke Offer"
 msgstr "Revoca l'offerta"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:481
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:484
 msgid "RFC 3339, including seconds and offset"
 msgstr ""
 
@@ -9589,7 +9589,7 @@ msgstr "Riferimento ordine unico"
 msgid "United States"
 msgstr "Stati Uniti"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:468
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:469
 msgid "University ID"
 msgstr ""
 
