@@ -469,14 +469,14 @@ const FinancialReportPage = () => {
                             label={t`University ID`}
                             maxLength={128}
                             required
-                            styles={{input: {minHeight: 44}}}
+                            styles={{input: {minHeight: 44, fontSize: 16}}}
                             {...form.getInputProps('university_id')}
                         />
                         <TextInput
                             label={t`Cycle ID`}
                             maxLength={128}
                             required
-                            styles={{input: {minHeight: 44}}}
+                            styles={{input: {minHeight: 44, fontSize: 16}}}
                             {...form.getInputProps('cycle_id')}
                         />
                         <TextInput
@@ -484,7 +484,7 @@ const FinancialReportPage = () => {
                             description={t`RFC 3339, including seconds and offset`}
                             placeholder="2026-08-31T23:59:59-07:00"
                             required
-                            styles={{input: {minHeight: 44}}}
+                            styles={{input: {minHeight: 44, fontSize: 16}}}
                             {...form.getInputProps('cutoff_at')}
                         />
                     </SimpleGrid>
