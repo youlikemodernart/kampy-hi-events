@@ -30,9 +30,32 @@ import {downloadBinary} from "../../../../../utilites/download.ts";
 import {showError} from "../../../../../utilites/notifications.tsx";
 import {PageBody} from "../../../../common/PageBody";
 import {PageTitle} from "../../../../common/PageTitle";
+import {
+    buildSyntheticFinancialReport,
+    SYNTHETIC_FINANCIAL_PREVIEW,
+} from "./syntheticPreview.ts";
 
 const SCOPE_IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
 const RFC3339_WITH_OFFSET = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-])(\d{2}):(\d{2})$/;
+
+/* eslint-disable lingui/no-unlocalized-strings -- private synthetic preview copy is intentionally English-only */
+const SYNTHETIC_PREVIEW_COPY = {
+    pageSubheading: 'Invented design fixtures for private interface review.',
+    alertTitle: 'Synthetic data preview',
+    alertBody: 'Every value below is an invented design fixture. No live ticket, Stripe, or DonorBox source is connected. Do not use this preview for reporting.',
+    positionTitle: 'Illustrative position',
+    badge: 'Synthetic preview',
+    positionNote: 'Fixture values are shown for interface review only.',
+    missingSources: 'Missing live sources',
+    componentsTitle: 'Illustrative position components',
+    sectionBadge: 'Synthetic',
+    scopeTitle: 'Preview scope',
+    scopeDescription: 'These identifiers label the browser-only fixture. They are not sent to the server.',
+    scopeButton: 'Update preview',
+    scopeRequiredTitle: 'Preview scope required',
+    scopeRequiredBody: 'Enter valid preview identifiers to render the browser-only fixture. No financial request is sent.',
+} as const;
+/* eslint-enable lingui/no-unlocalized-strings */
 
 const isLeapYear = (year: number): boolean => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 
@@ -163,9 +186,24 @@ const MetricTable = ({rows}: { rows: MetricRow[] }) => (
     </Table.ScrollContainer>
 );
 
-const ReportSection = ({title, rows}: { title: string; rows: MetricRow[] }) => (
+const ReportSection = ({
+    title,
+    rows,
+    syntheticPreview,
+}: {
+    title: string;
+    rows: MetricRow[];
+    syntheticPreview: boolean;
+}) => (
     <Paper component="section" withBorder p="lg" radius="md">
-        <Title order={2} size="h4" mb="sm">{title}</Title>
+        <Group justify="space-between" align="center" mb="sm">
+            <Title order={2} size="h4">{title}</Title>
+            {syntheticPreview && (
+                <Badge color="violet" variant="light">
+                    {SYNTHETIC_PREVIEW_COPY.sectionBadge}
+                </Badge>
+            )}
+        </Group>
         <MetricTable rows={rows}/>
     </Paper>
 );
@@ -193,7 +231,13 @@ const queryErrorMessage = (error: unknown): { title: string; message: string } =
     };
 };
 
-const FinancialReportContent = ({report}: { report: FinancialReport }) => {
+const FinancialReportContent = ({
+    report,
+    syntheticPreview,
+}: {
+    report: FinancialReport;
+    syntheticPreview: boolean;
+}) => {
     const missingSources = report.current_position.missing_or_unpublishable_sources;
     const evidenceRows = Object.entries(report.source_evidence).map(([source, evidence]) => ({
         source,
@@ -209,30 +253,38 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
             <Paper component="section" withBorder p="xl" radius="md">
                 <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
                     <div>
-                        <Text size="sm" c="dimmed">{t`Current known position`}</Text>
+                        <Text size="sm" c="dimmed">
+                            {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.positionTitle : t`Current known position`}
+                        </Text>
                         <Title order={2}>{formatCents(report.current_position.known_cents)}</Title>
                         <Text size="sm" mt="xs">
                             {t`Cutoff`}: {report.cutoff_at} · {report.reporting_timezone}
                         </Text>
                     </div>
                     <Badge
-                        color={report.publishable ? 'green' : 'yellow'}
+                        color={syntheticPreview ? 'violet' : report.publishable ? 'green' : 'yellow'}
                         variant="light"
                         size="lg"
                     >
-                        {report.publishable ? t`Publishable` : t`Review required`}
+                        {syntheticPreview
+                            ? SYNTHETIC_PREVIEW_COPY.badge
+                            : report.publishable
+                                ? t`Publishable`
+                                : t`Review required`}
                     </Badge>
                 </Group>
                 <Text mt="md">
-                    {report.current_position.complete === true
-                        ? t`All required sources are current and publishable.`
-                        : report.current_position.complete === false
-                            ? t`The current position is incomplete. Unavailable sources remain withheld.`
-                            : t`Report completeness is withheld.`}
+                    {syntheticPreview
+                        ? SYNTHETIC_PREVIEW_COPY.positionNote
+                        : report.current_position.complete === true
+                            ? t`All required sources are current and publishable.`
+                            : report.current_position.complete === false
+                                ? t`The current position is incomplete. Unavailable sources remain withheld.`
+                                : t`Report completeness is withheld.`}
                 </Text>
                 {report.current_position.complete !== true && (
                     <Text size="sm" c="dimmed" mt="xs">
-                        {t`Missing or unpublishable sources`}: {missingSources === null
+                        {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.missingSources : t`Missing or unpublishable sources`}: {missingSources === null
                             ? t`Withheld`
                             : missingSources.length > 0
                                 ? missingSources.join(', ')
@@ -244,6 +296,7 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
             <SimpleGrid cols={{base: 1, lg: 2}} spacing="lg">
                 <ReportSection
                     title={t`Plan`}
+                    syntheticPreview={syntheticPreview}
                     rows={[
                         {label: t`As of`, value: formatText(report.plan.as_of_at)},
                         {label: t`Planned ticket quantity`, value: formatInteger(report.plan.ticket_quantity)},
@@ -256,6 +309,7 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
                 />
                 <ReportSection
                     title={t`Policy`}
+                    syntheticPreview={syntheticPreview}
                     rows={[
                         {label: t`Policy version`, value: formatText(report.financial_policy.policy_version)},
                         {label: t`Effective at`, value: formatText(report.financial_policy.effective_at)},
@@ -270,6 +324,7 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
                 />
                 <ReportSection
                     title={t`Tickets`}
+                    syntheticPreview={syntheticPreview}
                     rows={[
                         {label: t`Status`, value: formatText(report.tickets.status)},
                         {label: t`Policy validation`, value: formatText(report.tickets.policy_validation_status)},
@@ -283,6 +338,7 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
                 />
                 <ReportSection
                     title={t`Stripe settlement`}
+                    syntheticPreview={syntheticPreview}
                     rows={[
                         {label: t`Status`, value: formatText(report.tickets.settlement.status)},
                         {label: t`Customer charges`, value: formatCents(report.tickets.settlement.actuals?.customer_charge_cents)},
@@ -296,6 +352,7 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
                 />
                 <ReportSection
                     title={t`Donations`}
+                    syntheticPreview={syntheticPreview}
                     rows={[
                         {label: t`Status`, value: formatText(report.donations.status)},
                         {label: t`Recognized revenue`, value: formatCents(report.donations.recognized_revenue_cents)},
@@ -308,6 +365,7 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
                 />
                 <ReportSection
                     title={t`Variances`}
+                    syntheticPreview={syntheticPreview}
                     rows={[
                         {label: t`Ticket quantity`, value: formatInteger(report.variances.ticket_quantity)},
                         {label: t`Ticket proceeds`, value: formatCents(report.variances.ticket_proceeds_cents)},
@@ -317,7 +375,16 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
             </SimpleGrid>
 
             <Paper component="section" withBorder p="lg" radius="md">
-                <Title order={2} size="h4" mb="sm">{t`Current position components`}</Title>
+                <Group justify="space-between" align="center" mb="sm">
+                    <Title order={2} size="h4">
+                        {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.componentsTitle : t`Current position components`}
+                    </Title>
+                    {syntheticPreview && (
+                        <Badge color="violet" variant="light">
+                            {SYNTHETIC_PREVIEW_COPY.sectionBadge}
+                        </Badge>
+                    )}
+                </Group>
                 {report.current_position.components.length === 0 ? (
                     <Text c="dimmed">{t`No publishable components are available.`}</Text>
                 ) : (
@@ -343,7 +410,14 @@ const FinancialReportContent = ({report}: { report: FinancialReport }) => {
             </Paper>
 
             <Paper component="section" withBorder p="lg" radius="md">
-                <Title order={2} size="h4" mb="sm">{t`Source evidence`}</Title>
+                <Group justify="space-between" align="center" mb="sm">
+                    <Title order={2} size="h4">{t`Source evidence`}</Title>
+                    {syntheticPreview && (
+                        <Badge color="violet" variant="light">
+                            {SYNTHETIC_PREVIEW_COPY.sectionBadge}
+                        </Badge>
+                    )}
+                </Group>
                 <Table.ScrollContainer minWidth={760}>
                     <Table striped withRowBorders>
                         <Table.Thead>
@@ -379,7 +453,11 @@ const FinancialReportPage = () => {
     const {eventId} = useParams<{ eventId: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const request = requestFromSearchParams(searchParams);
-    const reportQuery = useGetFinancialReport(eventId, request);
+    const syntheticPreview = searchParams.get('preview') === SYNTHETIC_FINANCIAL_PREVIEW;
+    const reportQuery = useGetFinancialReport(eventId, syntheticPreview ? null : request);
+    const syntheticReport = syntheticPreview && request && eventId
+        ? buildSyntheticFinancialReport(eventId, request)
+        : null;
     const {data: me} = useGetMe();
     const canExport = currentUserCan(me?.permissions, 'reports.export');
     const [downloadPending, setDownloadPending] = useState(false);
@@ -413,15 +491,21 @@ const FinancialReportPage = () => {
     });
 
     const handleScopeSubmit = (values: ScopeFormValues) => {
-        setSearchParams({
+        const nextSearchParams: Record<string, string> = {
             university_id: values.university_id.trim(),
             cycle_id: values.cycle_id.trim(),
             cutoff_at: values.cutoff_at.trim(),
-        }, {replace: true});
+        };
+
+        if (syntheticPreview) {
+            nextSearchParams.preview = SYNTHETIC_FINANCIAL_PREVIEW;
+        }
+
+        setSearchParams(nextSearchParams, {replace: true});
     };
 
     const handleExport = async () => {
-        if (!request || !eventId || !canExport) {
+        if (syntheticPreview || !request || !eventId || !canExport) {
             return;
         }
 
@@ -443,10 +527,12 @@ const FinancialReportPage = () => {
     return (
         <PageBody>
             <Group justify="space-between" align="flex-start" wrap="wrap" gap="md" mb="lg">
-                <PageTitle subheading={t`Read-only financial position with explicit source and policy withholding.`}>
+                <PageTitle subheading={syntheticPreview
+                    ? SYNTHETIC_PREVIEW_COPY.pageSubheading
+                    : t`Read-only financial position with explicit source and policy withholding.`}>
                     {t`Financial Report`}
                 </PageTitle>
-                {request && canExport && (
+                {request && canExport && !syntheticPreview && (
                     <Button
                         leftSection={<IconDownload size={16}/>}
                         onClick={handleExport}
@@ -459,9 +545,13 @@ const FinancialReportPage = () => {
             </Group>
 
             <Paper component="section" withBorder p="lg" radius="md" mb="lg">
-                <Title order={2} size="h4">{t`Report scope`}</Title>
+                <Title order={2} size="h4">
+                    {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.scopeTitle : t`Report scope`}
+                </Title>
                 <Text size="sm" c="dimmed" mt={4} mb="md">
-                    {t`Enter the authorized university, cycle, and cutoff. The same exact scope is used for the report and CSV export.`}
+                    {syntheticPreview
+                        ? SYNTHETIC_PREVIEW_COPY.scopeDescription
+                        : t`Enter the authorized university, cycle, and cutoff. The same exact scope is used for the report and CSV export.`}
                 </Text>
                 <form onSubmit={form.onSubmit(handleScopeSubmit)}>
                     <SimpleGrid cols={{base: 1, md: 3}} spacing="md">
@@ -488,17 +578,38 @@ const FinancialReportPage = () => {
                             {...form.getInputProps('cutoff_at')}
                         />
                     </SimpleGrid>
-                    <Button type="submit" mt="md" mih={44}>{t`Load report`}</Button>
+                    <Button type="submit" mt="md" mih={44}>
+                        {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.scopeButton : t`Load report`}
+                    </Button>
                 </form>
             </Paper>
 
             {!request && (
-                <Alert icon={<IconInfoCircle/>} title={t`Report scope required`} color="blue">
-                    {t`No report request is made until all three scope values are valid. Access is still checked by the server.`}
+                <Alert
+                    icon={<IconInfoCircle/>}
+                    title={syntheticPreview
+                        ? SYNTHETIC_PREVIEW_COPY.scopeRequiredTitle
+                        : t`Report scope required`}
+                    color="blue"
+                >
+                    {syntheticPreview
+                        ? SYNTHETIC_PREVIEW_COPY.scopeRequiredBody
+                        : t`No report request is made until all three scope values are valid. Access is still checked by the server.`}
                 </Alert>
             )}
 
-            {request && reportQuery.isLoading && (
+            {syntheticPreview && request && (
+                <Alert
+                    icon={<IconInfoCircle/>}
+                    title={SYNTHETIC_PREVIEW_COPY.alertTitle}
+                    color="violet"
+                    mb="lg"
+                >
+                    {SYNTHETIC_PREVIEW_COPY.alertBody}
+                </Alert>
+            )}
+
+            {request && !syntheticPreview && reportQuery.isLoading && (
                 <Stack gap="lg" aria-label={t`Loading financial report`}>
                     <Skeleton height={180} radius="md"/>
                     <SimpleGrid cols={{base: 1, lg: 2}} spacing="lg">
@@ -508,14 +619,24 @@ const FinancialReportPage = () => {
                 </Stack>
             )}
 
-            {request && errorMessage && (
+            {request && !syntheticPreview && errorMessage && (
                 <Alert icon={<IconInfoCircle/>} title={errorMessage.title} color="red">
                     {errorMessage.message}
                 </Alert>
             )}
 
-            {request && reportQuery.data && (
-                <FinancialReportContent report={reportQuery.data}/>
+            {request && syntheticReport && (
+                <FinancialReportContent
+                    report={syntheticReport}
+                    syntheticPreview={syntheticPreview}
+                />
+            )}
+
+            {request && !syntheticPreview && reportQuery.data && (
+                <FinancialReportContent
+                    report={reportQuery.data}
+                    syntheticPreview={false}
+                />
             )}
         </PageBody>
     );
