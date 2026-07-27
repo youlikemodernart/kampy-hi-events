@@ -1,5 +1,6 @@
 import {t} from "@lingui/macro";
 import {
+    Accordion,
     Alert,
     Badge,
     Button,
@@ -34,15 +35,16 @@ import {
     buildSyntheticFinancialReport,
     SYNTHETIC_FINANCIAL_PREVIEW,
 } from "./syntheticPreview.ts";
+import SyntheticFinancialReportContent from "./SyntheticFinancialReportContent.tsx";
 
 const SCOPE_IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
 const RFC3339_WITH_OFFSET = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-])(\d{2}):(\d{2})$/;
 
 /* eslint-disable lingui/no-unlocalized-strings -- private synthetic preview copy is intentionally English-only */
 const SYNTHETIC_PREVIEW_COPY = {
-    pageSubheading: 'Invented design fixtures for private interface review.',
-    alertTitle: 'Synthetic data preview',
-    alertBody: 'Every value below is an invented design fixture. No live ticket, Stripe, or DonorBox source is connected. Do not use this preview for reporting.',
+    pageSubheading: 'Invented values for interface review. Live event results are unavailable.',
+    alertTitle: 'Synthetic preview · Invented values · No live sources',
+    alertBody: 'This page tests the report design with invented values shown in USD. No live ticket, Stripe, or DonorBox data is connected, and CSV export is disabled.',
     positionTitle: 'Illustrative position',
     badge: 'Synthetic preview',
     positionNote: 'Fixture values are shown for interface review only.',
@@ -52,8 +54,11 @@ const SYNTHETIC_PREVIEW_COPY = {
     scopeTitle: 'Preview scope',
     scopeDescription: 'These identifiers label the browser-only fixture. They are not sent to the server.',
     scopeButton: 'Update preview',
+    scopeEdit: 'Edit scope',
+    scopeThrough: 'Through',
     scopeRequiredTitle: 'Preview scope required',
     scopeRequiredBody: 'Enter valid preview identifiers to render the browser-only fixture. No financial request is sent.',
+    reportingTimezone: 'America/Phoenix',
 } as const;
 /* eslint-enable lingui/no-unlocalized-strings */
 
@@ -169,6 +174,36 @@ const formatBoolean = (value: boolean | null | undefined): string => {
     }
 
     return value ? t`Yes` : t`No`;
+};
+
+const formatPreviewCycle = (value: string): string => {
+    const match = /^(\d{4})-(spring|summer|fall|winter)$/i.exec(value);
+    if (!match) {
+        return value;
+    }
+
+    const [, year, season] = match;
+    return `${season.charAt(0).toUpperCase()}${season.slice(1).toLowerCase()} ${year}`;
+};
+
+const formatPreviewCutoff = (value: string): string => {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+        return value;
+    }
+
+    return new Intl.DateTimeFormat(
+        typeof navigator === 'undefined' ? 'en-US' : navigator.language,
+        {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZone: SYNTHETIC_PREVIEW_COPY.reportingTimezone,
+            timeZoneName: 'short',
+        },
+    ).format(parsed);
 };
 
 const MetricTable = ({rows}: { rows: MetricRow[] }) => (
@@ -461,6 +496,9 @@ const FinancialReportPage = () => {
     const {data: me} = useGetMe();
     const canExport = currentUserCan(me?.permissions, 'reports.export');
     const [downloadPending, setDownloadPending] = useState(false);
+    const [scopeAccordionValue, setScopeAccordionValue] = useState<string | null>(
+        request ? null : 'preview-scope',
+    );
     const form = useForm<ScopeFormValues>({
         initialValues: {
             university_id: searchParams.get('university_id') ?? '',
@@ -499,6 +537,7 @@ const FinancialReportPage = () => {
 
         if (syntheticPreview) {
             nextSearchParams.preview = SYNTHETIC_FINANCIAL_PREVIEW;
+            setScopeAccordionValue(null);
         }
 
         setSearchParams(nextSearchParams, {replace: true});
@@ -524,6 +563,38 @@ const FinancialReportPage = () => {
         ? queryErrorMessage(reportQuery.error)
         : null;
 
+    const scopeForm = (
+        <form onSubmit={form.onSubmit(handleScopeSubmit)}>
+            <SimpleGrid cols={{base: 1, md: 3}} spacing="md">
+                <TextInput
+                    label={t`University ID`}
+                    maxLength={128}
+                    required
+                    styles={{input: {minHeight: 44, fontSize: 16}}}
+                    {...form.getInputProps('university_id')}
+                />
+                <TextInput
+                    label={t`Cycle ID`}
+                    maxLength={128}
+                    required
+                    styles={{input: {minHeight: 44, fontSize: 16}}}
+                    {...form.getInputProps('cycle_id')}
+                />
+                <TextInput
+                    label={t`Cutoff with timezone offset`}
+                    description={t`RFC 3339, including seconds and offset`}
+                    placeholder="2026-08-31T23:59:59-07:00"
+                    required
+                    styles={{input: {minHeight: 44, fontSize: 16}}}
+                    {...form.getInputProps('cutoff_at')}
+                />
+            </SimpleGrid>
+            <Button type="submit" mt="md" mih={44}>
+                {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.scopeButton : t`Load report`}
+            </Button>
+        </form>
+    );
+
     return (
         <PageBody>
             <Group justify="space-between" align="flex-start" wrap="wrap" gap="md" mb="lg">
@@ -544,60 +615,6 @@ const FinancialReportPage = () => {
                 )}
             </Group>
 
-            <Paper component="section" withBorder p="lg" radius="md" mb="lg">
-                <Title order={2} size="h4">
-                    {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.scopeTitle : t`Report scope`}
-                </Title>
-                <Text size="sm" c="dimmed" mt={4} mb="md">
-                    {syntheticPreview
-                        ? SYNTHETIC_PREVIEW_COPY.scopeDescription
-                        : t`Enter the authorized university, cycle, and cutoff. The same exact scope is used for the report and CSV export.`}
-                </Text>
-                <form onSubmit={form.onSubmit(handleScopeSubmit)}>
-                    <SimpleGrid cols={{base: 1, md: 3}} spacing="md">
-                        <TextInput
-                            label={t`University ID`}
-                            maxLength={128}
-                            required
-                            styles={{input: {minHeight: 44, fontSize: 16}}}
-                            {...form.getInputProps('university_id')}
-                        />
-                        <TextInput
-                            label={t`Cycle ID`}
-                            maxLength={128}
-                            required
-                            styles={{input: {minHeight: 44, fontSize: 16}}}
-                            {...form.getInputProps('cycle_id')}
-                        />
-                        <TextInput
-                            label={t`Cutoff with timezone offset`}
-                            description={t`RFC 3339, including seconds and offset`}
-                            placeholder="2026-08-31T23:59:59-07:00"
-                            required
-                            styles={{input: {minHeight: 44, fontSize: 16}}}
-                            {...form.getInputProps('cutoff_at')}
-                        />
-                    </SimpleGrid>
-                    <Button type="submit" mt="md" mih={44}>
-                        {syntheticPreview ? SYNTHETIC_PREVIEW_COPY.scopeButton : t`Load report`}
-                    </Button>
-                </form>
-            </Paper>
-
-            {!request && (
-                <Alert
-                    icon={<IconInfoCircle/>}
-                    title={syntheticPreview
-                        ? SYNTHETIC_PREVIEW_COPY.scopeRequiredTitle
-                        : t`Report scope required`}
-                    color="blue"
-                >
-                    {syntheticPreview
-                        ? SYNTHETIC_PREVIEW_COPY.scopeRequiredBody
-                        : t`No report request is made until all three scope values are valid. Access is still checked by the server.`}
-                </Alert>
-            )}
-
             {syntheticPreview && request && (
                 <Alert
                     icon={<IconInfoCircle/>}
@@ -606,6 +623,67 @@ const FinancialReportPage = () => {
                     mb="lg"
                 >
                     {SYNTHETIC_PREVIEW_COPY.alertBody}
+                </Alert>
+            )}
+
+            {syntheticPreview ? (
+                <Accordion
+                    variant="contained"
+                    radius="md"
+                    mb="lg"
+                    value={request ? scopeAccordionValue : 'preview-scope'}
+                    onChange={setScopeAccordionValue}
+                >
+                    <Accordion.Item value="preview-scope">
+                        <Accordion.Control>
+                            <Group justify="space-between" align="center" wrap="wrap" gap="xs" pr="xs">
+                                <div style={{minWidth: 0, flex: '1 1 18rem'}}>
+                                    <Text fw={700} style={{overflowWrap: 'anywhere'}}>
+                                        {request
+                                            ? `${request.university_id} · ${formatPreviewCycle(request.cycle_id)}`
+                                            : SYNTHETIC_PREVIEW_COPY.scopeRequiredTitle}
+                                    </Text>
+                                    <Text size="sm" c="dimmed" mt={2}>
+                                        {request
+                                            ? `${SYNTHETIC_PREVIEW_COPY.scopeThrough} ${formatPreviewCutoff(request.cutoff_at)}`
+                                            : SYNTHETIC_PREVIEW_COPY.scopeDescription}
+                                    </Text>
+                                </div>
+                                <Badge color="gray" variant="light">
+                                    {SYNTHETIC_PREVIEW_COPY.scopeEdit}
+                                </Badge>
+                            </Group>
+                        </Accordion.Control>
+                        <Accordion.Panel>
+                            <Text size="sm" c="dimmed" mb="md">
+                                {SYNTHETIC_PREVIEW_COPY.scopeDescription}
+                            </Text>
+                            {scopeForm}
+                        </Accordion.Panel>
+                    </Accordion.Item>
+                </Accordion>
+            ) : (
+                <Paper component="section" withBorder p="lg" radius="md" mb="lg">
+                    <Title order={2} size="h4">{t`Report scope`}</Title>
+                    <Text size="sm" c="dimmed" mt={4} mb="md">
+                        {t`Enter the authorized university, cycle, and cutoff. The same exact scope is used for the report and CSV export.`}
+                    </Text>
+                    {scopeForm}
+                </Paper>
+            )}
+
+            {!request && (
+                <Alert
+                    icon={<IconInfoCircle/>}
+                    title={syntheticPreview
+                        ? SYNTHETIC_PREVIEW_COPY.scopeRequiredTitle
+                        : t`Report scope required`}
+                    color="blue"
+                    mb="lg"
+                >
+                    {syntheticPreview
+                        ? SYNTHETIC_PREVIEW_COPY.scopeRequiredBody
+                        : t`No report request is made until all three scope values are valid. Access is still checked by the server.`}
                 </Alert>
             )}
 
@@ -626,10 +704,7 @@ const FinancialReportPage = () => {
             )}
 
             {request && syntheticReport && (
-                <FinancialReportContent
-                    report={syntheticReport}
-                    syntheticPreview={syntheticPreview}
-                />
+                <SyntheticFinancialReportContent report={syntheticReport}/>
             )}
 
             {request && !syntheticPreview && reportQuery.data && (

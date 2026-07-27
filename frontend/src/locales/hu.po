@@ -106,7 +106,7 @@ msgstr "{days} nap, {hours} óra, {minutes} perc, és {seconds} másodperc"
 msgid "{eventCount} events"
 msgstr "{eventCount} esemény"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:122
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:150
 msgid "{formattedValue} cents"
 msgstr ""
 
@@ -583,7 +583,7 @@ msgstr "Cím 2. sor"
 msgid "Address Line 2"
 msgstr "Cím 2. sor"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:268
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:357
 msgid "Adjustment timing"
 msgstr ""
 
@@ -693,7 +693,7 @@ msgstr "Minden feladat újrapróbálásra sorba állítva"
 msgid "All Products"
 msgstr "Minden termék"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:228
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:315
 msgid "All required sources are current and publishable."
 msgstr ""
 
@@ -705,7 +705,7 @@ msgstr "Minden állapot"
 msgid "All Upcoming Events"
 msgstr "Összes közelgő esemény"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:302
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:394
 msgid "Allocation base"
 msgstr ""
 
@@ -767,7 +767,7 @@ msgstr "Csodálatos, esemény, kulcsszavak..."
 
 #: src/components/common/OrdersTable/index.tsx:348
 #: src/components/forms/TaxAndFeeForm/index.tsx:71
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:329
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:431
 #: src/components/routes/product-widget/SelectProducts/Prices/Tiered/index.tsx:36
 msgid "Amount"
 msgstr "Összeg"
@@ -816,7 +816,7 @@ msgstr "A terméktulajdonosoktól érkező bármilyen kérdés erre az e-mail c�
 msgid "Appearance"
 msgstr "Megjelenés"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:290
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:381
 msgid "Application fees"
 msgstr ""
 
@@ -1023,7 +1023,7 @@ msgstr "ÁFA regisztrált az EU-ban?"
 msgid "Art"
 msgstr "Művészet"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:248
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:336
 msgid "As of"
 msgstr ""
 
@@ -2055,7 +2055,7 @@ msgstr "Kapcsolja össze a Stripe fiókját a fizetések fogadásának megkezdé
 msgid "Connect your Stripe account to start receiving payments."
 msgstr "Csatlakoztassa Stripe fiókját, hogy elkezdhesse a fizetések fogadását."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:291
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:382
 msgid "Connected net"
 msgstr ""
 
@@ -2448,7 +2448,7 @@ msgstr "CTA címke kötelező"
 msgid "Currency"
 msgstr "Pénznem"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:212
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:292
 msgid "Current known position"
 msgstr ""
 
@@ -2460,7 +2460,7 @@ msgstr "Jelenlegi jelszó"
 msgid "Current payment processor"
 msgstr "Jelenlegi fizetési szolgáltató"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:320
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:415
 msgid "Current position components"
 msgstr ""
 
@@ -2511,8 +2511,8 @@ msgstr "Egyedi sablon"
 msgid "Customer"
 msgstr "Ügyfél"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:279
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:288
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:369
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:379
 msgid "Customer charges"
 msgstr ""
 
@@ -2520,7 +2520,7 @@ msgstr ""
 msgid "Customer link copied to clipboard"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:250
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:338
 msgid "Customer ticket price"
 msgstr ""
 
@@ -2593,15 +2593,15 @@ msgstr "Testreszabhatja eseményoldalát, hogy illeszkedjen márkájához és st
 msgid "Customize your organizer page appearance"
 msgstr "Testreszabhatja szervezői oldalának megjelenését."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:215
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:296
 msgid "Cutoff"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:483
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:584
 msgid "Cutoff with timezone offset"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:476
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:577
 msgid "Cycle ID"
 msgstr ""
 
@@ -2847,7 +2847,7 @@ msgstr "Adomány"
 msgid "Donation / Pay what you'd like product"
 msgstr "Adomány / Fizess, amennyit szeretnél termék"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:298
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:389
 msgid "Donations"
 msgstr ""
 
@@ -2863,7 +2863,7 @@ msgid "Download .ics"
 msgstr ".ics letöltése"
 
 #: src/components/common/DownloadCsvButton/index.tsx:48
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:456
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:613
 msgid "Download CSV"
 msgstr "CSV letöltése"
 
@@ -3087,7 +3087,7 @@ msgstr "Szerkesztő"
 msgid "Education"
 msgstr "Oktatás"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:261
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:350
 msgid "Effective at"
 msgstr ""
 
@@ -3107,7 +3107,7 @@ msgstr "Jogosultsági hibák"
 msgid "Eligible Check-In Lists"
 msgstr "Jogosult bejelentkezési listák"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:277
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:367
 msgid "Eligible transactions"
 msgstr ""
 
@@ -3294,11 +3294,11 @@ msgstr "Angol"
 msgid "Enter a subject and body to see the preview"
 msgstr "Írjon be egy tárgyat és törzset az előnézet megtekintéséhez"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:407
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:523
 msgid "Enter a valid cycle ID."
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:399
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:515
 msgid "Enter a valid university ID."
 msgstr ""
 
@@ -3345,7 +3345,7 @@ msgstr "Vezetéknév megadása"
 msgid "Enter new password"
 msgstr "Írja be az új jelszót"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:464
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:669
 msgid "Enter the authorized university, cycle, and cutoff. The same exact scope is used for the report and CSV export."
 msgstr ""
 
@@ -4033,20 +4033,20 @@ msgstr "Szűrők ({activeFilterCount})"
 msgid "Finance"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:447
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:604
 #: src/components/routes/event/Reports/index.tsx:35
 msgid "Financial Report"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:433
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:556
 msgid "Financial report CSV is unavailable."
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:185
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:258
 msgid "Financial report data unavailable"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:178
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:251
 msgid "Financial report unavailable"
 msgstr ""
 
@@ -4194,7 +4194,7 @@ msgstr "Ingyenes termék, fizetési információ nem szükséges"
 msgid "French"
 msgstr "Francia"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:353
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:462
 msgid "Freshness"
 msgstr ""
 
@@ -4211,15 +4211,15 @@ msgstr "Teljes esemény időtartama"
 msgid "Full refund"
 msgstr "Teljes visszatérítés"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:264
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:353
 msgid "Fundraising allocation"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:252
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:340
 msgid "Fundraising goal"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:314
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:407
 msgid "Fundraising gross"
 msgstr ""
 
@@ -4301,7 +4301,7 @@ msgstr "Jó olvashatóság"
 msgid "Google Calendar"
 msgstr "Google Naptár"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:303
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:395
 msgid "Gross raised"
 msgstr ""
 
@@ -4591,7 +4591,7 @@ msgstr "Kép URL-címe"
 msgid "Images"
 msgstr "Képek"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:292
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:383
 msgid "Immediate adjustments"
 msgstr ""
 
@@ -4861,7 +4861,7 @@ msgstr "Csak kattintson az alábbi gombra a Stripe fiók újracsatlakoztatásáh
 msgid "Just looking for your tickets?"
 msgstr "Csak a jegyeit keresi?"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:280
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:370
 msgid "Kamp net settlement"
 msgstr ""
 
@@ -5024,7 +5024,7 @@ msgstr "ÉLŐ"
 msgid "Live Events"
 msgstr "Élő események"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:491
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:593
 msgid "Load report"
 msgstr ""
 
@@ -5033,7 +5033,7 @@ msgstr ""
 msgid "Loading events..."
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:502
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:691
 msgid "Loading financial report"
 msgstr ""
 
@@ -5320,7 +5320,7 @@ msgstr "Egyéb"
 msgid "Miscellaneous Settings"
 msgstr "Egyéb beállítások"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:235
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:322
 msgid "Missing or unpublishable sources"
 msgstr ""
 
@@ -5449,7 +5449,7 @@ msgstr "Éjszakai élet"
 
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:250
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:277
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:148
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:176
 msgid "No"
 msgstr "Nem"
 
@@ -5566,7 +5566,7 @@ msgstr "Nincs sikertelen feladat"
 msgid "No filters available"
 msgstr "Nincsenek elérhető szűrők"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:179
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:252
 msgid "No financial report is configured for this event and scope."
 msgstr ""
 
@@ -5663,7 +5663,7 @@ msgstr "Még nincsenek termékek"
 msgid "No Promo Codes to show"
 msgstr "Nincs megjeleníthető promóciós kód"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:322
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:424
 msgid "No publishable components are available."
 msgstr ""
 
@@ -5683,7 +5683,7 @@ msgstr "Nincs új fiók regisztráció"
 msgid "No recipients found"
 msgstr "Nem találhatók címzettek"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:497
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:686
 msgid "No report request is made until all three scope values are valid. Access is still checked by the server."
 msgstr ""
 
@@ -5765,7 +5765,7 @@ msgstr "Nem ÁFA-s vállalkozások vagy magánszemélyek: 23%-os ír ÁFA alkalm
 msgid "None"
 msgstr "Egyik sem"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:239
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:326
 msgid "None listed"
 msgstr ""
 
@@ -6636,23 +6636,23 @@ msgstr "Pinterest"
 msgid "Place this in the <head> of your website."
 msgstr "Helyezze ezt a weboldalának <head> részébe."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:246
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:333
 msgid "Plan"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:254
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:342
 msgid "Planned gross income"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:251
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:339
 msgid "Planned ticket proceeds"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:249
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:337
 msgid "Planned ticket quantity"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:253
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:341
 msgid "Planned university allocation"
 msgstr ""
 
@@ -6799,19 +6799,19 @@ msgstr "Kérjük, várjon, amíg előkészítjük számláját..."
 msgid "Please wait while we prepare your orders for export..."
 msgstr "Kérjük, várjon, amíg előkészítjük megrendeléseit az exportálásra..."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:258
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:346
 msgid "Policy"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:355
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:464
 msgid "Policy publishable"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:275
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:365
 msgid "Policy validation"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:260
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:349
 msgid "Policy version"
 msgstr ""
 
@@ -6927,7 +6927,7 @@ msgstr "Adatvédelmi irányelvek"
 msgid "Process Refund"
 msgstr "Visszatérítés feldolgozása"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:267
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:356
 msgid "Processing fee confirmation"
 msgstr ""
 
@@ -7080,7 +7080,7 @@ msgstr "Közzététel"
 msgid "Publish Event"
 msgstr "Esemény közzététele"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:223
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:307
 msgid "Publishable"
 msgstr ""
 
@@ -7166,7 +7166,7 @@ msgstr "Hely újbóli felajánlása"
 msgid "Read-only access to event data, orders, attendees, reports, and exports."
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:446
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:603
 msgid "Read-only financial position with explicit source and policy withholding."
 msgstr ""
 
@@ -7223,8 +7223,8 @@ msgstr "Címzettek"
 msgid "Recipients are available after the message is sent"
 msgstr "A címzettek a küldés után érhetők el"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:276
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:301
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:366
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:393
 msgid "Recognized revenue"
 msgstr ""
 
@@ -7289,7 +7289,7 @@ msgstr "Visszatérítés állapota"
 #: src/components/common/OrderSummary/index.tsx:80
 #: src/components/common/StatBoxes/index.tsx:57
 #: src/components/routes/event/orders.tsx:29
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:304
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:396
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:70
 msgid "Refunded"
 msgstr "Visszatérítve"
@@ -7331,7 +7331,7 @@ msgstr "eltávolítás"
 msgid "Remove"
 msgstr "Eltávolítás"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:231
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:318
 msgid "Report completeness is withheld."
 msgstr ""
 
@@ -7339,11 +7339,11 @@ msgstr ""
 msgid "Report not found"
 msgstr "Jelentés nem található"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:462
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:667
 msgid "Report scope"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:496
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:680
 msgid "Report scope required"
 msgstr ""
 
@@ -7505,7 +7505,7 @@ msgstr "Bevétel"
 msgid "Revenue Summary"
 msgstr "Bevételi összefoglaló"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:223
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:308
 msgid "Review required"
 msgstr ""
 
@@ -7517,7 +7517,7 @@ msgstr "Meghívó visszavonása"
 msgid "Revoke Offer"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:484
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:585
 msgid "RFC 3339, including seconds and offset"
 msgstr ""
 
@@ -7928,7 +7928,7 @@ msgstr "Válasszon..."
 msgid "Selected"
 msgstr "Kiválasztva"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:354
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:463
 msgid "Selection"
 msgstr ""
 
@@ -8091,7 +8091,7 @@ msgstr "Beállítás frissítve"
 msgid "Settings"
 msgstr "Beállítások"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:293
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:384
 msgid "Settlement after adjustments"
 msgstr ""
 
@@ -8282,22 +8282,22 @@ msgstr "Sajnáljuk, ez a promóciós kód nem felismerhető."
 
 #: src/components/common/PoweredByFooter/index.tsx:82
 #: src/components/routes/admin/Attribution/index.tsx:106
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:328
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:351
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:430
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:460
 msgid "Source"
 msgstr "Forrás"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:356
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:465
 msgid "Source as of"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:346
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:449
 msgid "Source evidence"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:281
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:294
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:306
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:371
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:385
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:398
 msgid "Source freshness"
 msgstr ""
 
@@ -8370,10 +8370,10 @@ msgstr "A statisztikák a fiók létrehozásának dátumán alapulnak"
 #: src/components/routes/admin/Messages/index.tsx:120
 #: src/components/routes/admin/Messages/index.tsx:167
 #: src/components/routes/admin/Messages/index.tsx:293
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:274
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:287
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:300
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:352
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:364
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:378
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:392
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:461
 #: src/components/routes/event/Reports/PromoCodesReport/index.tsx:88
 #: src/components/routes/organizer/Reports/EventsPerformanceReport/index.tsx:62
 msgid "Status"
@@ -8413,11 +8413,11 @@ msgstr "Stripe fizetési azonosító"
 msgid "Stripe payments are not enabled for this event."
 msgstr "A Stripe fizetések nincsenek engedélyezve ehhez az eseményhez."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:289
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:380
 msgid "Stripe processing fees"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:285
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:375
 msgid "Stripe settlement"
 msgstr ""
 
@@ -8805,7 +8805,7 @@ msgstr "Az a pénznem, amelyben a fix díj van meghatározva. A fizetéskor az o
 msgid "The currency of the order"
 msgstr "A rendelés pénzneme"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:230
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:317
 msgid "The current position is incomplete. Unavailable sources remain withheld."
 msgstr ""
 
@@ -8891,11 +8891,11 @@ msgstr "Az elsődleges márka szín a gombokhoz és kiemelésekhez"
 msgid "The quick brown fox jumps over the lazy dog."
 msgstr "A gyors barna róka átugrik a lusta kutyán."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:186
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:259
 msgid "The report cannot be loaded safely right now. Please try again later."
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:192
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:265
 msgid "The report request failed. Please try again."
 msgstr ""
 
@@ -9187,7 +9187,7 @@ msgstr "Jegy tervező"
 msgid "Ticket email has been resent to attendee"
 msgstr "Jegy e-mailt újraküldték a résztvevőnek."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:263
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:352
 msgid "Ticket fixed deduction"
 msgstr ""
 
@@ -9244,12 +9244,12 @@ msgstr "Jegyár"
 msgid "Ticket Price"
 msgstr "Jegy ára"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:313
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:406
 msgid "Ticket proceeds"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:278
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:312
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:368
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:405
 msgid "Ticket quantity"
 msgstr ""
 
@@ -9257,7 +9257,7 @@ msgstr ""
 msgid "Ticket resent successfully"
 msgstr "Jegy sikeresen újraküldve"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:262
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:351
 msgid "Ticket revenue basis"
 msgstr ""
 
@@ -9278,7 +9278,7 @@ msgstr "Jegyértékesítés"
 msgid "tickets"
 msgstr "jegyek"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:272
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:361
 #: src/components/routes/my-tickets/index.tsx:84
 msgid "Tickets"
 msgstr "Jegyek"
@@ -9560,7 +9560,7 @@ msgstr "Nem sikerült lekérni a résztvevőt."
 msgid "Unable to join waitlist"
 msgstr "Nem sikerült csatlakozni a várólistához"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:191
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:264
 msgid "Unable to load financial report"
 msgstr ""
 
@@ -9585,7 +9585,7 @@ msgstr "Egyedi rendelési hivatkozás"
 msgid "United States"
 msgstr "Egyesült Államok"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:469
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:570
 msgid "University ID"
 msgstr ""
 
@@ -9738,7 +9738,7 @@ msgstr "Borítókép használata"
 msgid "Use order details for all attendees. Attendee names and emails will match the buyer's information."
 msgstr "Rendelési adatok használata minden résztvevőhöz. A résztvevők nevei és e-mail címei meg fognak egyezni a vásárló információival."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:411
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:527
 msgid "Use RFC 3339 with an explicit offset, such as 2026-08-31T23:59:59-07:00."
 msgstr ""
 
@@ -9801,11 +9801,11 @@ msgstr "Érvényesítve"
 msgid "Validating your VAT number..."
 msgstr "ÁFA szám érvényesítése..."
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:305
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:397
 msgid "Validation required"
 msgstr ""
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:310
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:402
 msgid "Variances"
 msgstr ""
 
@@ -10405,12 +10405,12 @@ msgstr "Widget előnézet"
 msgid "Widget Settings"
 msgstr "Widget beállítások"
 
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:118
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:127
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:137
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:145
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:236
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:265
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:146
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:155
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:165
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:173
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:323
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:354
 msgid "Withheld"
 msgstr ""
 
@@ -10454,7 +10454,7 @@ msgstr "Év elejétől napjainkig"
 
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:250
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:277
-#: src/components/routes/event/Reports/FinancialReport/index.tsx:148
+#: src/components/routes/event/Reports/FinancialReport/index.tsx:176
 msgid "Yes"
 msgstr "Igen"
 

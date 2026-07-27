@@ -5,7 +5,7 @@ import {
 import {IdParam} from "../../../../../types.ts";
 
 export const SYNTHETIC_FINANCIAL_PREVIEW = 'synthetic';
-// eslint-disable-next-line lingui/no-unlocalized-strings
+export const SYNTHETIC_FINANCIAL_PREVIEW_CURRENCY = 'USD';
 const REPORTING_TIMEZONE = 'America/Phoenix';
 
 export const buildSyntheticFinancialReport = (
