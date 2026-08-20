@@ -35,6 +35,7 @@ class KampStripeMetadataServiceTest extends TestCase
                             'cycle_id' => '2026-fall',
                             'event_id' => 'gcu-kamp-fall-2026',
                             'pricing_policy' => 'gcu-intended-net-v1',
+                            'service_fee_id' => 81,
                         ],
                     ],
                 ],
@@ -44,9 +45,9 @@ class KampStripeMetadataServiceTest extends TestCase
 
     private function request(
         ?array $items = null,
-        float $fixedFee = 6.00,
+        float $fixedFee = 3.00,
         float $percentageFee = 0.00,
-        bool $passFeeToBuyer = true,
+        bool $passFeeToBuyer = false,
         string $currency = 'USD',
         string $stripeEnvironment = 'test',
         int $eventId = 3,
@@ -91,7 +92,10 @@ class KampStripeMetadataServiceTest extends TestCase
             ->setCurrency($currency)
             ->setTotalBeforeAdditions($totalBeforeAdditions)
             ->setTotalFee($totalFee)
-            ->setTotalTax(0.00)
+            ->setTotalTax(array_sum(array_map(
+                static fn (OrderItemDomainObject $item): float => $item->getTotalTax(),
+                $items,
+            )))
             ->setTotalGross($totalGross)
             ->setOrderItems(collect($items));
         $order->setEvent($event);
@@ -107,18 +111,25 @@ class KampStripeMetadataServiceTest extends TestCase
         );
     }
 
-    private function item(float $price, int $quantity, string $type = ProductType::TICKET->name): OrderItemDomainObject
-    {
+    private function item(
+        float $price,
+        int $quantity,
+        string $type = ProductType::TICKET->name,
+        int $serviceFeeId = 81,
+        array $taxes = [],
+    ): OrderItemDomainObject {
         $totalBeforeAdditions = $price * $quantity;
-        $platformFee = $price > 0 ? 6.00 * $quantity : 0.00;
-        $rollup = $platformFee > 0 ? [
+        $serviceFee = $price > 0 ? 6.00 * $quantity : 0.00;
+        $totalTax = array_sum(array_map(static fn (array $tax): float => $tax['value'], $taxes));
+        $rollup = $serviceFee > 0 ? [
             'fees' => [[
-                'id' => 0,
-                'name' => 'Platform Fee',
-                'rate' => $platformFee,
+                'id' => $serviceFeeId,
+                'name' => 'Service Fee',
+                'rate' => 6.00,
                 'type' => 'FIXED',
-                'value' => $platformFee,
+                'value' => $serviceFee,
             ]],
+            ...($taxes === [] ? [] : ['taxes' => $taxes]),
         ] : [];
 
         return (new OrderItemDomainObject)
@@ -126,13 +137,13 @@ class KampStripeMetadataServiceTest extends TestCase
             ->setQuantity($quantity)
             ->setProductType($type)
             ->setTotalBeforeAdditions($totalBeforeAdditions)
-            ->setTotalServiceFee($platformFee)
-            ->setTotalTax(0.00)
-            ->setTotalGross($totalBeforeAdditions + $platformFee)
+            ->setTotalServiceFee($serviceFee)
+            ->setTotalTax($totalTax)
+            ->setTotalGross($totalBeforeAdditions + $serviceFee + $totalTax)
             ->setTaxesAndFeesRollup($rollup);
     }
 
-    public function test_builds_strict_v2_metadata_and_deterministic_description_for_paid_tickets(): void
+    public function test_builds_versioned_metadata_and_deterministic_description_for_paid_tickets(): void
     {
         $result = (new KampStripeMetadataService($this->config()))->build($this->request());
 
@@ -143,15 +154,15 @@ class KampStripeMetadataServiceTest extends TestCase
             'kamp_cycle_id' => '2026-fall',
             'kamp_event_id' => 'gcu-kamp-fall-2026',
             'kamp_source' => 'hi_events',
-            'kamp_schema_version' => '2026-07-24.2',
+            'kamp_schema_version' => '2026-08-20.1',
             'kamp_source_namespace' => 'kampy_ticketing',
             'kamp_source_record_id' => 'hi_order_record_27',
             'kamp_source_order_id' => 'hi_order_order_test_001',
             'kamp_ticket_quantity' => '2',
             'kamp_pricing_policy' => 'gcu-intended-net-v1',
-            'kamp_fee_policy' => 'wawco-six-per-ticket-v1',
+            'kamp_fee_policy' => 'wawco-three-kamplove-three-v1',
             'kamp_environment' => 'test',
-            'kamp_adapter_version' => '2026-07-25.1',
+            'kamp_adapter_version' => '2026-08-20.1',
             'kamp_reconciliation_ref' => 'hi_recon_order_27',
         ], $result->metadata);
         $this->assertSame(
@@ -220,9 +231,9 @@ class KampStripeMetadataServiceTest extends TestCase
     public static function invalidContractProvider(): array
     {
         return [
-            'wrong fixed fee' => [5.99, 0.00, true, 'fixed_application_fee_mismatch'],
-            'nonzero percentage fee' => [6.00, 1.50, true, 'percentage_application_fee_mismatch'],
-            'buyer pass through disabled' => [6.00, 0.00, false, 'buyer_fee_pass_through_required'],
+            'wrong fixed fee' => [2.99, 0.00, false, 'fixed_application_fee_mismatch'],
+            'nonzero percentage fee' => [3.00, 1.50, false, 'percentage_application_fee_mismatch'],
+            'generated platform fee enabled' => [3.00, 0.00, true, 'generated_platform_fee_forbidden'],
         ];
     }
 
@@ -251,6 +262,7 @@ class KampStripeMetadataServiceTest extends TestCase
                             'cycle_id' => '2026-fall',
                             'event_id' => 'gcu-kamp-fall-2026',
                             'pricing_policy' => 'gcu-intended-net-v1',
+                            'service_fee_id' => 81,
                             'buyer_email' => 'private@example.com',
                         ],
                     ],
@@ -277,6 +289,7 @@ class KampStripeMetadataServiceTest extends TestCase
                             'cycle_id' => '2026-fall',
                             'event_id' => 'gcu-kamp-fall-2026',
                             'pricing_policy' => 'gcu-intended-net-v1',
+                            'service_fee_id' => 81,
                             'allocation_id' => 'allocation_001',
                         ],
                     ],
@@ -310,6 +323,7 @@ class KampStripeMetadataServiceTest extends TestCase
                 'cycle_id' => '2026-fall',
                 'event_id' => 'gcu-kamp-fall-2026',
                 'pricing_policy' => 'gcu-intended-net-v1',
+                'service_fee_id' => 81,
             ],
         ], JSON_THROW_ON_ERROR);
         $config = $this->config([
@@ -317,6 +331,68 @@ class KampStripeMetadataServiceTest extends TestCase
         ]);
 
         $this->assertNotNull((new KampStripeMetadataService($config))->build($this->request()));
+    }
+
+    public function test_permits_configured_tax_lines_and_preserves_exact_service_fee_arithmetic(): void
+    {
+        $item = $this->item(100.00, 1, taxes: [[
+            'id' => 92,
+            'name' => 'Configured tax',
+            'rate' => 5.00,
+            'type' => 'PERCENTAGE',
+            'value' => 5.30,
+        ]]);
+        $request = $this->request(items: [$item]);
+
+        $result = (new KampStripeMetadataService($this->config()))->build($request);
+
+        $this->assertNotNull($result);
+        $this->assertSame(11130, $request->amount->toMinorUnit());
+        $this->assertSame(600, MoneyValue::fromFloat($request->order->getTotalFee(), 'USD')->toMinorUnit());
+        $this->assertSame(530, MoneyValue::fromFloat($request->order->getTotalTax(), 'USD')->toMinorUnit());
+    }
+
+    #[DataProvider('invalidTaxRollupProvider')]
+    public function test_rejects_invalid_configured_tax_rollups(array $tax): void
+    {
+        try {
+            (new KampStripeMetadataService($this->config()))->build(
+                $this->request(items: [$this->item(100.00, 1, taxes: [$tax])]),
+            );
+            $this->fail('Expected an invalid configured tax rollup to fail closed.');
+        } catch (KampStripeMetadataConfigurationException $exception) {
+            $this->assertSame('invalid_tax_rollup', $exception->getReason());
+        }
+    }
+
+    public static function invalidTaxRollupProvider(): array
+    {
+        return [
+            'negative rate' => [[
+                'id' => 92, 'name' => 'Configured tax', 'rate' => -5.00, 'type' => 'PERCENTAGE', 'value' => 0.00,
+            ]],
+            'negative value' => [[
+                'id' => 92, 'name' => 'Configured tax', 'rate' => 5.00, 'type' => 'PERCENTAGE', 'value' => -5.30,
+            ]],
+            'missing identity' => [[
+                'name' => 'Configured tax', 'rate' => 5.00, 'type' => 'PERCENTAGE', 'value' => 5.30,
+            ]],
+            'invalid identity' => [[
+                'id' => 0, 'name' => 'Configured tax', 'rate' => 5.00, 'type' => 'PERCENTAGE', 'value' => 5.30,
+            ]],
+        ];
+    }
+
+    public function test_rejects_an_unmapped_service_fee_identity(): void
+    {
+        try {
+            (new KampStripeMetadataService($this->config()))->build(
+                $this->request(items: [$this->item(100.00, 1, serviceFeeId: 82)]),
+            );
+            $this->fail('Expected an unmapped service fee to fail closed.');
+        } catch (KampStripeMetadataConfigurationException $exception) {
+            $this->assertSame('service_fee_rollup_required', $exception->getReason());
+        }
     }
 
     public function test_rejects_missing_buyer_fee_in_the_persisted_order(): void
@@ -346,6 +422,7 @@ class KampStripeMetadataServiceTest extends TestCase
                             'cycle_id' => '2026-fall',
                             'event_id' => 'gcu-kamp-fall-2026',
                             'pricing_policy' => 'gcu-intended-net-v1',
+                            'service_fee_id' => 81,
                             'campaign_id' => 'AKIA'.'ABCDEFGHIJKLMNOP',
                         ],
                     ],

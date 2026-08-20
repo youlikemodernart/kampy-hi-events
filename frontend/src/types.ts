@@ -648,6 +648,7 @@ export interface Address {
 }
 
 interface TaxOrFee {
+    id?: number;
     name: string;
     value: number;
 }

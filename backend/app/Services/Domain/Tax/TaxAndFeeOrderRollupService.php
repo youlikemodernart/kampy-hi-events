@@ -17,9 +17,23 @@ class TaxAndFeeOrderRollupService
                 $orderRollup[$type] ??= [];
 
                 foreach ($taxesAndFees as $taxOrFee) {
-                    $foundIndex = array_search($taxOrFee['name'], array_column($orderRollup[$type], 'name'), true);
-                    if ($foundIndex === false) {
+                    $hasIdentity = is_int($taxOrFee['id'] ?? null) && $taxOrFee['id'] > 0;
+                    $foundIndex = null;
+                    foreach ($orderRollup[$type] as $index => $existingTaxOrFee) {
+                        $existingHasIdentity = is_int($existingTaxOrFee['id'] ?? null) && $existingTaxOrFee['id'] > 0;
+                        $sameIdentity = $hasIdentity
+                            ? $existingHasIdentity && $existingTaxOrFee['id'] === $taxOrFee['id']
+                            : ! $existingHasIdentity && $existingTaxOrFee['name'] === $taxOrFee['name'];
+
+                        if ($sameIdentity) {
+                            $foundIndex = $index;
+                            break;
+                        }
+                    }
+
+                    if ($foundIndex === null) {
                         $orderRollup[$type][] = [
+                            ...($hasIdentity ? ['id' => $taxOrFee['id']] : []),
                             'name' => $taxOrFee['name'],
                             'value' => $taxOrFee['value'],
                             'rate' => $taxOrFee['rate'],

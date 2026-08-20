@@ -2,8 +2,6 @@
 
 namespace HiEvents\Services\Domain\Tax;
 
-namespace HiEvents\Services\Domain\Tax;
-
 use HiEvents\DomainObjects\TaxAndFeesDomainObject;
 use Illuminate\Support\Str;
 
@@ -43,13 +41,14 @@ class TaxAndFeeRollupService
 
         $this->rollUp[$type] ??= [];
 
-        $foundIndex = array_search($name, array_column($this->rollUp[$type], 'name'), true);
+        $foundIndex = array_search($taxOrFee->getId(), array_column($this->rollUp[$type], 'id'), true);
         if ($foundIndex === false) {
             $this->rollUp[$type][] = [
+                'id' => $taxOrFee->getId(),
                 'name' => $name,
                 'rate' => $taxOrFee->getRate(),
                 'type' => $taxOrFee->getCalculationType(),
-                'value' => $amount
+                'value' => $amount,
             ];
         } else {
             $this->rollUp[$type][$foundIndex]['value'] += $amount;

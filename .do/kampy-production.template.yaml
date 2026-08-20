@@ -1,0 +1,222 @@
+# SOURCE TEMPLATE ONLY. Do not submit this file directly.
+# Replace every REPLACE_AT_DEPLOY value in an owner-only generated app spec.
+# Provider readback remains authoritative after creation.
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+name: kampy-hi-events-production
+region: sfo
+features:
+  - buildpack-stack=ubuntu-22
+domains:
+  - domain: tickets.kamplove.org
+    type: PRIMARY
+databases:
+  - name: kampy-postgres
+    engine: PG
+    production: true
+    cluster_name: REPLACE_AT_DEPLOY_POSTGRES_CLUSTER
+    db_name: kampy_hi_events
+    db_user: kampy_hi_events
+  - name: kampy-valkey
+    engine: VALKEY
+    production: true
+    cluster_name: REPLACE_AT_DEPLOY_VALKEY_CLUSTER
+envs:
+  - key: APP_NAME
+    scope: RUN_AND_BUILD_TIME
+    value: Kampy Tickets
+  - key: APP_ENV
+    scope: RUN_AND_BUILD_TIME
+    value: production
+  - key: APP_DEBUG
+    scope: RUN_AND_BUILD_TIME
+    value: "false"
+  - key: LOG_CHANNEL
+    scope: RUN_AND_BUILD_TIME
+    value: stderr
+  - key: APP_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://tickets.kamplove.org/api
+  - key: APP_FRONTEND_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://tickets.kamplove.org
+  - key: APP_CDN_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://kampy-hi-events-public.sfo3.cdn.digitaloceanspaces.com
+  - key: APP_KEY
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_APP_KEY
+  - key: JWT_SECRET
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_JWT_SECRET
+  - key: APP_SAAS_MODE_ENABLED
+    scope: RUN_AND_BUILD_TIME
+    value: "true"
+  - key: APP_SAAS_STRIPE_APPLICATION_FEE_PERCENT
+    scope: RUN_AND_BUILD_TIME
+    value: "0"
+  - key: APP_SAAS_STRIPE_APPLICATION_FEE_FIXED
+    scope: RUN_AND_BUILD_TIME
+    value: "3"
+  - key: APP_SAAS_DEFAULT_PASS_PLATFORM_FEE_TO_BUYER
+    scope: RUN_AND_BUILD_TIME
+    value: "false"
+  - key: APP_DISABLE_REGISTRATION
+    scope: RUN_AND_BUILD_TIME
+    value: "false"
+  - key: APP_STRIPE_CONNECT_ACCOUNT_TYPE
+    scope: RUN_AND_BUILD_TIME
+    value: express
+  - key: APP_PLATFORM_SUPPORT_EMAIL
+    scope: RUN_AND_BUILD_TIME
+    value: noah@whatarewecapableof.com
+  - key: DB_CONNECTION
+    scope: RUN_AND_BUILD_TIME
+    value: pgsql
+  - key: DATABASE_URL
+    scope: RUN_AND_BUILD_TIME
+    value: ${kampy-postgres.DATABASE_URL}
+  - key: QUEUE_CONNECTION
+    scope: RUN_AND_BUILD_TIME
+    value: redis
+  - key: WEBHOOK_QUEUE_NAME
+    scope: RUN_AND_BUILD_TIME
+    value: webhooks
+  - key: REDIS_URL
+    scope: RUN_AND_BUILD_TIME
+    value: ${kampy-valkey.REDIS_URL}
+  - key: REDIS_PREFIX
+    scope: RUN_AND_BUILD_TIME
+    value: kampy_hi_events_
+  - key: CACHE_STORE
+    scope: RUN_AND_BUILD_TIME
+    value: redis
+  - key: FILESYSTEM_DISK
+    scope: RUN_AND_BUILD_TIME
+    value: s3-private
+  - key: FILESYSTEM_PUBLIC_DISK
+    scope: RUN_AND_BUILD_TIME
+    value: s3-public
+  - key: FILESYSTEM_PRIVATE_DISK
+    scope: RUN_AND_BUILD_TIME
+    value: s3-private
+  - key: AWS_ACCESS_KEY_ID
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_SPACES_KEY
+  - key: AWS_SECRET_ACCESS_KEY
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_SPACES_SECRET
+  - key: AWS_DEFAULT_REGION
+    scope: RUN_AND_BUILD_TIME
+    value: sfo3
+  - key: AWS_PUBLIC_BUCKET
+    scope: RUN_AND_BUILD_TIME
+    value: kampy-hi-events-public
+  - key: AWS_PRIVATE_BUCKET
+    scope: RUN_AND_BUILD_TIME
+    value: kampy-hi-events-private
+  - key: AWS_ENDPOINT
+    scope: RUN_AND_BUILD_TIME
+    value: https://sfo3.digitaloceanspaces.com
+  - key: AWS_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://kampy-hi-events-public.sfo3.cdn.digitaloceanspaces.com
+  - key: AWS_USE_PATH_STYLE_ENDPOINT
+    scope: RUN_AND_BUILD_TIME
+    value: "false"
+  - key: MAIL_MAILER
+    scope: RUN_AND_BUILD_TIME
+    value: postmark
+  - key: POSTMARK_TOKEN
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_POSTMARK_TOKEN
+  - key: MAIL_FROM_ADDRESS
+    scope: RUN_AND_BUILD_TIME
+    value: tickets@kamplove.org
+  - key: MAIL_FROM_NAME
+    scope: RUN_AND_BUILD_TIME
+    value: Kamp Love
+  - key: STRIPE_PRIMARY_PLATFORM
+    scope: RUN_AND_BUILD_TIME
+    value: US
+  - key: STRIPE_PUBLIC_KEY
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_STRIPE_PUBLIC_KEY
+  - key: STRIPE_SECRET_KEY
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_STRIPE_SECRET_KEY
+  - key: STRIPE_WEBHOOK_SECRET
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AFTER_WEBHOOK_CREATION
+  - key: STRIPE_CONNECT_REFUND_APPLICATION_FEE_POLICY
+    scope: RUN_AND_BUILD_TIME
+    value: REPLACE_AT_DEPLOY_RETAIN_OR_RETURN
+  - key: STRIPE_WEBHOOK_RECONCILIATION_GRACE_HOURS
+    scope: RUN_AND_BUILD_TIME
+    value: "72"
+  - key: KAMP_STRIPE_METADATA_ENABLED
+    scope: RUN_AND_BUILD_TIME
+    value: "false"
+  - key: KAMP_STRIPE_SOURCE_NAMESPACE
+    scope: RUN_AND_BUILD_TIME
+    value: kampy_hi_events_production
+  - key: KAMP_STRIPE_EVENT_MAP
+    scope: RUN_AND_BUILD_TIME
+    value: "{}"
+  - key: KAMP_FINANCIAL_REPORT_BINDINGS
+    scope: RUN_AND_BUILD_TIME
+    value: "[]"
+  - key: VITE_FRONTEND_URL
+    scope: RUN_AND_BUILD_TIME
+    value: https://tickets.kamplove.org
+  - key: VITE_API_URL_CLIENT
+    scope: RUN_AND_BUILD_TIME
+    value: https://tickets.kamplove.org/api
+  - key: VITE_API_URL_SERVER
+    scope: RUN_AND_BUILD_TIME
+    value: http://localhost:80/api
+  - key: VITE_STRIPE_PUBLISHABLE_KEY
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: REPLACE_AT_DEPLOY_STRIPE_PUBLIC_KEY
+services:
+  - name: kampy-hi-events
+    github:
+      repo: youlikemodernart/kampy-hi-events
+      branch: production/kampy-hi-events-2026-08-20
+      deploy_on_push: false
+    dockerfile_path: Dockerfile.all-in-one
+    source_dir: /
+    http_port: 80
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-2gb
+    health_check:
+      initial_delay_seconds: 180
+      period_seconds: 15
+      timeout_seconds: 5
+      failure_threshold: 12
+    alerts:
+      - rule: CPU_UTILIZATION
+        operator: GREATER_THAN
+        value: 80
+        window: FIVE_MINUTES
+      - rule: MEM_UTILIZATION
+        operator: GREATER_THAN
+        value: 85
+        window: FIVE_MINUTES
+ingress:
+  rules:
+    - component:
+        name: kampy-hi-events
+      match:
+        path:
+          prefix: /

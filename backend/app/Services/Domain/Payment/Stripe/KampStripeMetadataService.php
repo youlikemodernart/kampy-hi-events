@@ -6,7 +6,6 @@ use HiEvents\DomainObjects\Enums\ProductType;
 use HiEvents\DomainObjects\Enums\TaxCalculationType;
 use HiEvents\DomainObjects\OrderItemDomainObject;
 use HiEvents\Exceptions\Stripe\KampStripeMetadataConfigurationException;
-use HiEvents\Services\Domain\Order\OrderPlatformFeePassThroughService;
 use HiEvents\Services\Domain\Payment\Stripe\DTOs\CreatePaymentIntentRequestDTO;
 use HiEvents\Services\Domain\Payment\Stripe\DTOs\KampStripeMetadataDTO;
 use HiEvents\Values\MoneyValue;
@@ -15,15 +14,17 @@ use JsonException;
 
 class KampStripeMetadataService
 {
-    public const SCHEMA_VERSION = '2026-07-24.2';
+    public const SCHEMA_VERSION = '2026-08-20.1';
 
-    public const ADAPTER_VERSION = '2026-07-25.1';
+    public const ADAPTER_VERSION = '2026-08-20.1';
 
     public const SOURCE = 'hi_events';
 
-    public const FEE_POLICY = 'wawco-six-per-ticket-v1';
+    public const FEE_POLICY = 'wawco-three-kamplove-three-v1';
 
-    public const FIXED_APPLICATION_FEE = 6.00;
+    public const FIXED_APPLICATION_FEE = 3.00;
+
+    public const FIXED_BUYER_SERVICE_FEE = 6.00;
 
     public const APPLICATION_FEE_CURRENCY = 'USD';
 
@@ -36,6 +37,7 @@ class KampStripeMetadataService
         'cycle_id',
         'event_id',
         'pricing_policy',
+        'service_fee_id',
         'campaign_id',
         'allocation_id',
     ];
@@ -98,7 +100,7 @@ class KampStripeMetadataService
             $this->fail('stripe_environment_required');
         }
         $ticketQuantity = $this->paidTicketQuantity($request);
-        $this->assertBuyerFeeConservation($request, $ticketQuantity);
+        $this->assertBuyerFeeConservation($request, $eventConfiguration, $ticketQuantity);
 
         $orderRecordId = 'hi_order_record_'.$request->order->getId();
         $sourceOrderId = 'hi_order_'.$request->order->getShortId();
@@ -179,8 +181,8 @@ class KampStripeMetadataService
         }
 
         $eventSettings = $request->order->getEvent()?->getEventSettings();
-        if ($eventSettings === null || ! $eventSettings->getPassPlatformFeeToBuyer()) {
-            $this->fail('buyer_fee_pass_through_required');
+        if ($eventSettings === null || $eventSettings->getPassPlatformFeeToBuyer()) {
+            $this->fail('generated_platform_fee_forbidden');
         }
     }
 
@@ -248,6 +250,7 @@ class KampStripeMetadataService
             $this->assertSafeValue($field, $eventConfiguration[$field] ?? null, self::SAFE_ID_PATTERN);
         }
         $this->assertSafeValue('pricing_policy', $eventConfiguration['pricing_policy'] ?? null, self::SAFE_POLICY_PATTERN);
+        $this->assertPositiveInteger('service_fee_id', $eventConfiguration['service_fee_id'] ?? null);
 
         foreach (['campaign_id', 'allocation_id'] as $field) {
             if (array_key_exists($field, $eventConfiguration)) {
@@ -261,10 +264,15 @@ class KampStripeMetadataService
         return $eventConfiguration;
     }
 
-    private function assertBuyerFeeConservation(CreatePaymentIntentRequestDTO $request, int $ticketQuantity): void
-    {
-        $expectedFeeMinor = (int) round(self::FIXED_APPLICATION_FEE * 100 * $ticketQuantity);
+    private function assertBuyerFeeConservation(
+        CreatePaymentIntentRequestDTO $request,
+        array $eventConfiguration,
+        int $ticketQuantity,
+    ): void {
+        $expectedOrderFeeMinor = (int) round(self::FIXED_BUYER_SERVICE_FEE * 100 * $ticketQuantity);
+        $expectedServiceFeeId = $eventConfiguration['service_fee_id'];
         $itemGrossMinor = 0;
+        $itemTaxMinor = 0;
 
         foreach ($request->order->getOrderItems() as $item) {
             $rollup = $item->getTaxesAndFeesRollup() ?? [];
@@ -288,36 +296,61 @@ class KampStripeMetadataService
                 continue;
             }
 
-            if (count($fees) !== 1 || $taxes !== []) {
+            if (count($fees) !== 1) {
                 $this->fail('unexpected_ticket_addition');
             }
-            $platformFee = $fees[0];
-            if (! is_array($platformFee)
-                || ($platformFee['id'] ?? null) !== OrderPlatformFeePassThroughService::PLATFORM_FEE_ID
-                || ($platformFee['type'] ?? null) !== TaxCalculationType::FIXED->name) {
-                $this->fail('platform_fee_rollup_required');
+            $serviceFee = $fees[0];
+            if (! is_array($serviceFee)
+                || ($serviceFee['id'] ?? null) !== $expectedServiceFeeId
+                || ($serviceFee['type'] ?? null) !== TaxCalculationType::FIXED->name) {
+                $this->fail('service_fee_rollup_required');
             }
 
-            $itemExpectedFeeMinor = (int) round(self::FIXED_APPLICATION_FEE * 100 * $item->getQuantity());
-            if ($this->moneyMinor($platformFee['value'] ?? null) !== $itemExpectedFeeMinor
-                || $this->moneyMinor($platformFee['rate'] ?? null) !== $itemExpectedFeeMinor
+            $itemExpectedFeeMinor = (int) round(self::FIXED_BUYER_SERVICE_FEE * 100 * $item->getQuantity());
+            $taxMinor = $this->taxRollupMinor($taxes);
+            if ($this->moneyMinor($serviceFee['value'] ?? null) !== $itemExpectedFeeMinor
+                || $this->moneyMinor($serviceFee['rate'] ?? null) !== (int) round(self::FIXED_BUYER_SERVICE_FEE * 100)
                 || $this->moneyMinor($item->getTotalServiceFee()) !== $itemExpectedFeeMinor
-                || $this->moneyMinor($item->getTotalTax()) !== 0
-                || $this->moneyMinor($item->getTotalGross()) !== $this->moneyMinor($item->getTotalBeforeAdditions()) + $itemExpectedFeeMinor) {
+                || $this->moneyMinor($item->getTotalTax()) !== $taxMinor
+                || $this->moneyMinor($item->getTotalGross()) !== $this->moneyMinor($item->getTotalBeforeAdditions()) + $itemExpectedFeeMinor + $taxMinor) {
                 $this->fail('buyer_fee_amount_mismatch');
             }
 
             $itemGrossMinor += $this->moneyMinor($item->getTotalGross());
+            $itemTaxMinor += $taxMinor;
         }
 
         $orderGrossMinor = $this->moneyMinor($request->order->getTotalGross());
-        if ($this->moneyMinor($request->order->getTotalFee()) !== $expectedFeeMinor
-            || $this->moneyMinor($request->order->getTotalTax()) !== 0
-            || $orderGrossMinor !== $this->moneyMinor($request->order->getTotalBeforeAdditions()) + $expectedFeeMinor
+        if ($this->moneyMinor($request->order->getTotalFee()) !== $expectedOrderFeeMinor
+            || $this->moneyMinor($request->order->getTotalTax()) !== $itemTaxMinor
+            || $orderGrossMinor !== $this->moneyMinor($request->order->getTotalBeforeAdditions()) + $expectedOrderFeeMinor + $itemTaxMinor
             || $orderGrossMinor !== $itemGrossMinor
             || $request->amount->toMinorUnit() !== $orderGrossMinor) {
             $this->fail('buyer_fee_amount_mismatch');
         }
+    }
+
+    private function taxRollupMinor(array $taxes): int
+    {
+        $total = 0;
+        foreach ($taxes as $tax) {
+            if (! is_array($tax)
+                || ! is_int($tax['id'] ?? null)
+                || $tax['id'] < 1
+                || ! in_array($tax['type'] ?? null, [TaxCalculationType::FIXED->name, TaxCalculationType::PERCENTAGE->name], true)
+                || (! is_int($tax['rate'] ?? null) && ! is_float($tax['rate'] ?? null))
+                || ! is_finite((float) $tax['rate'])
+                || $tax['rate'] < 0
+                || (! is_int($tax['value'] ?? null) && ! is_float($tax['value'] ?? null))
+                || ! is_finite((float) $tax['value'])
+                || $tax['value'] < 0) {
+                $this->fail('invalid_tax_rollup');
+            }
+
+            $total += $this->moneyMinor($tax['value']);
+        }
+
+        return $total;
     }
 
     private function moneyMinor(mixed $value): int
@@ -372,6 +405,13 @@ class KampStripeMetadataService
                 $patterns[$key],
                 in_array($key, ['kamp_ticket_quantity', 'kamp_schema_version', 'kamp_adapter_version'], true),
             );
+        }
+    }
+
+    private function assertPositiveInteger(string $field, mixed $value): void
+    {
+        if (! is_int($value) || $value < 1) {
+            $this->fail('invalid_'.$field);
         }
     }
 

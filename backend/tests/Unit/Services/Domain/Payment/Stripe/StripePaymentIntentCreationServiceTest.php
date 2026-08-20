@@ -9,7 +9,9 @@ use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\EventSettingDomainObject;
 use HiEvents\DomainObjects\OrderDomainObject;
 use HiEvents\DomainObjects\OrderItemDomainObject;
+use HiEvents\DomainObjects\ProductDomainObject;
 use HiEvents\DomainObjects\StripeCustomerDomainObject;
+use HiEvents\DomainObjects\TaxAndFeesDomainObject;
 use HiEvents\Exceptions\Stripe\KampStripeMetadataConfigurationException;
 use HiEvents\Repository\Interfaces\StripeCustomerRepositoryInterface;
 use HiEvents\Services\Domain\Order\DTO\ApplicationFeeValuesDTO;
@@ -17,6 +19,8 @@ use HiEvents\Services\Domain\Order\OrderApplicationFeeCalculationService;
 use HiEvents\Services\Domain\Payment\Stripe\DTOs\CreatePaymentIntentRequestDTO;
 use HiEvents\Services\Domain\Payment\Stripe\KampStripeMetadataService;
 use HiEvents\Services\Domain\Payment\Stripe\StripePaymentIntentCreationService;
+use HiEvents\Services\Domain\Tax\TaxAndFeeCalculationService;
+use HiEvents\Services\Domain\Tax\TaxAndFeeRollupService;
 use HiEvents\Values\MoneyValue;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseManager;
@@ -75,6 +79,7 @@ class StripePaymentIntentCreationServiceTest extends TestCase
                             'cycle_id' => '2026-fall',
                             'event_id' => 'gcu-kamp-fall-2026',
                             'pricing_policy' => 'gcu-intended-net-v1',
+                            'service_fee_id' => 81,
                         ],
                     ],
                 ],
@@ -82,11 +87,11 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         ]);
     }
 
-    private function request(): CreatePaymentIntentRequestDTO
+    private function request(int $quantity = 1): CreatePaymentIntentRequestDTO
     {
         $accountConfiguration = (new AccountConfigurationDomainObject)
             ->setApplicationFees([
-                'fixed' => 6.00,
+                'fixed' => 3.00,
                 'percentage' => 0.00,
                 'currency' => 'USD',
             ])
@@ -95,9 +100,14 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $account = (new AccountDomainObject)->setId(1);
         $account->setConfiguration($accountConfiguration);
 
-        $eventSettings = (new EventSettingDomainObject)->setPassPlatformFeeToBuyer(true);
+        $eventSettings = (new EventSettingDomainObject)->setPassPlatformFeeToBuyer(false);
         $event = (new EventDomainObject)->setId(3);
         $event->setEventSettings($eventSettings);
+
+        $calculation = (new TaxAndFeeCalculationService(new TaxAndFeeRollupService))
+            ->calculateTaxAndFeesForProduct($this->configuredProduct(), 100.00, $quantity);
+        $totalBeforeAdditions = 100.00 * $quantity;
+        $totalGross = $totalBeforeAdditions + $calculation->feeTotal + $calculation->taxTotal;
 
         $order = (new OrderDomainObject)
             ->setId(27)
@@ -105,36 +115,28 @@ class StripePaymentIntentCreationServiceTest extends TestCase
             ->setShortId('order_test_001')
             ->setPublicId('ord_public_invented_001')
             ->setCurrency('USD')
-            ->setTotalBeforeAdditions(101.90)
-            ->setTotalFee(12.00)
-            ->setTotalTax(0.00)
-            ->setTotalGross(113.90)
+            ->setTotalBeforeAdditions($totalBeforeAdditions)
+            ->setTotalFee($calculation->feeTotal)
+            ->setTotalTax($calculation->taxTotal)
+            ->setTotalGross($totalGross)
             ->setFirstName('Invented')
             ->setLastName('Buyer')
             ->setEmail('invented@example.invalid')
             ->setOrderItems(collect([
                 (new OrderItemDomainObject)
-                    ->setPrice(50.95)
-                    ->setQuantity(2)
+                    ->setPrice(100.00)
+                    ->setQuantity($quantity)
                     ->setProductType(ProductType::TICKET->name)
-                    ->setTotalBeforeAdditions(101.90)
-                    ->setTotalServiceFee(12.00)
-                    ->setTotalTax(0.00)
-                    ->setTotalGross(113.90)
-                    ->setTaxesAndFeesRollup([
-                        'fees' => [[
-                            'id' => 0,
-                            'name' => 'Platform Fee',
-                            'rate' => 12.00,
-                            'type' => 'FIXED',
-                            'value' => 12.00,
-                        ]],
-                    ]),
+                    ->setTotalBeforeAdditions($totalBeforeAdditions)
+                    ->setTotalServiceFee($calculation->feeTotal)
+                    ->setTotalTax($calculation->taxTotal)
+                    ->setTotalGross($totalGross)
+                    ->setTaxesAndFeesRollup($calculation->rollUp),
             ]));
         $order->setEvent($event);
 
         return new CreatePaymentIntentRequestDTO(
-            amount: MoneyValue::fromFloat(113.90, 'USD'),
+            amount: MoneyValue::fromFloat($totalGross, 'USD'),
             currencyCode: 'USD',
             account: $account,
             order: $order,
@@ -142,6 +144,16 @@ class StripePaymentIntentCreationServiceTest extends TestCase
             description: 'Existing description',
             stripeEnvironment: 'test',
         );
+    }
+
+    private function configuredProduct(): ProductDomainObject
+    {
+        return (new ProductDomainObject)->setTaxAndFees(collect([
+            (new TaxAndFeesDomainObject)
+                ->setId(81)->setName('Service Fee')->setRate(6.00)->setCalculationType('FIXED')->setType('FEE'),
+            (new TaxAndFeesDomainObject)
+                ->setId(92)->setName('Configured tax')->setRate(5.00)->setCalculationType('PERCENTAGE')->setType('TAX'),
+        ]));
     }
 
     private function existingCustomer(): StripeCustomerDomainObject
@@ -217,16 +229,16 @@ class StripePaymentIntentCreationServiceTest extends TestCase
                     $actualKeys = array_keys($metadata);
                     sort($actualKeys);
 
-                    return $params['amount'] === 11390
+                    return $params['amount'] === 11130
                         && $params['currency'] === 'USD'
                         && $params['customer'] === 'cus_invented_fixture'
-                        && $params['application_fee_amount'] === 1200
+                        && $params['application_fee_amount'] === 300
                         && $actualKeys === $expectedKeys
-                        && $metadata['kamp_schema_version'] === '2026-07-24.2'
+                        && $metadata['kamp_schema_version'] === '2026-08-20.1'
                         && $metadata['kamp_source'] === 'hi_events'
                         && $metadata['kamp_source_namespace'] === 'kampy_ticketing'
-                        && $metadata['kamp_ticket_quantity'] === '2'
-                        && $metadata['kamp_fee_policy'] === 'wawco-six-per-ticket-v1'
+                        && $metadata['kamp_ticket_quantity'] === '1'
+                        && $metadata['kamp_fee_policy'] === 'wawco-three-kamplove-three-v1'
                         && $metadata['kamp_environment'] === 'test'
                         && ! in_array('invented@example.invalid', $metadata, true)
                         && $params['description'] === 'Kamp | gcu | 2026-fall | gcu-kamp-fall-2026 | order:hi_order_order_test_001';
@@ -256,8 +268,8 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $databaseManager->shouldReceive('rollBack')->never();
 
         $applicationFee = new ApplicationFeeValuesDTO(
-            grossApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
-            netApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
+            grossApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
+            netApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
         );
         $feeService = $this->createMock(OrderApplicationFeeCalculationService::class);
         $feeService->expects($this->once())
@@ -274,6 +286,45 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $this->assertSame('pi_invented_fixture', $response->paymentIntentId);
         $this->assertSame('acct_connectedfixture', $response->accountId);
         $this->assertSame($applicationFee, $response->applicationFeeData);
+    }
+
+    public function test_creates_two_ticket_direct_charge_with_tax_and_split_fees(): void
+    {
+        $request = $this->request(2);
+        $config = $this->config();
+        $paymentIntents = $this->createMock(PaymentIntentServiceDouble::class);
+        $paymentIntents->expects($this->once())
+            ->method('create')
+            ->with(
+                $this->callback(static fn (array $params): bool => $params['amount'] === 22260
+                    && $params['application_fee_amount'] === 600
+                    && $params['currency'] === 'USD'),
+                $this->callback(static fn (array $opts): bool => $opts['stripe_account'] === 'acct_connectedfixture'
+                    && isset($opts['idempotency_key'])),
+            )
+            ->willReturn(PaymentIntent::constructFrom([
+                'id' => 'pi_two_ticket_fixture',
+                'client_secret' => 'pi_two_ticket_fixture_secret',
+            ]));
+
+        $customerRepository = $this->createMock(StripeCustomerRepositoryInterface::class);
+        $customerRepository->expects($this->once())->method('findFirstWhere')->willReturn($this->existingCustomer());
+        $databaseManager = Mockery::mock(DatabaseManager::class);
+        $databaseManager->shouldReceive('beginTransaction')->once();
+        $databaseManager->shouldReceive('commit')->once();
+        $databaseManager->shouldReceive('rollBack')->never();
+        $feeService = $this->createMock(OrderApplicationFeeCalculationService::class);
+        $feeService->expects($this->once())->method('calculateApplicationFee')->willReturn(new ApplicationFeeValuesDTO(
+            grossApplicationFee: MoneyValue::fromFloat(6.00, 'USD'),
+            netApplicationFee: MoneyValue::fromFloat(6.00, 'USD'),
+        ));
+
+        $this->service($config, $customerRepository, $databaseManager, $feeService)
+            ->createPaymentIntentWithClient($this->stripeClient($paymentIntents), $request);
+
+        $this->assertSame(12.00, $request->order->getTotalFee());
+        $this->assertSame(10.60, $request->order->getTotalTax());
+        $this->assertSame(22260, $request->amount->toMinorUnit());
     }
 
     public function test_customer_creation_uses_a_stable_order_key_before_payment_intent_creation(): void
@@ -322,8 +373,8 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $feeService->expects($this->once())
             ->method('calculateApplicationFee')
             ->willReturn(new ApplicationFeeValuesDTO(
-                grossApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
-                netApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
+                grossApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
+                netApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
             ));
 
         $this->service(
@@ -355,8 +406,8 @@ class StripePaymentIntentCreationServiceTest extends TestCase
 
         $feeService = $this->createMock(OrderApplicationFeeCalculationService::class);
         $feeService->method('calculateApplicationFee')->willReturn(new ApplicationFeeValuesDTO(
-            grossApplicationFee: MoneyValue::fromFloat(6.00, 'USD'),
-            netApplicationFee: MoneyValue::fromFloat(6.00, 'USD'),
+            grossApplicationFee: MoneyValue::fromFloat(2.00, 'USD'),
+            netApplicationFee: MoneyValue::fromFloat(2.00, 'USD'),
         ));
 
         try {
@@ -380,9 +431,9 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $paymentIntent = PaymentIntent::constructFrom([
             'id' => 'pi_existing_fixture',
             'client_secret' => 'pi_existing_fixture_secret',
-            'amount' => 11390,
+            'amount' => 11130,
             'currency' => 'usd',
-            'application_fee_amount' => 1200,
+            'application_fee_amount' => 300,
             'metadata' => $kampMetadata->metadata,
             'description' => $kampMetadata->description,
         ]);
@@ -397,8 +448,8 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $feeService->expects($this->once())
             ->method('calculateApplicationFee')
             ->willReturn(new ApplicationFeeValuesDTO(
-                grossApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
-                netApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
+                grossApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
+                netApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
             ));
 
         $clientSecret = $this->service(
@@ -415,6 +466,51 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $this->assertSame('pi_existing_fixture_secret', $clientSecret);
     }
 
+    public function test_rejects_reuse_of_an_existing_payment_intent_with_a_legacy_six_dollar_application_fee(): void
+    {
+        $request = $this->request();
+        $config = $this->config();
+        $kampMetadata = (new KampStripeMetadataService($config))->build($request);
+        $paymentIntent = PaymentIntent::constructFrom([
+            'id' => 'pi_existing_fixture',
+            'client_secret' => 'pi_existing_fixture_secret',
+            'amount' => 11130,
+            'currency' => 'usd',
+            'application_fee_amount' => 600,
+            'metadata' => $kampMetadata->metadata,
+            'description' => $kampMetadata->description,
+        ]);
+
+        $paymentIntents = $this->createMock(PaymentIntentServiceDouble::class);
+        $paymentIntents->expects($this->once())
+            ->method('retrieve')
+            ->willReturn($paymentIntent);
+
+        $feeService = $this->createMock(OrderApplicationFeeCalculationService::class);
+        $feeService->expects($this->once())
+            ->method('calculateApplicationFee')
+            ->willReturn(new ApplicationFeeValuesDTO(
+                grossApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
+                netApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
+            ));
+
+        try {
+            $this->service(
+                $config,
+                $this->createMock(StripeCustomerRepositoryInterface::class),
+                Mockery::mock(DatabaseManager::class),
+                $feeService,
+            )->retrieveValidatedPaymentIntentClientSecretWithClient(
+                $this->stripeClient($paymentIntents),
+                'pi_existing_fixture',
+                $request,
+            );
+            $this->fail('Expected a legacy six-dollar application fee to fail closed.');
+        } catch (KampStripeMetadataConfigurationException $exception) {
+            $this->assertSame('existing_payment_intent_contract_mismatch', $exception->getReason());
+        }
+    }
+
     public function test_rejects_an_existing_payment_intent_with_legacy_metadata(): void
     {
         $request = $this->request();
@@ -422,9 +518,9 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $paymentIntent = PaymentIntent::constructFrom([
             'id' => 'pi_existing_fixture',
             'client_secret' => 'pi_existing_fixture_secret',
-            'amount' => 11390,
+            'amount' => 11130,
             'currency' => 'usd',
-            'application_fee_amount' => 1200,
+            'application_fee_amount' => 300,
             'metadata' => ['order_id' => '27'],
             'description' => 'Old generic description',
         ]);
@@ -438,8 +534,8 @@ class StripePaymentIntentCreationServiceTest extends TestCase
         $feeService->expects($this->once())
             ->method('calculateApplicationFee')
             ->willReturn(new ApplicationFeeValuesDTO(
-                grossApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
-                netApplicationFee: MoneyValue::fromFloat(12.00, 'USD'),
+                grossApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
+                netApplicationFee: MoneyValue::fromFloat(3.00, 'USD'),
             ));
 
         try {
