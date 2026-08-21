@@ -1,13 +1,13 @@
 @use "../../../styles/mixins.scss";
 
 // Design tokens
-$font-display: var(--theme-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-$font-body:  var(--theme-font-family, 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
+$font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
 
-$radius-xl: 28px;
-$radius-lg: 20px;
-$radius-md: 14px;
-$radius-sm: 10px;
+$radius-xl: 10px;
+$radius-lg: 10px;
+$radius-md: 10px;
+$radius-sm: 8px;
 $radius-xs: 6px;
 
 $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1334,5 +1334,140 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   svg {
     width: 0.9rem;
     height: 0.9rem;
+  }
+}
+
+// Kamp Love buyer-surface foundation. These final overrides intentionally
+// preserve event content and native Hi.Events behavior while fixing the visual shell.
+.wrapper {
+  max-width: 980px;
+  padding: 32px 24px 18px;
+}
+
+.mainCard {
+  border-radius: 10px;
+  border: 1px solid #dadada;
+  box-shadow: 0 12px 36px rgba(23, 23, 23, 0.06);
+  animation: none;
+}
+
+.coverImage,
+.mainCard:hover .coverImage {
+  transform: none;
+}
+
+.eventHeader,
+.section {
+  padding: 28px 32px;
+}
+
+.eventTitle {
+  max-width: 16ch;
+  font-size: clamp(2rem, 6vw, 3.65rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.sectionTitle,
+.ticketsSection :global(.hi-product-category-title) {
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.organizerPill,
+.metaIconBox,
+.statusBadge,
+.onlineEventBadge {
+  border-radius: 999px;
+}
+
+.actionButton,
+.addToCalendarButton,
+.contactButton,
+.scrollToTicketsButton {
+  min-height: 44px;
+  font-family: var(--kamp-font-utility, sans-serif);
+  font-weight: 700;
+}
+
+.addToCalendarButton,
+.contactButton,
+.scrollToTicketsButton {
+  border-radius: 999px;
+}
+
+.actionButton:hover,
+.organizerPill:hover,
+.metaIconBox:hover,
+.scrollToTicketsButton:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.ticketsSection {
+  :global(.hi-product-row) {
+    border: 1px solid var(--kamp-line-control, #8a8a8a);
+    border-radius: 10px;
+    cursor: default;
+  }
+
+  :global(.hi-product-row.hi-product-highlighted) {
+    border-color: var(--kamp-orange, #ff7b00);
+    background: var(--kamp-paper, #ffffff);
+    box-shadow: inset 4px 0 0 var(--kamp-orange, #ff7b00);
+  }
+
+  :global(.hi-product-highlight-message) {
+    background: var(--kamp-orange-tint, #fdeede);
+    color: var(--kamp-ink, #171717);
+    font-family: var(--kamp-font-utility, sans-serif);
+    font-weight: 700;
+  }
+
+  :global(.hi-product-title h3),
+  :global(.hi-price-tier-label) {
+    font-weight: 400;
+  }
+
+  :global(.hi-continue-button),
+  :global(.hi-apply-promo-code-button),
+  :global(.hi-close-promo-code-input-button) {
+    background: var(--kamp-ink, #171717);
+    color: var(--kamp-cream, #f9f4f0);
+    border-radius: 999px;
+    font-family: var(--kamp-font-utility, sans-serif);
+    font-weight: 700;
+  }
+
+  :global(.hi-promo-code-input),
+  :global(.select-input input),
+  :global(.hi-donation-input) {
+    border-color: var(--kamp-line-control, #8a8a8a);
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 0;
+  }
+
+  .eventHeader,
+  .section {
+    padding: 24px 18px;
+  }
+
+  .eventTitle {
+    max-width: none;
+    font-size: clamp(2rem, 12vw, 3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mainCard,
+  .section,
+  .scrollToTicketsButton {
+    animation: none;
   }
 }

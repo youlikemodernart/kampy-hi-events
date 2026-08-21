@@ -1,23 +1,21 @@
-// Design tokens
-$font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-$radius-sm: 10px;
-$radius-xs: 6px;
-$transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
+$font-utility: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$transition-fast: 0.15s ease;
 
 .container {
-  max-width: 500px;
+  max-width: 560px;
   margin: 0 auto;
+  padding-inline: 18px;
   position: relative;
 }
 
 .paymentMethodSelector {
-  margin-top: 20px;
-  margin-bottom: 4px;
+  margin: 24px 0 4px;
 }
 
 .paymentMethodLabel {
   margin-bottom: 8px;
-  color: var(--checkout-text-primary, #111827);
+  color: var(--checkout-text-primary, #171717);
 }
 
 .paymentMethodTabs {
@@ -26,68 +24,53 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .paymentMethodTab {
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: var(--checkout-surface, #FFFFFF);
-  border: 1px solid var(--checkout-border, #E5E7EB);
-  border-radius: $radius-xs;
+  background: var(--checkout-surface, #ffffff);
+  border: 1px solid var(--checkout-border, #8a8a8a);
+  border-radius: 10px;
   cursor: pointer;
+  font-family: $font-utility;
   font-size: 14px;
-  font-weight: 500;
-  color: var(--checkout-text-secondary, #6B7280);
-  transition: all $transition-fast;
+  font-weight: 700;
+  color: var(--checkout-text-secondary, #585254);
+  transition: border-color $transition-fast, background-color $transition-fast;
 
-  &:hover {
-    border-color: var(--checkout-accent-muted, #D1D5DB);
-    background: var(--checkout-accent-soft, #F9FAFB);
-  }
-
+  &:hover,
   &.active {
-    border-color: var(--checkout-accent, var(--mantine-primary-color-filled));
-    background: var(--checkout-accent-soft, var(--mantine-primary-color-light));
-    color: var(--checkout-accent, var(--mantine-primary-color-filled));
+    border-color: var(--checkout-text-primary, #171717);
+    background: var(--checkout-brand-orange-soft, #fdeede);
+    color: var(--checkout-text-primary, #171717);
   }
 }
 
 .checkoutActions {
-  margin-top: 32px;
-  margin-bottom: 24px;
+  margin: 32px 0 24px;
 }
 
 .continueButton {
   width: 100%;
-  height: 48px;
-  border-radius: $radius-sm;
-  font-family: $font-display;
-  font-weight: 600;
+  min-height: 50px;
+  border-radius: 999px;
+  font-family: $font-utility;
+  font-weight: 700;
   font-size: 16px;
-  transition: transform $transition-fast, box-shadow $transition-fast;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--checkout-accent-soft, rgba(0, 0, 0, 0.15));
-    filter: brightness(1.05);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
+  transition: none;
 }
 
 .tosNotice {
+  max-width: 50ch;
+  margin: 12px auto 0;
   text-align: center;
-  margin-top: 12px;
   font-size: 12px;
-  color: var(--checkout-text-secondary, #6B7280);
+  color: var(--checkout-text-secondary, #585254);
 
   a {
-    color: var(--checkout-accent, var(--mantine-primary-color-filled));
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
+    color: var(--checkout-text-primary, #171717);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }

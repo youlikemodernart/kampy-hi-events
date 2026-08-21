@@ -32,12 +32,10 @@ import {
 } from "../../../utilites/addressUtilities.ts";
 import {StatusToggle} from "../../common/StatusToggle";
 import {getConfig} from "../../../utilites/config.ts";
-import {computeThemeVariables, validateThemeSettings} from "../../../utilites/themeUtils.ts";
+import {validateThemeSettings} from "../../../utilites/themeUtils.ts";
 import {useOrganizerTrackingPixels} from "../../../hooks/useOrganizerTrackingPixels";
 import {trackPixelEvent, hasActivePixels} from "../../../utilites/trackingPixels";
 import {CookieConsentBanner} from "../../common/CookieConsentBanner";
-import {removeTransparency} from "../../../utilites/colorHelper.ts";
-import {ensureHomepageFontLoaded} from "../../../utilites/fontLoader.ts";
 import {ShareComponent} from "../../common/ShareIcon";
 import {EventDateRange} from "../../common/EventDateRange";
 import {CalendarOptionsPopover} from "../../common/CalendarOptionsPopover";
@@ -114,26 +112,21 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
 
     const rawThemeSettings = event?.settings?.homepage_theme_settings;
     const themeSettings = validateThemeSettings(rawThemeSettings);
-    const cssVars = computeThemeVariables(themeSettings);
     const backgroundType = themeSettings.background_type;
 
-    useEffect(() => {
-        ensureHomepageFontLoaded(themeSettings.font_family);
-    }, [themeSettings.font_family]);
-
     const themeStyles = {
-        '--event-bg-color': themeSettings.background,
-        '--event-content-bg-color': cssVars['--theme-surface'],
-        '--event-primary-color': themeSettings.accent,
-        '--event-primary-text-color': cssVars['--theme-text-primary'],
-        '--event-secondary-color': cssVars['--theme-text-secondary'],
-        '--event-secondary-text-color': cssVars['--theme-text-tertiary'],
-        '--event-accent-contrast': cssVars['--theme-accent-contrast'],
-        '--event-accent-soft': cssVars['--theme-accent-soft'],
-        '--event-accent-muted': cssVars['--theme-accent-muted'],
-        '--event-border-color': cssVars['--theme-border'],
-        '--theme-font-family': cssVars['--theme-font-family'],
-        fontFamily: cssVars['--theme-font-family'],
+        '--event-bg-color': '#f9f4f0',
+        '--event-content-bg-color': '#ffffff',
+        '--event-primary-color': '#171717',
+        '--event-primary-text-color': '#171717',
+        '--event-secondary-color': '#585254',
+        '--event-secondary-text-color': '#585254',
+        '--event-accent-contrast': '#f9f4f0',
+        '--event-accent-soft': '#fdeede',
+        '--event-accent-muted': '#ff7b00',
+        '--event-border-color': '#dadada',
+        '--theme-font-family': "'PT Serif', Georgia, 'Times New Roman', serif",
+        fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
     } as React.CSSProperties;
 
     const coverImageData = eventCoverImage(event);
@@ -198,12 +191,12 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
             <main
                 className={classes.pageWrapper}
                 style={themeStyles}
-                data-mode={themeSettings.mode}
+                data-mode="light"
             >
                 <style>
                     {`
                         body, .ssr-loader {
-                            background-color: ${removeTransparency(themeSettings.background)} !important;
+                            background-color: #f9f4f0 !important;
                         }
                     `}
                 </style>

@@ -1,34 +1,24 @@
 @use "../../../styles/mixins";
 
-$font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-$font-body:  'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
+$font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
 
 .container {
   display: flex;
-  // Use dvh (dynamic viewport height) with fallback for older browsers
-  // This fixes iOS Safari where 100vh includes the address bar height
   min-height: 100vh;
   min-height: 100dvh;
   font-family: $font-body;
+  background: var(--checkout-background, #f9f4f0);
+  color: var(--checkout-text-primary, #171717);
 
-  // CSS variables are set by CheckoutThemeProvider via MantineProvider cssVariablesResolver
-  // Available variables:
-  // --checkout-accent, --checkout-accent-contrast, --checkout-accent-soft, --checkout-accent-muted
-  // --checkout-background, --checkout-surface
-  // --checkout-text-primary, --checkout-text-secondary, --checkout-text-tertiary
-  // --checkout-border
-
-  background-color: var(--checkout-background, #F9FAFB);
-  color: var(--checkout-text-primary, #1a1a1a);
-
-  // Countdown timer colors - semantic colors that don't change with theme
   .countdown {
-    color: var(--mantine-color-teal-6, #0ca678);
-    font-weight: 600;
+    color: #2f6b4f;
+    font-family: var(--checkout-font-utility, sans-serif);
+    font-weight: 700;
   }
 
   .countdownCloseToExpiry {
-    color: var(--mantine-color-red-7, #ad2f26);
+    color: #9f3620;
   }
 
   .timerGroup {
@@ -37,6 +27,7 @@ $font-body:  'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sa
 
   .timerLabel {
     color: var(--checkout-text-secondary);
+    font-family: var(--checkout-font-utility, sans-serif);
     font-size: 0.875rem;
 
     @include mixins.respond-below(sm) {
@@ -45,66 +36,96 @@ $font-body:  'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sa
   }
 
   .subTitle {
-    font-size: 0.95em;
     margin-top: 10px;
     color: var(--checkout-text-secondary);
+    font-size: 0.95em;
   }
 
   .mainContent {
     flex: 1;
+  }
 
-    .header {
-      height: 60px;
-      background-color: var(--checkout-surface);
-      border-bottom: 1px solid var(--checkout-border);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-      text-align: center;
+  .header {
+    min-height: 72px;
+    background: var(--checkout-surface);
+    border-bottom: 1px solid #dadada;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+  }
 
-      .actionBar {
-        padding: var(--hi-spacing-md);
-        width: 100%;
+  .actionBar {
+    padding: 12px 20px;
+    width: 100%;
+  }
 
-        .title {
-          font-family: $font-display;
-          font-size: 1.2em;
-          font-weight: 600;
-          color: var(--checkout-text-primary);
-        }
-      }
+  .title {
+    font-family: $font-display;
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--checkout-text-primary);
+  }
 
-      h1 {
-        font-family: $font-display;
-        font-size: 1.3em;
-        font-weight: 600;
-        width: 100%;
-        max-width: 700px;
-        padding: 0 15px;
-        color: var(--checkout-text-primary);
+  h1 {
+    width: 100%;
+    max-width: 700px;
+    margin: 0;
+    padding: 0 15px;
+    overflow: hidden;
+    color: var(--checkout-text-primary);
+    font-family: $font-display;
+    font-size: 1.3rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-
-        @include mixins.respond-below(md) {
-          font-size: 1em;
-        }
-      }
+    @include mixins.respond-below(md) {
+      font-size: 1rem;
     }
   }
 
   a:not([class]) {
-    color: var(--checkout-accent);
-
-    &:hover {
-      text-decoration: underline;
-    }
+    color: var(--checkout-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   :global(.mantine-SegmentedControl-label[data-active]) {
     color: var(--checkout-accent-contrast) !important;
+  }
+
+  :global(.mantine-Button-root) {
+    min-height: 44px;
+    border-radius: 999px;
+    font-family: var(--checkout-font-utility, sans-serif);
+    font-weight: 700;
+  }
+
+  :global(.mantine-ActionIcon-root) {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 999px;
+  }
+
+  :global(.mantine-Paper-root) {
+    border-radius: 10px;
+    border-color: #dadada;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .container {
+    .header {
+      min-height: 64px;
+    }
+
+    .actionBar {
+      padding: 8px 10px;
+    }
   }
 }

@@ -1,35 +1,102 @@
 @use "mixins";
 
+@font-face {
+  font-family: 'PT Serif';
+  src: url('/fonts/ptserif-400.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PT Serif';
+  src: url('/fonts/ptserif-400-italic.woff2') format('woff2');
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PT Serif';
+  src: url('/fonts/ptserif-700.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PT Serif';
+  src: url('/fonts/ptserif-700-italic.woff2') format('woff2');
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/fonts/lato-400.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/fonts/lato-700.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/fonts/lato-900.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
 :root {
-  --hi-text: var(--mantine-color-primary-9);
-  --hi-primary: var(--mantine-color-primary-9);
-  --hi-secondary:  var(--mantine-color-secondary-1);
-  --hi-secondary-text: var(--mantine-color-primary-8);
-  --hi-color-gray: #f7f6f8;
-  --hi-color-gray-2: #e2e2e2;
-  --hi-color-gray-dark: #838383;
-  --hi-color-money-green: #00b894;
-  --hi-color-blue: var(--mantine-color-primary-4);
-  --hi-link-color: var(--hi-primary);
-  --hi-pink: var(--mantine-color-primary-5);
-  --hi-primary-alt: var(--mantine-color-primary-6);
-  --hi-gradient: linear-gradient(135deg, var(--hi-primary), var(--hi-primary-alt));
-  --hi-scrollbar-thumb: #e1e1e1;
+  --kamp-font-serif: 'PT Serif', Georgia, 'Times New Roman', serif;
+  --kamp-font-utility: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --kamp-cream: #f9f4f0;
+  --kamp-paper: #ffffff;
+  --kamp-ink: #171717;
+  --kamp-muted: #585254;
+  --kamp-line: #dadada;
+  --kamp-line-control: #8a8a8a;
+  --kamp-orange: #ff7b00;
+  --kamp-orange-tint: #fdeede;
+  --kamp-ok: #2f6b4f;
+  --kamp-ok-tint: #e7f0ea;
+  --kamp-wait: #40607d;
+  --kamp-wait-tint: #e9edf2;
+  --kamp-stop: #9f3620;
+  --kamp-stop-tint: #f5e2dc;
 
-  --hi-color-white: #ffffff;
-  --hi-color-black: #000000;
+  --hi-text: var(--kamp-ink);
+  --hi-primary: var(--kamp-ink);
+  --hi-secondary: var(--kamp-orange-tint);
+  --hi-secondary-text: var(--kamp-muted);
+  --hi-color-gray: var(--kamp-cream);
+  --hi-color-gray-2: var(--kamp-line);
+  --hi-color-gray-dark: var(--kamp-muted);
+  --hi-color-money-green: var(--kamp-ok);
+  --hi-color-blue: var(--kamp-wait);
+  --hi-link-color: var(--kamp-ink);
+  --hi-pink: var(--kamp-orange);
+  --hi-primary-alt: var(--kamp-orange);
+  --hi-gradient: linear-gradient(135deg, var(--kamp-ink), #2a2728);
+  --hi-scrollbar-thumb: var(--kamp-line);
 
-  --hi-spacing-xs: 3px;
-  --hi-spacing-sm: 5px;
-  --hi-spacing-md: 10px;
+  --hi-color-white: var(--kamp-paper);
+  --hi-color-black: var(--kamp-ink);
+
+  --hi-spacing-xs: 4px;
+  --hi-spacing-sm: 8px;
+  --hi-spacing-md: 12px;
   --hi-spacing-lg: 20px;
-  --hi-spacing-xl: 25px;
+  --hi-spacing-xl: 32px;
 
-  --hi-radius-xs: 3px;
-  --hi-radius-sm: 5px;
-  --hi-radius-md: 7px;
+  --hi-radius-xs: 6px;
+  --hi-radius-sm: 10px;
+  --hi-radius-md: 10px;
   --hi-radius-lg: 10px;
-  --hi-radius-xl: 15px;
+  --hi-radius-xl: 10px;
 }
 
 * {
@@ -41,15 +108,65 @@ html {
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--kamp-font-serif);
   color: var(--hi-text);
   background-color: var(--checkout-background, var(--hi-color-gray)) !important;
   height: auto;
-  letter-spacing: 0.2px;
+  letter-spacing: 0;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3 {
-  letter-spacing: 0.3px;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--kamp-font-serif);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button, [role='button'], input, select {
+  min-height: 44px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--kamp-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--kamp-cream);
+}
+
+.mantine-Button-root {
+  min-height: 44px;
+  border-radius: 999px;
+  font-family: var(--kamp-font-utility);
+  font-weight: 700;
+}
+
+.mantine-Input-label,
+.mantine-Table-th,
+.mantine-Badge-root {
+  font-family: var(--kamp-font-utility);
+}
+
+.mantine-Input-input,
+.mantine-Select-input,
+.mantine-Textarea-input {
+  min-height: 44px;
+  border-color: var(--kamp-line-control);
+  border-radius: 10px;
+  background: var(--kamp-paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 fieldset {

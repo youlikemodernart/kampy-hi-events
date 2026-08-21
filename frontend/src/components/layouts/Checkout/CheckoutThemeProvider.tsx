@@ -13,11 +13,11 @@ interface CheckoutThemeProviderProps {
  */
 const LIGHT_PALETTE = {
     surface: '#ffffff',
-    background: '#f8f9fa',
-    textPrimary: '#1a1a1a',
-    textSecondary: '#525252',
-    textTertiary: '#737373',
-    border: '#e5e7eb',
+    background: '#f9f4f0',
+    textPrimary: '#171717',
+    textSecondary: '#585254',
+    textTertiary: '#585254',
+    border: '#8a8a8a',
 };
 
 const DARK_PALETTE = {
@@ -81,6 +81,12 @@ function createCheckoutTheme(accentColor: string, mode: 'light' | 'dark'): Manti
             primary: primaryColors,
         },
         primaryShade: mode === 'dark' ? 6 : 7,
+        fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
+        headings: {
+            fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
+            fontWeight: '400',
+        },
+        defaultRadius: 'md',
         components: {
             Button: {
                 defaultProps: {
@@ -91,6 +97,7 @@ function createCheckoutTheme(accentColor: string, mode: 'light' | 'dark'): Manti
                         return {
                             root: {
                                 '--button-color': contrastColor,
+                                '--button-radius': '999px',
                             },
                         };
                     }
@@ -160,6 +167,10 @@ function createCSSVariablesResolver(accentColor: string, mode: 'light' | 'dark')
                 '--checkout-text-secondary': palette.textSecondary,
                 '--checkout-text-tertiary': palette.textTertiary,
                 '--checkout-border': palette.border,
+                '--checkout-brand-orange': '#ff7b00',
+                '--checkout-brand-orange-soft': '#fdeede',
+                '--checkout-font-serif': "'PT Serif', Georgia, 'Times New Roman', serif",
+                '--checkout-font-utility': "'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 
                 // Override global --hi-text (set to accent in global.scss) and
                 // Mantine's default text color to use fixed palette instead

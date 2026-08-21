@@ -73,12 +73,16 @@ export const App: FC<
             <MantineProvider
                 theme={{
                     colors: {
-                        primary: generateColors(getConfig("VITE_APP_PRIMARY_COLOR", "#40296C") as string),
-                        secondary: generateColors(getConfig("VITE_APP_SECONDARY_COLOR", "#3d0b44") as string),
+                        primary: generateColors(getConfig("VITE_APP_PRIMARY_COLOR", "#ff7b00") as string),
+                        secondary: generateColors(getConfig("VITE_APP_SECONDARY_COLOR", "#171717") as string),
                     },
                     primaryColor: "primary",
-                    fontFamily: "Outfit, sans-serif",
-                    primaryShade: 8,
+                    fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
+                    headings: {
+                        fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
+                        fontWeight: "400",
+                    },
+                    primaryShade: 7,
                 }}
             >
                 <HelmetProvider context={props.helmetContext}>

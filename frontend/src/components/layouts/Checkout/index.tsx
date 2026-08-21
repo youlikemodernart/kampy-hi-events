@@ -18,14 +18,11 @@ import {withLoadingNotification} from "../../../utilites/withLoadingNotification
 import {useAbandonOrderPublic} from "../../../mutations/useAbandonOrderPublic.ts";
 import {showError, showInfo} from "../../../utilites/notifications.tsx";
 import {isDateInFuture} from "../../../utilites/dates.ts";
-import {detectMode} from "../../../utilites/themeUtils.ts";
 import {CheckoutThemeProvider} from "./CheckoutThemeProvider.tsx";
 import {useOrganizerTrackingPixels} from "../../../hooks/useOrganizerTrackingPixels";
 import {trackPixelEvent, hasActivePixels} from "../../../utilites/trackingPixels";
 import {CookieConsentBanner} from "../../common/CookieConsentBanner";
 import {useGetEventPublic} from "../../../queries/useGetEventPublic.ts";
-
-const DEFAULT_ACCENT = '#8b5cf6';
 
 const Checkout = () => {
     const {eventId, orderShortId} = useParams();
@@ -182,14 +179,12 @@ const Checkout = () => {
         }
     }, [order?.status, order?.short_id, consentGranted]);
 
-    // Get accent color from event settings, derive mode from homepage background
-    const homepageSettings = event?.settings?.homepage_theme_settings;
-    const accentColor = homepageSettings?.accent || DEFAULT_ACCENT;
-    // Mode is derived from the homepage background color (light homepage = light checkout)
-    const checkoutMode = homepageSettings?.mode || detectMode(homepageSettings?.background || '#ffffff');
+    // Kamp Love uses one fixed, high-contrast checkout foundation. Event content and
+    // transaction behavior remain dynamic; organizer theme settings do not restyle checkout.
+    const checkoutMode = 'light' as const;
 
     return (
-        <CheckoutThemeProvider accentColor={accentColor} mode={checkoutMode}>
+        <CheckoutThemeProvider accentColor="#171717" mode={checkoutMode}>
             <div className={classes.container} data-mode={checkoutMode}>
                 <div className={classes.mainContent}>
                     <header className={classes.header}>

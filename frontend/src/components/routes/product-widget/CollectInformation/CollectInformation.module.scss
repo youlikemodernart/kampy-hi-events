@@ -1,6 +1,7 @@
 @use "../../../../styles/mixins";
 
-$font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
+$font-utility: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 $radius-sm: 10px;
 $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -165,22 +166,12 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
 .continueButton {
   width: 100%;
-  height: 48px;
-  border-radius: $radius-sm;
-  font-family: $font-display;
-  font-weight: 600;
+  min-height: 50px;
+  border-radius: 999px;
+  font-family: $font-utility;
+  font-weight: 700;
   font-size: 16px;
-  transition: transform $transition-fast, box-shadow $transition-fast;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--checkout-accent-soft, rgba(0, 0, 0, 0.15));
-    filter: brightness(1.05);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
+  transition: none;
 }
 
 .tosNotice {
