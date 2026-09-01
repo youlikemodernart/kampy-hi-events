@@ -78,6 +78,34 @@
   --kamp-wood: #6f5f4e;
   --kamp-sand: #efe7db;
 
+  // Kamper structural grammar. Expression chooses among these tokens; components do not
+  // invent local spacing, radius, or elevation scales.
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --band-py: clamp(3rem, 5vw, 4.5rem);
+  --band-py-material: clamp(3.5rem, 6vw, 5.5rem);
+  --band-contour-clear: 2rem;
+  --band-max: 68rem;
+  --band-gutter: max(1.25rem, calc((100% - var(--band-max)) / 2));
+  --measure: 66ch;
+  --measure-lead: 54ch;
+  --review-max: 60rem;
+  --radius: 10px;
+  --radius-pill: 999px;
+  --elev-1: 0 1px 2px rgba(23, 23, 23, 0.05), 0 0 0 1px var(--kamp-line);
+  --elev-2: 0 12px 32px rgba(23, 23, 23, 0.16);
+  --card-pad: 1.5rem;
+  --panel-pad: clamp(1.5rem, 3vw, 2rem);
+  --motion-feedback: 120ms;
+  --motion-transition: 200ms;
+
   --hi-text: var(--kamp-ink);
   --hi-primary: var(--kamp-ink);
   --hi-secondary: var(--kamp-orange-tint);
@@ -102,11 +130,11 @@
   --hi-spacing-lg: 20px;
   --hi-spacing-xl: 32px;
 
-  --hi-radius-xs: 6px;
-  --hi-radius-sm: 10px;
-  --hi-radius-md: 10px;
-  --hi-radius-lg: 10px;
-  --hi-radius-xl: 10px;
+  --hi-radius-xs: var(--radius);
+  --hi-radius-sm: var(--radius);
+  --hi-radius-md: var(--radius);
+  --hi-radius-lg: var(--radius);
+  --hi-radius-xl: var(--radius);
 }
 
 * {
@@ -133,6 +161,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
   letter-spacing: -0.03em;
   text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 button, input, select, textarea {

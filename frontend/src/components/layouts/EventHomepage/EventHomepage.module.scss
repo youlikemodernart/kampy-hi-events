@@ -9,16 +9,16 @@
 
 $serif: 'PT Serif', Georgia, 'Times New Roman', serif;
 $util: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-$radius-panel: 16px;
-$radius-card: 12px;
-$radius-pill: 999px;
-$feedback: 140ms ease-out;
+$radius-panel: var(--radius);
+$radius-card: var(--radius);
+$radius-pill: var(--radius-pill);
+$feedback: var(--motion-feedback) ease-out;
 
-@mixin band($py: 76px) {
-  padding: $py max(20px, calc((100% - 1120px) / 2));
+@mixin band($py: var(--band-py)) {
+  padding: $py var(--band-gutter);
 
   @include mixins.respond-below(md) {
-    padding: 48px 20px;
+    padding-inline: 20px;
   }
 }
 
@@ -40,6 +40,24 @@ $feedback: 140ms ease-out;
 }
 
 // Page ground -------------------------------------------------------------
+.skipLink {
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: 1100;
+  transform: translateY(-200%);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--kamp-ink);
+  color: var(--kamp-cream);
+  font-family: $util;
+  font-weight: 700;
+
+  &:focus {
+    transform: none;
+  }
+}
+
 .background {
   position: fixed;
   inset: 0;
@@ -146,7 +164,7 @@ $feedback: 140ms ease-out;
   inset: auto 0 0 0;
   z-index: 3;
   padding: 0 0 clamp(28px, 5vw, 56px);
-  padding-inline: max(20px, calc((100% - 1120px) / 2));
+  padding-inline: var(--band-gutter);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -191,13 +209,14 @@ $feedback: 140ms ease-out;
   font-family: $serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(2.75rem, 1rem + 7vw, 5.5rem);
+  font-size: clamp(2.75rem, 1rem + 7vw, 5rem);
   line-height: 0.98;
   letter-spacing: -0.035em;
   max-width: 16ch;
   margin: 0;
   color: var(--primary-text-color);
   text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .heroOverlay .eventTitle {
@@ -205,9 +224,25 @@ $feedback: 140ms ease-out;
   text-shadow: 0 2px 30px rgba(23, 23, 23, 0.45);
 }
 
+// Deliberate Invitation-register fallback for events without photography.
+.heroFallback {
+  @include band(var(--band-py-material));
+  min-height: clamp(20rem, 48vh, 34rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  background: var(--kamp-forest);
+  color: var(--kamp-cream);
+
+  .eventTitle {
+    color: var(--kamp-cream);
+  }
+}
+
 // Byline strip: who is inviting you --------------------------------------
 .bylineStrip {
-  @include band(18px);
+  @include band(var(--space-5));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -293,17 +328,17 @@ a.organizerPill:hover {
 
 // Essentials: logistics made delightfully simple (forest material field) --
 .essentialsBand {
-  @include band(clamp(48px, 6vw, 84px));
+  @include band(var(--band-py-material));
   @include contour-top;
-  background: var(--kamp-forest, #2f5147);
-  color: var(--kamp-cream, #f9f4f0);
-  padding-top: clamp(60px, 7vw, 104px);
+  background: var(--kamp-forest);
+  color: var(--kamp-cream);
+  padding-top: calc(var(--band-py-material) + var(--band-contour-clear));
 }
 
 .essentialsGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(24px, 5vw, 64px) clamp(32px, 6vw, 88px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-7) var(--space-8);
   align-items: flex-start;
 }
 
@@ -324,7 +359,7 @@ a.organizerPill:hover {
 .essentialValue {
   font-family: $serif;
   font-weight: 400;
-  font-size: clamp(1.85rem, 1rem + 3vw, 3.25rem);
+  font-size: clamp(1.75rem, 1rem + 2.6vw, 3rem);
   line-height: 1.04;
   letter-spacing: -0.03em;
   color: var(--kamp-cream, #f9f4f0);
@@ -398,7 +433,7 @@ a.organizerPill:hover {
 
 // Editorial bands (About, generic sections) -------------------------------
 .section {
-  @include band(clamp(44px, 5vw, 72px));
+  @include band(var(--band-py));
   background: var(--kamp-cream, #f9f4f0);
 }
 
@@ -414,6 +449,7 @@ a.organizerPill:hover {
   letter-spacing: -0.03em;
   color: var(--primary-text-color);
   margin: 0;
+  overflow-wrap: break-word;
 }
 
 .eyebrow {
@@ -507,7 +543,7 @@ a.organizerPill:hover {
 
 // Tickets: one substantial cream panel, part of the invitation ------------
 .ticketsBand {
-  @include band(clamp(44px, 5vw, 72px));
+  @include band(var(--band-py));
   background: var(--kamp-sand, #efe7db);
 }
 
@@ -515,12 +551,11 @@ a.organizerPill:hover {
   background: var(--content-bg-color);
   border: 1px solid var(--border-color);
   border-radius: $radius-panel;
-  box-shadow: 0 1px 2px rgba(23, 23, 23, 0.05), 0 18px 48px rgba(23, 23, 23, 0.08);
-  padding: clamp(28px, 4vw, 48px);
+  box-shadow: var(--elev-1);
+  padding: var(--panel-pad);
   margin-top: clamp(-72px, -6vw, -40px);
 
   @include mixins.respond-below(md) {
-    padding: 24px 18px;
     margin-top: -32px;
   }
 }
@@ -543,6 +578,7 @@ a.organizerPill:hover {
   letter-spacing: -0.03em;
   color: var(--primary-text-color);
   margin: 0 0 10px;
+  overflow-wrap: break-word;
 }
 
 .ticketsIntro {
@@ -713,7 +749,7 @@ a.organizerPill:hover {
       button {
         width: 44px;
         height: 44px;
-        border-radius: 8px;
+        border-radius: var(--radius);
         border: none;
         background: transparent;
         color: var(--primary-text-color);
@@ -760,7 +796,7 @@ a.organizerPill:hover {
     background: var(--kamp-stop-tint, #f5e2dc);
     border-left: 4px solid var(--kamp-stop, #9f3620);
     color: var(--kamp-stop, #9f3620);
-    border-radius: 6px;
+    border-radius: var(--radius);
     padding: 10px 14px;
     font-size: 0.9375rem;
     margin: 12px 0;
@@ -785,7 +821,7 @@ a.organizerPill:hover {
     .hi-product-page-message {
       background: var(--kamp-wait-tint, #e9edf2);
       border-left: 4px solid var(--kamp-wait, #40607d);
-      border-radius: 6px;
+      border-radius: var(--radius);
       padding: 12px 16px;
       margin-bottom: 16px;
       font-size: 0.9375rem;
@@ -892,7 +928,7 @@ a.organizerPill:hover {
 
 // Your Kamp: logistics expressed visually (real data + honest structure) ---
 .yourKampBand {
-  @include band(clamp(44px, 5vw, 72px));
+  @include band(var(--band-py));
   background: var(--kamp-cream, #f9f4f0);
 }
 
@@ -907,7 +943,7 @@ a.organizerPill:hover {
   background: var(--content-bg-color);
   border: 1px solid var(--border-color);
   border-radius: $radius-card;
-  padding: 26px 24px;
+  padding: var(--card-pad);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -929,6 +965,7 @@ a.organizerPill:hover {
   line-height: 1.15;
   letter-spacing: -0.02em;
   color: var(--primary-text-color);
+  overflow-wrap: break-word;
 }
 
 .logisticsBody {
@@ -1009,7 +1046,7 @@ a.organizerPill:hover {
 
 // Merch: an editorial storefront insertion point (not connected) ----------
 .merchBand {
-  @include band(clamp(44px, 5vw, 72px));
+  @include band(var(--band-py));
   background: var(--kamp-sand, #efe7db);
 }
 
@@ -1032,7 +1069,7 @@ a.organizerPill:hover {
 
 // FAQ / questions: honest, uses the real organizer contact ----------------
 .faqBand {
-  @include band(clamp(44px, 5vw, 72px));
+  @include band(var(--band-py));
   background: var(--kamp-cream, #f9f4f0);
 }
 
@@ -1224,7 +1261,7 @@ a.organizerPill:hover {
 
 // Four-C signature (deep ink material field with an organic contour) ------
 .signatureBand {
-  @include band(clamp(40px, 5vw, 64px));
+  @include band(var(--band-py-material));
   @include contour-top;
   padding-top: clamp(56px, 6vw, 88px);
   display: flex;
@@ -1266,7 +1303,7 @@ a.organizerPill:hover {
 
 // Footer ------------------------------------------------------------------
 .footerSection {
-  @include band(clamp(32px, 4vw, 48px));
+  @include band(var(--space-7));
   padding-bottom: 96px;
   text-align: center;
   color: var(--secondary-text-color);
@@ -1343,7 +1380,7 @@ a.organizerPill:hover {
   border-radius: $radius-pill;
   border: 1px solid var(--kamp-forest, #2f5147);
   cursor: pointer;
-  box-shadow: 0 12px 32px rgba(23, 23, 23, 0.22);
+  box-shadow: var(--elev-2);
   transition: background $feedback;
 
   @include mixins.respond-below(sm) {

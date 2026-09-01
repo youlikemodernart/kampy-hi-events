@@ -56,7 +56,7 @@ msgstr "{0} <0>签退</0>成功"
 msgid "{0} Active Webhooks"
 msgstr "{0} 个活动的 Webhook"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:495
+#: src/components/routes/product-widget/SelectProducts/index.tsx:504
 msgid "{0} available"
 msgstr "{0}可用"
 
@@ -271,7 +271,7 @@ msgstr "多行文本输入"
 msgid "A new verification code has been sent to your email"
 msgstr "新的验证码已发送到您的邮箱"
 
-#: src/components/layouts/EventHomepage/index.tsx:452
+#: src/components/layouts/EventHomepage/index.tsx:475
 msgid "A packing list will appear here when it's posted."
 msgstr ""
 
@@ -316,7 +316,7 @@ msgstr "标准税，如增值税或消费税"
 msgid "Abandoned"
 msgstr "已放弃"
 
-#: src/components/layouts/EventHomepage/index.tsx:383
+#: src/components/layouts/EventHomepage/index.tsx:405
 msgid "About"
 msgstr "关于"
 
@@ -531,7 +531,7 @@ msgstr "增加层级"
 
 #: src/components/common/AddEventToCalendarButton/index.tsx:14
 #: src/components/common/AddToCalendarCTA/index.tsx:24
-#: src/components/layouts/EventHomepage/index.tsx:362
+#: src/components/layouts/EventHomepage/index.tsx:384
 msgid "Add to Calendar"
 msgstr "添加到日历"
 
@@ -828,7 +828,7 @@ msgstr ""
 msgid "Application Fees Configuration"
 msgstr "应用费用配置"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:583
+#: src/components/routes/product-widget/SelectProducts/index.tsx:592
 msgid "applied"
 msgstr "应用"
 
@@ -844,7 +844,7 @@ msgstr "适用于1个产品"
 msgid "Apply"
 msgstr "应用"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:611
+#: src/components/routes/product-widget/SelectProducts/index.tsx:620
 msgid "Apply Promo Code"
 msgstr "应用促销代码"
 
@@ -1424,7 +1424,7 @@ msgstr "相机扫描仪"
 msgid "Campaign"
 msgstr "活动"
 
-#: src/components/layouts/EventHomepage/index.tsx:610
+#: src/components/layouts/EventHomepage/index.tsx:633
 msgid "Camping"
 msgstr ""
 
@@ -1718,11 +1718,11 @@ msgstr "为新活动选择默认设置。这可以针对单个活动进行覆盖
 msgid "Choose who pays the platform fee. This does not affect additional fees you've configured in your account settings."
 msgstr "选择谁支付平台费用。这不会影响您在账户设置中配置的额外费用。"
 
-#: src/components/layouts/EventHomepage/index.tsx:398
+#: src/components/layouts/EventHomepage/index.tsx:420
 msgid "Choose your registration below."
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:613
+#: src/components/layouts/EventHomepage/index.tsx:636
 msgid "Christ"
 msgstr ""
 
@@ -1746,7 +1746,7 @@ msgstr "点击复制"
 msgid "Click to view notes"
 msgstr "点击查看备注"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:616
+#: src/components/routes/product-widget/SelectProducts/index.tsx:625
 msgid "close"
 msgstr "关闭"
 
@@ -1755,7 +1755,7 @@ msgstr "关闭"
 #: src/components/modals/JoinWaitlistModal/index.tsx:103
 #: src/components/modals/JoinWaitlistModal/index.tsx:130
 #: src/components/modals/RefundOrderModal/index.tsx:188
-#: src/components/routes/product-widget/SelectProducts/index.tsx:617
+#: src/components/routes/product-widget/SelectProducts/index.tsx:626
 msgid "Close"
 msgstr "关闭"
 
@@ -1855,7 +1855,7 @@ msgstr "以逗号分隔的描述活动的关键字。搜索引擎将使用这些
 msgid "Communication Preferences"
 msgstr "通信偏好"
 
-#: src/components/layouts/EventHomepage/index.tsx:612
+#: src/components/layouts/EventHomepage/index.tsx:635
 msgid "Community"
 msgstr ""
 
@@ -2089,7 +2089,7 @@ msgstr ""
 msgid "Connected to Stripe"
 msgstr "已连接到 Stripe"
 
-#: src/components/layouts/EventHomepage/index.tsx:611
+#: src/components/layouts/EventHomepage/index.tsx:634
 msgid "Connection"
 msgstr ""
 
@@ -2098,8 +2098,8 @@ msgid "Connection Details"
 msgstr "连接详情"
 
 #: src/components/common/WaitlistTable/index.tsx:149
-#: src/components/layouts/EventHomepage/index.tsx:503
-#: src/components/layouts/EventHomepage/index.tsx:600
+#: src/components/layouts/EventHomepage/index.tsx:526
+#: src/components/layouts/EventHomepage/index.tsx:623
 #: src/components/layouts/OrganizerHomepage/index.tsx:258
 msgid "Contact"
 msgstr "联系"
@@ -2119,7 +2119,7 @@ msgstr "支持联系邮箱"
 
 #: src/components/common/WidgetEditor/index.tsx:29
 #: src/components/common/WidgetEditor/index.tsx:222
-#: src/components/routes/product-widget/SelectProducts/index.tsx:569
+#: src/components/routes/product-widget/SelectProducts/index.tsx:578
 msgid "Continue"
 msgstr "继续"
 
@@ -2138,7 +2138,7 @@ msgstr "继续设置"
 msgid "Continue Setup"
 msgstr "继续设置"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:405
+#: src/components/routes/product-widget/SelectProducts/index.tsx:406
 msgid "Continue to Checkout"
 msgstr "继续结账"
 
@@ -2850,7 +2850,7 @@ msgstr "{0}中的折扣"
 msgid "Discount Type"
 msgstr "折扣类型"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:422
+#: src/components/routes/product-widget/SelectProducts/index.tsx:423
 msgid "Dismiss this message"
 msgstr "关闭此消息"
 
@@ -4287,8 +4287,8 @@ msgstr "生成代码"
 msgid "German"
 msgstr "德国"
 
-#: src/components/layouts/EventHomepage/index.tsx:373
-#: src/components/layouts/EventHomepage/index.tsx:443
+#: src/components/layouts/EventHomepage/index.tsx:395
+#: src/components/layouts/EventHomepage/index.tsx:466
 msgid "Get Directions"
 msgstr "获取路线"
 
@@ -4308,7 +4308,7 @@ msgstr "开始使用"
 msgid "Get your event ready"
 msgstr "准备好您的活动"
 
-#: src/components/layouts/EventHomepage/index.tsx:427
+#: src/components/layouts/EventHomepage/index.tsx:450
 msgid "Getting ready"
 msgstr ""
 
@@ -4316,7 +4316,7 @@ msgstr ""
 msgid "Getting Started"
 msgstr "入门"
 
-#: src/components/layouts/EventHomepage/index.tsx:432
+#: src/components/layouts/EventHomepage/index.tsx:455
 msgid "Getting there"
 msgstr ""
 
@@ -4376,7 +4376,7 @@ msgstr "来宾管理"
 msgid "Guests"
 msgstr "宾客"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:578
+#: src/components/routes/product-widget/SelectProducts/index.tsx:587
 msgid "Have a promo code?"
 msgstr "有促销代码吗？"
 
@@ -4439,8 +4439,8 @@ msgstr "隐藏于公众视线之外"
 msgid "Hidden questions are only visible to the event organizer and not to the customer."
 msgstr "隐藏问题只有活动组织者可以看到，客户看不到。"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:443
-#: src/components/routes/product-widget/SelectProducts/index.tsx:543
+#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:552
 msgid "Hide"
 msgstr "隐藏"
 
@@ -4586,7 +4586,7 @@ msgstr "我同意<0>条款和条件</0>。"
 msgid "I confirm this is a transactional message related to this event"
 msgstr "我确认这是与此活动相关的交易消息"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:382
+#: src/components/routes/product-widget/SelectProducts/index.tsx:383
 msgid "If a new tab did not open automatically, please click the button below to continue to checkout."
 msgstr "如果没有自动打开新标签页，请点击下方按钮继续结账。"
 
@@ -4879,11 +4879,11 @@ msgstr "约翰"
 msgid "Johnson"
 msgstr "约翰逊"
 
-#: src/components/layouts/EventHomepage/index.tsx:342
+#: src/components/layouts/EventHomepage/index.tsx:364
 msgid "Join from anywhere"
 msgstr "随时随地加入"
 
-#: src/components/layouts/EventHomepage/index.tsx:396
+#: src/components/layouts/EventHomepage/index.tsx:418
 msgid "Join us at Kamp"
 msgstr ""
 
@@ -4910,10 +4910,10 @@ msgid "Just looking for your tickets?"
 msgstr "只是在找您的票？"
 
 #: src/components/layouts/EventHomepage/index.tsx:609
-msgid "Kamp Love"
-msgstr ""
+#~ msgid "Kamp Love"
+#~ msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:474
+#: src/components/layouts/EventHomepage/index.tsx:497
 msgid "Kamp Love merch will live here, on the same page as your ticket."
 msgstr ""
 
@@ -4921,7 +4921,7 @@ msgstr ""
 msgid "Kamp net settlement"
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:470
+#: src/components/layouts/EventHomepage/index.tsx:493
 msgid "Kamp Store"
 msgstr ""
 
@@ -5286,11 +5286,11 @@ msgstr "每份订单的最高限额"
 msgid "Medium"
 msgstr "媒介"
 
-#: src/components/layouts/EventHomepage/index.tsx:468
+#: src/components/layouts/EventHomepage/index.tsx:491
 msgid "Merch"
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:483
+#: src/components/layouts/EventHomepage/index.tsx:506
 msgid "Merch storefront mounts here once connected."
 msgstr ""
 
@@ -5991,8 +5991,8 @@ msgstr "持续进行"
 msgid "Online"
 msgstr "在线"
 
-#: src/components/layouts/EventHomepage/index.tsx:176
-#: src/components/layouts/EventHomepage/index.tsx:341
+#: src/components/layouts/EventHomepage/index.tsx:175
+#: src/components/layouts/EventHomepage/index.tsx:363
 #: src/components/layouts/OrganizerHomepage/EventCard/index.tsx:167
 msgid "Online Event"
 msgstr "在线活动"
@@ -6317,7 +6317,7 @@ msgstr "组织名称"
 
 #: src/components/common/AdminEventsTable/index.tsx:87
 #: src/components/common/AttendeeTicket/index.tsx:82
-#: src/components/layouts/EventHomepage/index.tsx:512
+#: src/components/layouts/EventHomepage/index.tsx:535
 #: src/components/routes/admin/Dashboard/index.tsx:257
 #: src/components/routes/admin/Dashboard/index.tsx:306
 #: src/components/routes/admin/Dashboard/index.tsx:352
@@ -6780,7 +6780,7 @@ msgstr "请检查您的电子邮件是否有效"
 msgid "Please check your email to confirm your email address"
 msgstr "请检查您的电子邮件以确认您的电子邮件地址"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:373
+#: src/components/routes/product-widget/SelectProducts/index.tsx:374
 msgid "Please continue in the new tab"
 msgstr "请在新标签页中继续"
 
@@ -6837,7 +6837,7 @@ msgstr "请选择日期范围"
 msgid "Please select an image."
 msgstr "请选择一张图片。"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:304
+#: src/components/routes/product-widget/SelectProducts/index.tsx:305
 msgid "Please select at least one product"
 msgstr "请选择至少一个产品"
 
@@ -6991,7 +6991,7 @@ msgid "Print to PDF"
 msgstr "打印为PDF"
 
 #: src/components/common/CookieConsentBanner/index.tsx:51
-#: src/components/layouts/EventHomepage/index.tsx:624
+#: src/components/layouts/EventHomepage/index.tsx:647
 #: src/components/layouts/OrganizerHomepage/index.tsx:341
 msgid "Privacy Policy"
 msgstr "隐私政策"
@@ -7096,7 +7096,7 @@ msgstr "简介"
 msgid "Profile updated successfully"
 msgstr "成功更新个人资料"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:239
+#: src/components/routes/product-widget/SelectProducts/index.tsx:240
 msgid "Promo {promo_code} code applied"
 msgstr "已使用促销 {promo_code} 代码"
 
@@ -7197,8 +7197,7 @@ msgstr "问题描述"
 msgid "Question Title"
 msgstr "问题标题"
 
-#: src/components/layouts/EventHomepage/index.tsx:490
-#: src/components/layouts/EventHomepage/index.tsx:492
+#: src/components/layouts/EventHomepage/index.tsx:515
 #: src/components/modals/DuplicateEventModal/index.tsx:25
 msgid "Questions"
 msgstr "问题"
@@ -7208,7 +7207,7 @@ msgstr "问题"
 msgid "Questions & Answers"
 msgstr "问与答"
 
-#: src/components/layouts/EventHomepage/index.tsx:493
+#: src/components/layouts/EventHomepage/index.tsx:516
 msgid "Questions about this Kamp?"
 msgstr ""
 
@@ -7240,7 +7239,7 @@ msgstr "超出速率限制。请稍后再试。"
 msgid "Re-offer Spot"
 msgstr "重新提供名额"
 
-#: src/components/layouts/EventHomepage/index.tsx:496
+#: src/components/layouts/EventHomepage/index.tsx:519
 msgid "Reach out and we'll help you get ready."
 msgstr ""
 
@@ -7390,12 +7389,12 @@ msgstr "退款"
 msgid "Regional Settings"
 msgstr "区域设置"
 
-#: src/components/layouts/EventHomepage/index.tsx:644
+#: src/components/layouts/EventHomepage/index.tsx:667
 #: src/components/routes/auth/Register/index.tsx:137
 msgid "Register"
 msgstr "注册"
 
-#: src/components/layouts/EventHomepage/index.tsx:395
+#: src/components/layouts/EventHomepage/index.tsx:417
 msgid "Registration"
 msgstr ""
 
@@ -7408,14 +7407,14 @@ msgstr "注册问题"
 msgid "Remaining Uses"
 msgstr "剩余使用次数"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:587
+#: src/components/routes/product-widget/SelectProducts/index.tsx:596
 msgid "remove"
 msgstr "去除"
 
 #: src/components/common/Editor/Controls/InsertImageControl/index.tsx:146
 #: src/components/common/WaitlistTable/index.tsx:78
 #: src/components/common/WaitlistTable/index.tsx:111
-#: src/components/routes/product-widget/SelectProducts/index.tsx:588
+#: src/components/routes/product-widget/SelectProducts/index.tsx:597
 msgid "Remove"
 msgstr "移除"
 
@@ -7752,7 +7751,7 @@ msgstr "保存增值税设置"
 msgid "Scan"
 msgstr "扫描"
 
-#: src/components/layouts/EventHomepage/index.tsx:458
+#: src/components/layouts/EventHomepage/index.tsx:481
 msgid "Schedule"
 msgstr ""
 
@@ -8192,7 +8191,7 @@ msgid "Setup & Design"
 msgstr "设置与设计"
 
 #: src/components/common/ShareIcon/index.tsx:30
-#: src/components/layouts/EventHomepage/index.tsx:309
+#: src/components/layouts/EventHomepage/index.tsx:341
 #: src/components/layouts/OrganizerLayout/index.tsx:246
 #: src/components/modals/ShareModal/index.tsx:37
 #: src/components/modals/ShareModal/index.tsx:165
@@ -8241,8 +8240,8 @@ msgstr "显示营销订阅复选框"
 msgid "Show marketing opt-in checkbox by default"
 msgstr "默认显示营销订阅复选框"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:443
-#: src/components/routes/product-widget/SelectProducts/index.tsx:542
+#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:551
 msgid "Show more"
 msgstr "显示更多"
 
@@ -8291,6 +8290,10 @@ msgstr "单行文本框"
 msgid "Skip this step"
 msgstr "跳过此步骤"
 
+#: src/components/layouts/EventHomepage/index.tsx:210
+msgid "Skip to main content"
+msgstr ""
+
 #: src/components/routes/auth/AcceptInvitation/index.tsx:103
 #: src/components/routes/auth/Register/index.tsx:97
 msgid "Smith"
@@ -8323,7 +8326,7 @@ msgid "Sold out"
 msgstr "售罄"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:81
-#: src/components/layouts/EventHomepage/index.tsx:162
+#: src/components/layouts/EventHomepage/index.tsx:161
 msgid "Sold Out"
 msgstr "售罄"
 
@@ -8368,7 +8371,7 @@ msgstr "出错了。请重试。"
 msgid "Sorry for the inconvenience."
 msgstr "对于给您带来的不便，我们深表歉意。"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:313
+#: src/components/routes/product-widget/SelectProducts/index.tsx:314
 msgid "Sorry, this promo code is not recognized"
 msgstr "对不起，此优惠代码不可用"
 
@@ -8745,7 +8748,7 @@ msgstr "系统默认"
 msgid "T-shirt"
 msgstr "T恤衫"
 
-#: src/components/layouts/EventHomepage/index.tsx:471
+#: src/components/layouts/EventHomepage/index.tsx:494
 msgid "Take Kamp home"
 msgstr ""
 
@@ -8858,7 +8861,7 @@ msgstr "模板删除成功"
 msgid "Template saved successfully"
 msgstr "模板保存成功"
 
-#: src/components/layouts/EventHomepage/index.tsx:630
+#: src/components/layouts/EventHomepage/index.tsx:653
 #: src/components/layouts/OrganizerHomepage/index.tsx:348
 msgid "Terms of Service"
 msgstr "服务条款"
@@ -8875,8 +8878,8 @@ msgstr "感谢您的参与！"
 msgid "Thanks for your support as we continue to grow and improve Hi.Events!"
 msgstr "感谢您的支持，我们将继续发展和改进 Hi.Events！"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:199
-#: src/components/routes/product-widget/SelectProducts/index.tsx:248
+#: src/components/routes/product-widget/SelectProducts/index.tsx:200
+#: src/components/routes/product-widget/SelectProducts/index.tsx:249
 msgid "That promo code is invalid"
 msgstr "促销代码无效"
 
@@ -8953,7 +8956,7 @@ msgstr "您点击的链接无效。"
 msgid "The locale of the customer"
 msgstr "客户的语言"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:527
+#: src/components/routes/product-widget/SelectProducts/index.tsx:536
 msgid "The maximum number of products for {0}is {1}"
 msgstr "{0}的最大产品数量是{1}"
 
@@ -8994,7 +8997,7 @@ msgstr ""
 msgid "The report request failed. Please try again."
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:459
+#: src/components/layouts/EventHomepage/index.tsx:482
 msgid "The schedule will appear here when it's posted."
 msgstr ""
 
@@ -9029,11 +9032,11 @@ msgstr "戏剧"
 msgid "Theme & Colors"
 msgstr "主题与颜色"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:339
+#: src/components/routes/product-widget/SelectProducts/index.tsx:340
 msgid "There are no products available for this event"
 msgstr "此活动没有可用产品"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:461
 msgid "There are no products available in this category"
 msgstr "此类别中没有可用产品"
 
@@ -9109,7 +9112,7 @@ msgstr "此代码将用于跟踪销售。只允许字母、数字、连字符和
 msgid "This color combination may be hard to read for some users"
 msgstr "此颜色组合对某些用户来说可能难以阅读"
 
-#: src/components/layouts/EventHomepage/index.tsx:334
+#: src/components/layouts/EventHomepage/index.tsx:356
 msgid "This event has ended"
 msgstr "此活动已结束"
 
@@ -9391,7 +9394,7 @@ msgstr "票务与商品"
 msgid "Tickets are automatically offered to waitlisted customers when capacity becomes available."
 msgstr "当有空余名额时，门票将自动提供给候补名单中的客户。"
 
-#: src/components/layouts/EventHomepage/index.tsx:169
+#: src/components/layouts/EventHomepage/index.tsx:168
 msgid "Tickets Available"
 msgstr "门票有售"
 
@@ -9639,7 +9642,7 @@ msgstr "无法签退参与者"
 msgid "Unable to create product. Please check the your details"
 msgstr "无法创建产品。请检查您的详细信息"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:182
+#: src/components/routes/product-widget/SelectProducts/index.tsx:183
 msgid "Unable to create product. Please check your details"
 msgstr "无法创建产品。请检查您的详细信息"
 
@@ -9717,7 +9720,7 @@ msgstr "未知参会者"
 msgid "Unlimited"
 msgstr "无限制"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:490
+#: src/components/routes/product-widget/SelectProducts/index.tsx:499
 msgid "Unlimited available"
 msgstr "无限供应"
 
@@ -10370,7 +10373,7 @@ msgstr "此容量应适用于哪些产品？"
 msgid "What time will you be arriving?"
 msgstr "您什么时候抵达？"
 
-#: src/components/layouts/EventHomepage/index.tsx:451
+#: src/components/layouts/EventHomepage/index.tsx:474
 msgid "What to bring"
 msgstr ""
 
@@ -10390,7 +10393,7 @@ msgstr "您需要做的事:"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
-#: src/components/layouts/EventHomepage/index.tsx:329
+#: src/components/layouts/EventHomepage/index.tsx:352
 msgid "When"
 msgstr ""
 
@@ -10494,8 +10497,8 @@ msgstr "启用后，Stripe Connect交易将不收取应用费用。用于不支�
 msgid "When offline payments are enabled, users will be able to complete their orders and receive their tickets. Their tickets will clearly indicate the order is not paid, and the check-in tool will notify the check-in staff if an order requires payment."
 msgstr "启用线下支付后，用户可以完成订单并收到门票。他们的门票将清楚地显示订单未支付，签到工具会通知签到工作人员订单是否需要支付。"
 
-#: src/components/layouts/EventHomepage/index.tsx:340
-#: src/components/layouts/EventHomepage/index.tsx:348
+#: src/components/layouts/EventHomepage/index.tsx:362
+#: src/components/layouts/EventHomepage/index.tsx:370
 msgid "Where"
 msgstr ""
 
@@ -10802,7 +10805,7 @@ msgstr "您的活动已上线！"
 msgid "Your event must be live before you can sell tickets to attendees."
 msgstr "在向与会者销售门票之前，您的活动必须处于上线状态。"
 
-#: src/components/layouts/EventHomepage/index.tsx:426
+#: src/components/layouts/EventHomepage/index.tsx:449
 msgid "Your Kamp"
 msgstr ""
 

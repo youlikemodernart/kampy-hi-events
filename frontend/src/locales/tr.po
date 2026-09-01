@@ -56,7 +56,7 @@ msgstr "{0} <0>başarıyla check-out yaptı</0>"
 msgid "{0} Active Webhooks"
 msgstr "{0} Aktif Webhook"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:495
+#: src/components/routes/product-widget/SelectProducts/index.tsx:504
 msgid "{0} available"
 msgstr "{0} mevcut"
 
@@ -271,7 +271,7 @@ msgstr "Çok satırlı metin girişi"
 msgid "A new verification code has been sent to your email"
 msgstr "E-postanıza yeni bir doğrulama kodu gönderildi"
 
-#: src/components/layouts/EventHomepage/index.tsx:452
+#: src/components/layouts/EventHomepage/index.tsx:475
 msgid "A packing list will appear here when it's posted."
 msgstr ""
 
@@ -316,7 +316,7 @@ msgstr "KDV veya ÖTV gibi standart vergi"
 msgid "Abandoned"
 msgstr "Terk edildi"
 
-#: src/components/layouts/EventHomepage/index.tsx:383
+#: src/components/layouts/EventHomepage/index.tsx:405
 msgid "About"
 msgstr "Hakkında"
 
@@ -531,7 +531,7 @@ msgstr "Kademe ekle"
 
 #: src/components/common/AddEventToCalendarButton/index.tsx:14
 #: src/components/common/AddToCalendarCTA/index.tsx:24
-#: src/components/layouts/EventHomepage/index.tsx:362
+#: src/components/layouts/EventHomepage/index.tsx:384
 msgid "Add to Calendar"
 msgstr "Takvime Ekle"
 
@@ -828,7 +828,7 @@ msgstr ""
 msgid "Application Fees Configuration"
 msgstr "Uygulama Ücretleri Yapılandırması"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:583
+#: src/components/routes/product-widget/SelectProducts/index.tsx:592
 msgid "applied"
 msgstr "uygulandı"
 
@@ -844,7 +844,7 @@ msgstr "1 ürüne uygulanır"
 msgid "Apply"
 msgstr "Uygula"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:611
+#: src/components/routes/product-widget/SelectProducts/index.tsx:620
 msgid "Apply Promo Code"
 msgstr "Promosyon Kodunu Uygula"
 
@@ -1424,7 +1424,7 @@ msgstr "Kamera Tarayıcı"
 msgid "Campaign"
 msgstr "Kampanya"
 
-#: src/components/layouts/EventHomepage/index.tsx:610
+#: src/components/layouts/EventHomepage/index.tsx:633
 msgid "Camping"
 msgstr ""
 
@@ -1718,11 +1718,11 @@ msgstr "Yeni etkinlikler için varsayılan ayarı seçin. Bu, bireysel etkinlikl
 msgid "Choose who pays the platform fee. This does not affect additional fees you've configured in your account settings."
 msgstr "Platform ücretini kimin ödeyeceğini seçin. Bu, hesap ayarlarınızda yapılandırdığınız ek ücretleri etkilemez."
 
-#: src/components/layouts/EventHomepage/index.tsx:398
+#: src/components/layouts/EventHomepage/index.tsx:420
 msgid "Choose your registration below."
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:613
+#: src/components/layouts/EventHomepage/index.tsx:636
 msgid "Christ"
 msgstr ""
 
@@ -1746,7 +1746,7 @@ msgstr "Kopyalamak için tıklayın"
 msgid "Click to view notes"
 msgstr "Notları görüntülemek için tıklayın"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:616
+#: src/components/routes/product-widget/SelectProducts/index.tsx:625
 msgid "close"
 msgstr "kapat"
 
@@ -1755,7 +1755,7 @@ msgstr "kapat"
 #: src/components/modals/JoinWaitlistModal/index.tsx:103
 #: src/components/modals/JoinWaitlistModal/index.tsx:130
 #: src/components/modals/RefundOrderModal/index.tsx:188
-#: src/components/routes/product-widget/SelectProducts/index.tsx:617
+#: src/components/routes/product-widget/SelectProducts/index.tsx:626
 msgid "Close"
 msgstr "Kapat"
 
@@ -1855,7 +1855,7 @@ msgstr "Etkinliği tanımlayan virgülle ayrılmış anahtar kelimeler. Bunlar a
 msgid "Communication Preferences"
 msgstr "İletişim Tercihleri"
 
-#: src/components/layouts/EventHomepage/index.tsx:612
+#: src/components/layouts/EventHomepage/index.tsx:635
 msgid "Community"
 msgstr ""
 
@@ -2089,7 +2089,7 @@ msgstr ""
 msgid "Connected to Stripe"
 msgstr "Stripe'a Bağlandı"
 
-#: src/components/layouts/EventHomepage/index.tsx:611
+#: src/components/layouts/EventHomepage/index.tsx:634
 msgid "Connection"
 msgstr ""
 
@@ -2098,8 +2098,8 @@ msgid "Connection Details"
 msgstr "Bağlantı Detayları"
 
 #: src/components/common/WaitlistTable/index.tsx:149
-#: src/components/layouts/EventHomepage/index.tsx:503
-#: src/components/layouts/EventHomepage/index.tsx:600
+#: src/components/layouts/EventHomepage/index.tsx:526
+#: src/components/layouts/EventHomepage/index.tsx:623
 #: src/components/layouts/OrganizerHomepage/index.tsx:258
 msgid "Contact"
 msgstr "İletişim"
@@ -2119,7 +2119,7 @@ msgstr "Destek için iletişim e-postası"
 
 #: src/components/common/WidgetEditor/index.tsx:29
 #: src/components/common/WidgetEditor/index.tsx:222
-#: src/components/routes/product-widget/SelectProducts/index.tsx:569
+#: src/components/routes/product-widget/SelectProducts/index.tsx:578
 msgid "Continue"
 msgstr "Devam Et"
 
@@ -2138,7 +2138,7 @@ msgstr "Kuruluma devam et"
 msgid "Continue Setup"
 msgstr "Kuruluma Devam Et"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:405
+#: src/components/routes/product-widget/SelectProducts/index.tsx:406
 msgid "Continue to Checkout"
 msgstr "Ödemeye Devam Et"
 
@@ -2850,7 +2850,7 @@ msgstr "{0} cinsinden indirim"
 msgid "Discount Type"
 msgstr "İndirim Türü"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:422
+#: src/components/routes/product-widget/SelectProducts/index.tsx:423
 msgid "Dismiss this message"
 msgstr "Bu mesajı kapat"
 
@@ -4287,8 +4287,8 @@ msgstr "Kod oluştur"
 msgid "German"
 msgstr "Almanca"
 
-#: src/components/layouts/EventHomepage/index.tsx:373
-#: src/components/layouts/EventHomepage/index.tsx:443
+#: src/components/layouts/EventHomepage/index.tsx:395
+#: src/components/layouts/EventHomepage/index.tsx:466
 msgid "Get Directions"
 msgstr "Yol Tarifi Al"
 
@@ -4308,7 +4308,7 @@ msgstr "Başlayın"
 msgid "Get your event ready"
 msgstr "Etkinliğinizi hazırlayın"
 
-#: src/components/layouts/EventHomepage/index.tsx:427
+#: src/components/layouts/EventHomepage/index.tsx:450
 msgid "Getting ready"
 msgstr ""
 
@@ -4316,7 +4316,7 @@ msgstr ""
 msgid "Getting Started"
 msgstr "Başlarken"
 
-#: src/components/layouts/EventHomepage/index.tsx:432
+#: src/components/layouts/EventHomepage/index.tsx:455
 msgid "Getting there"
 msgstr ""
 
@@ -4376,7 +4376,7 @@ msgstr "Misafir yönetimi"
 msgid "Guests"
 msgstr "Misafirler"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:578
+#: src/components/routes/product-widget/SelectProducts/index.tsx:587
 msgid "Have a promo code?"
 msgstr "Promosyon kodunuz var mı?"
 
@@ -4439,8 +4439,8 @@ msgstr "Halk görünümünden gizli"
 msgid "Hidden questions are only visible to the event organizer and not to the customer."
 msgstr "Gizli sorular yalnızca etkinlik organizatörü tarafından görülebilir, müşteri tarafından görülemez."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:443
-#: src/components/routes/product-widget/SelectProducts/index.tsx:543
+#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:552
 msgid "Hide"
 msgstr "Gizle"
 
@@ -4586,7 +4586,7 @@ msgstr "<0>Şartlar ve koşulları</0> kabul ediyorum"
 msgid "I confirm this is a transactional message related to this event"
 msgstr "Bunun bu etkinlikle ilgili işlemsel bir mesaj olduğunu onaylıyorum"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:382
+#: src/components/routes/product-widget/SelectProducts/index.tsx:383
 msgid "If a new tab did not open automatically, please click the button below to continue to checkout."
 msgstr "Yeni bir sekme otomatik olarak açılmadıysa, ödemeye devam etmek için lütfen aşağıdaki düğmeyi tıklayın."
 
@@ -4879,11 +4879,11 @@ msgstr "John"
 msgid "Johnson"
 msgstr "Johnson"
 
-#: src/components/layouts/EventHomepage/index.tsx:342
+#: src/components/layouts/EventHomepage/index.tsx:364
 msgid "Join from anywhere"
 msgstr "Her yerden katılın"
 
-#: src/components/layouts/EventHomepage/index.tsx:396
+#: src/components/layouts/EventHomepage/index.tsx:418
 msgid "Join us at Kamp"
 msgstr ""
 
@@ -4910,10 +4910,10 @@ msgid "Just looking for your tickets?"
 msgstr "Sadece biletlerinizi mi arıyorsunuz?"
 
 #: src/components/layouts/EventHomepage/index.tsx:609
-msgid "Kamp Love"
-msgstr ""
+#~ msgid "Kamp Love"
+#~ msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:474
+#: src/components/layouts/EventHomepage/index.tsx:497
 msgid "Kamp Love merch will live here, on the same page as your ticket."
 msgstr ""
 
@@ -4921,7 +4921,7 @@ msgstr ""
 msgid "Kamp net settlement"
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:470
+#: src/components/layouts/EventHomepage/index.tsx:493
 msgid "Kamp Store"
 msgstr ""
 
@@ -5286,11 +5286,11 @@ msgstr "Sipariş Başına Maksimum"
 msgid "Medium"
 msgstr "Ortam"
 
-#: src/components/layouts/EventHomepage/index.tsx:468
+#: src/components/layouts/EventHomepage/index.tsx:491
 msgid "Merch"
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:483
+#: src/components/layouts/EventHomepage/index.tsx:506
 msgid "Merch storefront mounts here once connected."
 msgstr ""
 
@@ -5991,8 +5991,8 @@ msgstr "Devam Eden"
 msgid "Online"
 msgstr "Çevrimiçi"
 
-#: src/components/layouts/EventHomepage/index.tsx:176
-#: src/components/layouts/EventHomepage/index.tsx:341
+#: src/components/layouts/EventHomepage/index.tsx:175
+#: src/components/layouts/EventHomepage/index.tsx:363
 #: src/components/layouts/OrganizerHomepage/EventCard/index.tsx:167
 msgid "Online Event"
 msgstr "Çevrimiçi Etkinlik"
@@ -6317,7 +6317,7 @@ msgstr "Organizasyon Adı"
 
 #: src/components/common/AdminEventsTable/index.tsx:87
 #: src/components/common/AttendeeTicket/index.tsx:82
-#: src/components/layouts/EventHomepage/index.tsx:512
+#: src/components/layouts/EventHomepage/index.tsx:535
 #: src/components/routes/admin/Dashboard/index.tsx:257
 #: src/components/routes/admin/Dashboard/index.tsx:306
 #: src/components/routes/admin/Dashboard/index.tsx:352
@@ -6780,7 +6780,7 @@ msgstr "Lütfen e-postanızın geçerli olduğunu kontrol edin"
 msgid "Please check your email to confirm your email address"
 msgstr "E-posta adresinizi onaylamak için lütfen e-postanızı kontrol edin"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:373
+#: src/components/routes/product-widget/SelectProducts/index.tsx:374
 msgid "Please continue in the new tab"
 msgstr "Lütfen yeni sekmede devam edin"
 
@@ -6837,7 +6837,7 @@ msgstr "Lütfen bir tarih aralığı seçin"
 msgid "Please select an image."
 msgstr "Lütfen bir görsel seçin."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:304
+#: src/components/routes/product-widget/SelectProducts/index.tsx:305
 msgid "Please select at least one product"
 msgstr "Lütfen en az bir ürün seçin"
 
@@ -6991,7 +6991,7 @@ msgid "Print to PDF"
 msgstr "PDF'ye Yazdır"
 
 #: src/components/common/CookieConsentBanner/index.tsx:51
-#: src/components/layouts/EventHomepage/index.tsx:624
+#: src/components/layouts/EventHomepage/index.tsx:647
 #: src/components/layouts/OrganizerHomepage/index.tsx:341
 msgid "Privacy Policy"
 msgstr "Gizlilik Politikası"
@@ -7096,7 +7096,7 @@ msgstr "Profil"
 msgid "Profile updated successfully"
 msgstr "Profil başarıyla güncellendi"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:239
+#: src/components/routes/product-widget/SelectProducts/index.tsx:240
 msgid "Promo {promo_code} code applied"
 msgstr "Promosyon {promo_code} kodu uygulandı"
 
@@ -7197,8 +7197,7 @@ msgstr "Soru Açıklaması"
 msgid "Question Title"
 msgstr "Soru Başlığı"
 
-#: src/components/layouts/EventHomepage/index.tsx:490
-#: src/components/layouts/EventHomepage/index.tsx:492
+#: src/components/layouts/EventHomepage/index.tsx:515
 #: src/components/modals/DuplicateEventModal/index.tsx:25
 msgid "Questions"
 msgstr "Sorular"
@@ -7208,7 +7207,7 @@ msgstr "Sorular"
 msgid "Questions & Answers"
 msgstr "Sorular ve Cevaplar"
 
-#: src/components/layouts/EventHomepage/index.tsx:493
+#: src/components/layouts/EventHomepage/index.tsx:516
 msgid "Questions about this Kamp?"
 msgstr ""
 
@@ -7240,7 +7239,7 @@ msgstr "Hız sınırı aşıldı. Lütfen daha sonra tekrar deneyin."
 msgid "Re-offer Spot"
 msgstr "Yeri Yeniden Teklif Et"
 
-#: src/components/layouts/EventHomepage/index.tsx:496
+#: src/components/layouts/EventHomepage/index.tsx:519
 msgid "Reach out and we'll help you get ready."
 msgstr ""
 
@@ -7390,12 +7389,12 @@ msgstr "İadeler"
 msgid "Regional Settings"
 msgstr "Bölgesel Ayarlar"
 
-#: src/components/layouts/EventHomepage/index.tsx:644
+#: src/components/layouts/EventHomepage/index.tsx:667
 #: src/components/routes/auth/Register/index.tsx:137
 msgid "Register"
 msgstr "Kayıt Ol"
 
-#: src/components/layouts/EventHomepage/index.tsx:395
+#: src/components/layouts/EventHomepage/index.tsx:417
 msgid "Registration"
 msgstr ""
 
@@ -7408,14 +7407,14 @@ msgstr "Kayıt soruları"
 msgid "Remaining Uses"
 msgstr "Kalan Kullanım"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:587
+#: src/components/routes/product-widget/SelectProducts/index.tsx:596
 msgid "remove"
 msgstr "kaldır"
 
 #: src/components/common/Editor/Controls/InsertImageControl/index.tsx:146
 #: src/components/common/WaitlistTable/index.tsx:78
 #: src/components/common/WaitlistTable/index.tsx:111
-#: src/components/routes/product-widget/SelectProducts/index.tsx:588
+#: src/components/routes/product-widget/SelectProducts/index.tsx:597
 msgid "Remove"
 msgstr "Kaldır"
 
@@ -7752,7 +7751,7 @@ msgstr "KDV Ayarlarını Kaydet"
 msgid "Scan"
 msgstr "Tara"
 
-#: src/components/layouts/EventHomepage/index.tsx:458
+#: src/components/layouts/EventHomepage/index.tsx:481
 msgid "Schedule"
 msgstr ""
 
@@ -8192,7 +8191,7 @@ msgid "Setup & Design"
 msgstr "Kurulum ve Tasarım"
 
 #: src/components/common/ShareIcon/index.tsx:30
-#: src/components/layouts/EventHomepage/index.tsx:309
+#: src/components/layouts/EventHomepage/index.tsx:341
 #: src/components/layouts/OrganizerLayout/index.tsx:246
 #: src/components/modals/ShareModal/index.tsx:37
 #: src/components/modals/ShareModal/index.tsx:165
@@ -8241,8 +8240,8 @@ msgstr "Pazarlama onay kutusunu göster"
 msgid "Show marketing opt-in checkbox by default"
 msgstr "Varsayılan olarak pazarlama onay kutusunu göster"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:443
-#: src/components/routes/product-widget/SelectProducts/index.tsx:542
+#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:551
 msgid "Show more"
 msgstr "Daha fazla göster"
 
@@ -8291,6 +8290,10 @@ msgstr "Tek satır metin kutusu"
 msgid "Skip this step"
 msgstr "Bu adımı atla"
 
+#: src/components/layouts/EventHomepage/index.tsx:210
+msgid "Skip to main content"
+msgstr ""
+
 #: src/components/routes/auth/AcceptInvitation/index.tsx:103
 #: src/components/routes/auth/Register/index.tsx:97
 msgid "Smith"
@@ -8323,7 +8326,7 @@ msgid "Sold out"
 msgstr "Tükendi"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:81
-#: src/components/layouts/EventHomepage/index.tsx:162
+#: src/components/layouts/EventHomepage/index.tsx:161
 msgid "Sold Out"
 msgstr "Tükendi"
 
@@ -8368,7 +8371,7 @@ msgstr "Bir şeyler yanlış gitti. Lütfen tekrar deneyin."
 msgid "Sorry for the inconvenience."
 msgstr "Rahatsızlık için özür dileriz."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:313
+#: src/components/routes/product-widget/SelectProducts/index.tsx:314
 msgid "Sorry, this promo code is not recognized"
 msgstr "Üzgünüz, bu promosyon kodu tanınmıyor"
 
@@ -8745,7 +8748,7 @@ msgstr "Sistem Varsayılanı"
 msgid "T-shirt"
 msgstr "Tişört"
 
-#: src/components/layouts/EventHomepage/index.tsx:471
+#: src/components/layouts/EventHomepage/index.tsx:494
 msgid "Take Kamp home"
 msgstr ""
 
@@ -8858,7 +8861,7 @@ msgstr "Şablon başarıyla silindi"
 msgid "Template saved successfully"
 msgstr "Şablon başarıyla kaydedildi"
 
-#: src/components/layouts/EventHomepage/index.tsx:630
+#: src/components/layouts/EventHomepage/index.tsx:653
 #: src/components/layouts/OrganizerHomepage/index.tsx:348
 msgid "Terms of Service"
 msgstr "Hizmet Koşulları"
@@ -8875,8 +8878,8 @@ msgstr "Katıldığınız için teşekkürler!"
 msgid "Thanks for your support as we continue to grow and improve Hi.Events!"
 msgstr "Hi.Events'i büyütmeye ve geliştirmeye devam ederken desteğiniz için teşekkürler!"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:199
-#: src/components/routes/product-widget/SelectProducts/index.tsx:248
+#: src/components/routes/product-widget/SelectProducts/index.tsx:200
+#: src/components/routes/product-widget/SelectProducts/index.tsx:249
 msgid "That promo code is invalid"
 msgstr "Bu promosyon kodu geçersiz"
 
@@ -8953,7 +8956,7 @@ msgstr "Tıkladığınız bağlantı geçersiz."
 msgid "The locale of the customer"
 msgstr "Müşterinin dili"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:527
+#: src/components/routes/product-widget/SelectProducts/index.tsx:536
 msgid "The maximum number of products for {0}is {1}"
 msgstr "{0} için maksimum ürün sayısı {1}"
 
@@ -8994,7 +8997,7 @@ msgstr ""
 msgid "The report request failed. Please try again."
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:459
+#: src/components/layouts/EventHomepage/index.tsx:482
 msgid "The schedule will appear here when it's posted."
 msgstr ""
 
@@ -9029,11 +9032,11 @@ msgstr "Tiyatro"
 msgid "Theme & Colors"
 msgstr "Tema ve Renkler"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:339
+#: src/components/routes/product-widget/SelectProducts/index.tsx:340
 msgid "There are no products available for this event"
 msgstr "Bu etkinlik için mevcut ürün yok"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:461
 msgid "There are no products available in this category"
 msgstr "Bu kategoride mevcut ürün yok"
 
@@ -9109,7 +9112,7 @@ msgstr "Bu kod satışları izlemek için kullanılacaktır. Yalnızca harfler, 
 msgid "This color combination may be hard to read for some users"
 msgstr "Bu renk kombinasyonu bazı kullanıcılar için okunması zor olabilir"
 
-#: src/components/layouts/EventHomepage/index.tsx:334
+#: src/components/layouts/EventHomepage/index.tsx:356
 msgid "This event has ended"
 msgstr "Bu etkinlik sona erdi"
 
@@ -9391,7 +9394,7 @@ msgstr "Biletler ve Ürünler"
 msgid "Tickets are automatically offered to waitlisted customers when capacity becomes available."
 msgstr "Kapasite uygun olduğunda biletler bekleme listesindeki müşterilere otomatik olarak sunulur."
 
-#: src/components/layouts/EventHomepage/index.tsx:169
+#: src/components/layouts/EventHomepage/index.tsx:168
 msgid "Tickets Available"
 msgstr "Mevcut Biletler"
 
@@ -9639,7 +9642,7 @@ msgstr "Katılımcı check-out'u yapılamadı"
 msgid "Unable to create product. Please check the your details"
 msgstr "Ürün oluşturulamadı. Lütfen bilgilerinizi kontrol edin"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:182
+#: src/components/routes/product-widget/SelectProducts/index.tsx:183
 msgid "Unable to create product. Please check your details"
 msgstr "Ürün oluşturulamadı. Lütfen bilgilerinizi kontrol edin"
 
@@ -9717,7 +9720,7 @@ msgstr "Bilinmeyen Katılımcı"
 msgid "Unlimited"
 msgstr "Sınırsız"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:490
+#: src/components/routes/product-widget/SelectProducts/index.tsx:499
 msgid "Unlimited available"
 msgstr "Sınırsız mevcut"
 
@@ -10370,7 +10373,7 @@ msgstr "Bu kapasite hangi ürünler için geçerli olmalı?"
 msgid "What time will you be arriving?"
 msgstr "Hangi saatte geleceksiniz?"
 
-#: src/components/layouts/EventHomepage/index.tsx:451
+#: src/components/layouts/EventHomepage/index.tsx:474
 msgid "What to bring"
 msgstr ""
 
@@ -10390,7 +10393,7 @@ msgstr "Yapmanız gerekenler:"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
-#: src/components/layouts/EventHomepage/index.tsx:329
+#: src/components/layouts/EventHomepage/index.tsx:352
 msgid "When"
 msgstr ""
 
@@ -10494,8 +10497,8 @@ msgstr "Etkinleştirildiğinde, Stripe Connect işlemlerinde uygulama ücreti al
 msgid "When offline payments are enabled, users will be able to complete their orders and receive their tickets. Their tickets will clearly indicate the order is not paid, and the check-in tool will notify the check-in staff if an order requires payment."
 msgstr "Çevrimdışı ödemeler etkinleştirildiğinde, kullanıcılar siparişlerini tamamlayabilir ve biletlerini alabilir. Biletleri siparişin ödenmediğini açıkça belirtecek ve check-in aracı, bir sipariş ödeme gerektiriyorsa check-in personelini bilgilendirecek."
 
-#: src/components/layouts/EventHomepage/index.tsx:340
-#: src/components/layouts/EventHomepage/index.tsx:348
+#: src/components/layouts/EventHomepage/index.tsx:362
+#: src/components/layouts/EventHomepage/index.tsx:370
 msgid "Where"
 msgstr ""
 
@@ -10802,7 +10805,7 @@ msgstr "Etkinliğiniz yayında!"
 msgid "Your event must be live before you can sell tickets to attendees."
 msgstr "Katılımcılara bilet satmadan önce etkinliğinizin canlı olması gerekir."
 
-#: src/components/layouts/EventHomepage/index.tsx:426
+#: src/components/layouts/EventHomepage/index.tsx:449
 msgid "Your Kamp"
 msgstr ""
 

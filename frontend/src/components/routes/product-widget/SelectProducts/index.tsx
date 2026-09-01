@@ -86,6 +86,7 @@ interface SelectProductsProps {
     continueButtonText?: string;
     widgetMode?: 'preview' | 'normal' | 'embedded';
     showPoweredBy?: boolean;
+    categoryHeadingAs?: 'heading' | 'label';
 }
 
 const SelectProducts = (props: SelectProductsProps) => {
@@ -433,11 +434,19 @@ const SelectProducts = (props: SelectProductsProps) => {
                         {productCategories && productCategories.map((category) => {
                             return (
                                 <div className={'hi-product-category-row'} key={category.id}>
-                                    <h2 className={'hi-product-category-title'} style={category.description ? {
-                                        marginBottom: '0px'
-                                    } : {}}>
-                                        {category.name}
-                                    </h2>
+                                    {props.categoryHeadingAs === 'label' ? (
+                                        <div className={'hi-product-category-title'} style={category.description ? {
+                                            marginBottom: '0px'
+                                        } : {}}>
+                                            {category.name}
+                                        </div>
+                                    ) : (
+                                        <h2 className={'hi-product-category-title'} style={category.description ? {
+                                            marginBottom: '0px'
+                                        } : {}}>
+                                            {category.name}
+                                        </h2>
+                                    )}
                                     {category.description && (
                                         <div className={'hi-product-category-description'}>
                                             <Spoiler maxHeight={500} showLabel={t`Show more`} hideLabel={t`Hide`}>

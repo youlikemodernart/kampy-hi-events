@@ -32,9 +32,8 @@ import {useOrganizerTrackingPixels} from "../../../hooks/useOrganizerTrackingPix
 import {trackPixelEvent, hasActivePixels} from "../../../utilites/trackingPixels";
 import {CookieConsentBanner} from "../../common/CookieConsentBanner";
 import {ShareComponent} from "../../common/ShareIcon";
-import {EventDateRange} from "../../common/EventDateRange";
 import {CalendarOptionsPopover} from "../../common/CalendarOptionsPopover";
-import {isDateInPast} from "../../../utilites/dates.ts";
+import {formatDateWithLocale, isDateInPast} from "../../../utilites/dates.ts";
 
 // Future Shopify merch lives on this same Kamper page: one coherent surface for tickets,
 // event information, and later merchandise. The section, its Kamp Love styling, and its mount
@@ -55,7 +54,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
     const {event, promoCodeValid, promoCode} = loaderData;
     const [showScrollButton, setShowScrollButton] = useState(false);
     const [contactModalOpen, setContactModalOpen] = useState(false);
-    const ticketsSectionRef = useRef<HTMLDivElement>(null);
+    const ticketsSectionRef = useRef<HTMLElement>(null);
 
     const {consentPending, consentGranted, onConsent} = useOrganizerTrackingPixels(
         event?.organizer?.settings?.tracking_pixels
@@ -115,18 +114,18 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
     }
 
     const themeStyles = {
-        '--event-bg-color': '#f9f4f0',
-        '--event-content-bg-color': '#ffffff',
-        '--event-primary-color': '#171717',
-        '--event-primary-text-color': '#171717',
-        '--event-secondary-color': '#585254',
-        '--event-secondary-text-color': '#585254',
-        '--event-accent-contrast': '#f9f4f0',
-        '--event-accent-soft': '#fdeede',
-        '--event-accent-muted': '#ff7b00',
-        '--event-border-color': '#dadada',
-        '--theme-font-family': "'PT Serif', Georgia, 'Times New Roman', serif",
-        fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
+        '--event-bg-color': 'var(--kamp-cream)',
+        '--event-content-bg-color': 'var(--kamp-paper)',
+        '--event-primary-color': 'var(--kamp-ink)',
+        '--event-primary-text-color': 'var(--kamp-ink)',
+        '--event-secondary-color': 'var(--kamp-muted)',
+        '--event-secondary-text-color': 'var(--kamp-muted)',
+        '--event-accent-contrast': 'var(--kamp-cream)',
+        '--event-accent-soft': 'var(--kamp-orange-tint)',
+        '--event-accent-muted': 'var(--kamp-orange)',
+        '--event-border-color': 'var(--kamp-line)',
+        '--theme-font-family': 'var(--kamp-font-serif)',
+        fontFamily: 'var(--kamp-font-serif)',
     } as React.CSSProperties;
 
     const coverImageData = eventCoverImage(event);
@@ -176,6 +175,22 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         : (isOnlineEvent ? t`Online Event` : organizer?.name);
 
     const mapUrl = event.settings?.maps_url || (locationDetails ? getGoogleMapsUrl(locationDetails) : null);
+    const isSameDay = Boolean(event.end_date && event.start_date.substring(0, 10) === event.end_date.substring(0, 10));
+    const startDateDisplay = formatDateWithLocale(event.start_date, 'shortDate', event.timezone);
+    const endDateDisplay = event.end_date
+        ? formatDateWithLocale(event.end_date, 'shortDate', event.timezone)
+        : null;
+    const eventDateDisplay = isSameDay || !endDateDisplay
+        ? startDateDisplay
+        : `${startDateDisplay} - ${endDateDisplay}`;
+    const startTimeDisplay = formatDateWithLocale(event.start_date, 'timeOnly', event.timezone);
+    const endTimeDisplay = event.end_date
+        ? formatDateWithLocale(event.end_date, 'timeOnly', event.timezone)
+        : null;
+    const timezoneDisplay = formatDateWithLocale(event.start_date, 'timezone', event.timezone);
+    const eventTimeDisplay = endTimeDisplay
+        ? `${startTimeDisplay} - ${endTimeDisplay} ${timezoneDisplay}`
+        : `${startTimeDisplay} ${timezoneDisplay}`;
 
     return (
         <>
@@ -192,7 +207,9 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                 />
             )}
 
+            <a className={classes.skipLink} href="#main-content">{t`Skip to main content`}</a>
             <main
+                id="main-content"
                 className={classes.pageWrapper}
                 style={themeStyles}
                 data-mode="light"
@@ -255,7 +272,22 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                         </div>
                                     </div>
                                 )}
-
+                                {!coverImage && (
+                                    <div className={classes.heroFallback}>
+                                        {statusBadge && (
+                                            <div className={classes.statusBadges}>
+                                                <span className={classes.statusBadge}>
+                                                    <IconTicket aria-hidden="true"/>
+                                                    {statusBadge.text}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {heroKicker && (
+                                            <div className={classes.heroKicker}>{heroKicker}</div>
+                                        )}
+                                        <h1 className={classes.eventTitle}>{event.title}</h1>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Byline: who is inviting you to this Kamp */}
@@ -306,30 +338,20 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                         url={eventHomepageUrl(event)}
                                         imageUrl={coverImage || undefined}
                                     >
-                                        <button className={classes.actionButton} title={t`Share`}>
-                                            <IconShare/>
+                                        <button className={classes.actionButton} aria-label={t`Share`}>
+                                            <IconShare aria-hidden="true"/>
                                         </button>
                                     </ShareComponent>
                                 </div>
                             </div>
-
-                            {!coverImage && (
-                                <div className={classes.section}>
-                                    {heroKicker && (
-                                        <div className={classes.eyebrow}>{heroKicker}</div>
-                                    )}
-                                    <h1 className={classes.eventTitle}>{event.title}</h1>
-                                </div>
-                            )}
 
                             {/* Essentials: logistics made delightfully simple */}
                             <div className={classes.essentialsBand}>
                                 <div className={classes.essentialsGrid}>
                                     <div className={classes.essentialBlock}>
                                         <div className={classes.essentialLabel}>{t`When`}</div>
-                                        <div className={classes.essentialValue}>
-                                            <EventDateRange event={event}/>
-                                        </div>
+                                        <div className={classes.essentialValue}>{eventDateDisplay}</div>
+                                        <div className={classes.essentialSub}>{eventTimeDisplay}</div>
                                         {event.end_date && isDateInPast(event.end_date) && (
                                             <div className={classes.essentialSub}>{t`This event has ended`}</div>
                                         )}
@@ -390,10 +412,10 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                             )}
 
                             {/* Tickets: one substantial cream panel, part of the Kamp invitation */}
-                            <div className={classes.ticketsBand} id="tickets" ref={ticketsSectionRef}>
+                            <section className={classes.ticketsBand} id="tickets" ref={ticketsSectionRef} aria-labelledby="tickets-heading">
                                 <div className={classes.ticketsPanel}>
                                     <div className={classes.ticketsEyebrow}>{t`Registration`}</div>
-                                    <h2 className={classes.ticketsTitle}>{t`Join us at Kamp`}</h2>
+                                    <h2 className={classes.ticketsTitle} id="tickets-heading">{t`Join us at Kamp`}</h2>
                                     <p className={classes.ticketsIntro}>
                                         {t`Choose your registration below.`}
                                     </p>
@@ -413,14 +435,15 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                             promoCodeValid={promoCodeValid}
                                             promoCode={promoCode}
                                             showPoweredBy={false}
+                                            categoryHeadingAs="label"
                                         />
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
                             {/* Your Kamp: logistics expressed visually. Real data populates cards;
                                 modules without a data source are honest, clearly-empty insertion points. */}
-                            {(hasLocation || SHOW_KAMP_PREP) && (
+                            {hasLocation && locationDetails && (
                                 <div className={classes.yourKampBand} id="your-kamp">
                                     <div className={classes.sectionHeader}>
                                         <div className={classes.eyebrow}>{t`Your Kamp`}</div>
@@ -487,10 +510,10 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
 
                             {/* Questions: an honest FAQ-ready module backed by the real organizer contact */}
                             {organizer && (
-                                <section className={classes.faqBand} id="questions" aria-label={t`Questions`}>
+                                <section className={classes.faqBand} id="questions" aria-labelledby="questions-heading">
                                     <div className={classes.sectionHeader}>
                                         <div className={classes.eyebrow}>{t`Questions`}</div>
-                                        <h2 className={classes.sectionTitle}>{t`Questions about this Kamp?`}</h2>
+                                        <h2 className={classes.sectionTitle} id="questions-heading">{t`Questions about this Kamp?`}</h2>
                                     </div>
                                     <p className={classes.faqNote}>
                                         {t`Reach out and we'll help you get ready.`}
@@ -566,9 +589,9 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className={classes.socialLink}
-                                                                    title={platform}
+                                                                    aria-label={platform}
                                                                 >
-                                                                    <IconComponent size={18}/>
+                                                                    <IconComponent size={18} aria-hidden="true"/>
                                                                 </a>
                                                             );
                                                         })}
@@ -583,9 +606,9 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className={classes.socialLink}
-                                                                title={hostname}
+                                                                aria-label={hostname}
                                                             >
-                                                                <IconWorld size={18}/>
+                                                                <IconWorld size={18} aria-hidden="true"/>
                                                             </a>
                                                         );
                                                     } catch {
@@ -606,7 +629,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                             )}
 
                             {/* Kamp Love signature: Camping, Connection, Community, Christ */}
-                            <div className={classes.signatureBand} aria-label={t`Kamp Love`}>
+                            <div className={classes.signatureBand}>
                                 <span className={classes.signatureItem}>{t`Camping`}</span>
                                 <span className={classes.signatureItem}>{t`Connection`}</span>
                                 <span className={classes.signatureItem}>{t`Community`}</span>
@@ -615,7 +638,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                         </div>
 
                         {/* Footer */}
-                        <div className={classes.footerSection}>
+                        <footer className={classes.footerSection}>
                             <div className={classes.footerLinks}>
                                 <Anchor
                                     href={getConfig('VITE_PRIVACY_URL', 'https://kamplove.org/privacy-policy')}
@@ -631,7 +654,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                 </Anchor>
                             </div>
                             <PoweredByFooter className={classes.poweredByFooter}/>
-                        </div>
+                        </footer>
                     </div>
 
                     {/* Floating Scroll Button */}

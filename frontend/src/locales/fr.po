@@ -56,7 +56,7 @@ msgstr "{0} <0>sorti</0> avec succès"
 msgid "{0} Active Webhooks"
 msgstr "{0} webhooks actifs"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:495
+#: src/components/routes/product-widget/SelectProducts/index.tsx:504
 msgid "{0} available"
 msgstr "{0} disponible"
 
@@ -271,7 +271,7 @@ msgstr "Une saisie de texte sur plusieurs lignes"
 msgid "A new verification code has been sent to your email"
 msgstr "Un nouveau code de vérification a été envoyé à votre adresse e-mail"
 
-#: src/components/layouts/EventHomepage/index.tsx:452
+#: src/components/layouts/EventHomepage/index.tsx:475
 msgid "A packing list will appear here when it's posted."
 msgstr ""
 
@@ -316,7 +316,7 @@ msgstr "Une taxe standard, comme la TVA ou la TPS"
 msgid "Abandoned"
 msgstr "Abandonné"
 
-#: src/components/layouts/EventHomepage/index.tsx:383
+#: src/components/layouts/EventHomepage/index.tsx:405
 msgid "About"
 msgstr "À propos"
 
@@ -531,7 +531,7 @@ msgstr "Ajouter un niveau"
 
 #: src/components/common/AddEventToCalendarButton/index.tsx:14
 #: src/components/common/AddToCalendarCTA/index.tsx:24
-#: src/components/layouts/EventHomepage/index.tsx:362
+#: src/components/layouts/EventHomepage/index.tsx:384
 msgid "Add to Calendar"
 msgstr "Ajouter au calendrier"
 
@@ -828,7 +828,7 @@ msgstr ""
 msgid "Application Fees Configuration"
 msgstr "Configuration des frais d'application"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:583
+#: src/components/routes/product-widget/SelectProducts/index.tsx:592
 msgid "applied"
 msgstr "appliqué"
 
@@ -844,7 +844,7 @@ msgstr "S'applique à 1 produit"
 msgid "Apply"
 msgstr "Appliquer"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:611
+#: src/components/routes/product-widget/SelectProducts/index.tsx:620
 msgid "Apply Promo Code"
 msgstr "Appliquer le code promotionnel"
 
@@ -1424,7 +1424,7 @@ msgstr "Scanner caméra"
 msgid "Campaign"
 msgstr "Campagne"
 
-#: src/components/layouts/EventHomepage/index.tsx:610
+#: src/components/layouts/EventHomepage/index.tsx:633
 msgid "Camping"
 msgstr ""
 
@@ -1718,11 +1718,11 @@ msgstr "Choisissez le paramètre par défaut pour les nouveaux événements. Cec
 msgid "Choose who pays the platform fee. This does not affect additional fees you've configured in your account settings."
 msgstr "Choisissez qui paie les frais de plateforme. Cela n'affecte pas les frais supplémentaires que vous avez configurés dans les paramètres de votre compte."
 
-#: src/components/layouts/EventHomepage/index.tsx:398
+#: src/components/layouts/EventHomepage/index.tsx:420
 msgid "Choose your registration below."
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:613
+#: src/components/layouts/EventHomepage/index.tsx:636
 msgid "Christ"
 msgstr ""
 
@@ -1746,7 +1746,7 @@ msgstr "Cliquez pour copier"
 msgid "Click to view notes"
 msgstr "Cliquez pour voir les notes"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:616
+#: src/components/routes/product-widget/SelectProducts/index.tsx:625
 msgid "close"
 msgstr "fermer"
 
@@ -1755,7 +1755,7 @@ msgstr "fermer"
 #: src/components/modals/JoinWaitlistModal/index.tsx:103
 #: src/components/modals/JoinWaitlistModal/index.tsx:130
 #: src/components/modals/RefundOrderModal/index.tsx:188
-#: src/components/routes/product-widget/SelectProducts/index.tsx:617
+#: src/components/routes/product-widget/SelectProducts/index.tsx:626
 msgid "Close"
 msgstr "Fermer"
 
@@ -1855,7 +1855,7 @@ msgstr "Mots-clés séparés par des virgules qui décrivent l'événement. Ceux
 msgid "Communication Preferences"
 msgstr "Préférences de communication"
 
-#: src/components/layouts/EventHomepage/index.tsx:612
+#: src/components/layouts/EventHomepage/index.tsx:635
 msgid "Community"
 msgstr ""
 
@@ -2089,7 +2089,7 @@ msgstr ""
 msgid "Connected to Stripe"
 msgstr "Connecté à Stripe"
 
-#: src/components/layouts/EventHomepage/index.tsx:611
+#: src/components/layouts/EventHomepage/index.tsx:634
 msgid "Connection"
 msgstr ""
 
@@ -2098,8 +2098,8 @@ msgid "Connection Details"
 msgstr "Détails de connexion"
 
 #: src/components/common/WaitlistTable/index.tsx:149
-#: src/components/layouts/EventHomepage/index.tsx:503
-#: src/components/layouts/EventHomepage/index.tsx:600
+#: src/components/layouts/EventHomepage/index.tsx:526
+#: src/components/layouts/EventHomepage/index.tsx:623
 #: src/components/layouts/OrganizerHomepage/index.tsx:258
 msgid "Contact"
 msgstr "Contact"
@@ -2119,7 +2119,7 @@ msgstr "Email de contact pour le support"
 
 #: src/components/common/WidgetEditor/index.tsx:29
 #: src/components/common/WidgetEditor/index.tsx:222
-#: src/components/routes/product-widget/SelectProducts/index.tsx:569
+#: src/components/routes/product-widget/SelectProducts/index.tsx:578
 msgid "Continue"
 msgstr "Continuer"
 
@@ -2138,7 +2138,7 @@ msgstr "Continuer la configuration"
 msgid "Continue Setup"
 msgstr "Continuer la configuration"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:405
+#: src/components/routes/product-widget/SelectProducts/index.tsx:406
 msgid "Continue to Checkout"
 msgstr "Passer à la caisse"
 
@@ -2850,7 +2850,7 @@ msgstr "Remise en {0}"
 msgid "Discount Type"
 msgstr "Type de remise"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:422
+#: src/components/routes/product-widget/SelectProducts/index.tsx:423
 msgid "Dismiss this message"
 msgstr "Ignorer ce message"
 
@@ -4287,8 +4287,8 @@ msgstr "Générer un code"
 msgid "German"
 msgstr "Allemand"
 
-#: src/components/layouts/EventHomepage/index.tsx:373
-#: src/components/layouts/EventHomepage/index.tsx:443
+#: src/components/layouts/EventHomepage/index.tsx:395
+#: src/components/layouts/EventHomepage/index.tsx:466
 msgid "Get Directions"
 msgstr "Itinéraire"
 
@@ -4308,7 +4308,7 @@ msgstr "Commencer"
 msgid "Get your event ready"
 msgstr "Préparez votre événement"
 
-#: src/components/layouts/EventHomepage/index.tsx:427
+#: src/components/layouts/EventHomepage/index.tsx:450
 msgid "Getting ready"
 msgstr ""
 
@@ -4316,7 +4316,7 @@ msgstr ""
 msgid "Getting Started"
 msgstr "Commencer"
 
-#: src/components/layouts/EventHomepage/index.tsx:432
+#: src/components/layouts/EventHomepage/index.tsx:455
 msgid "Getting there"
 msgstr ""
 
@@ -4376,7 +4376,7 @@ msgstr "Gestion des invités"
 msgid "Guests"
 msgstr "Invités"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:578
+#: src/components/routes/product-widget/SelectProducts/index.tsx:587
 msgid "Have a promo code?"
 msgstr "Avez vous un code de réduction?"
 
@@ -4439,8 +4439,8 @@ msgstr "Caché à la vue du public"
 msgid "Hidden questions are only visible to the event organizer and not to the customer."
 msgstr "Les questions masquées ne sont visibles que par l'organisateur de l'événement et non par le client."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:443
-#: src/components/routes/product-widget/SelectProducts/index.tsx:543
+#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:552
 msgid "Hide"
 msgstr "Cacher"
 
@@ -4586,7 +4586,7 @@ msgstr "J'accepte les <0>termes et conditions</0>"
 msgid "I confirm this is a transactional message related to this event"
 msgstr "Je confirme qu'il s'agit d'un message transactionnel lié à cet événement"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:382
+#: src/components/routes/product-widget/SelectProducts/index.tsx:383
 msgid "If a new tab did not open automatically, please click the button below to continue to checkout."
 msgstr "Si un nouvel onglet ne s'est pas ouvert automatiquement, veuillez cliquer sur le bouton ci-dessous pour poursuivre le paiement."
 
@@ -4879,11 +4879,11 @@ msgstr "John"
 msgid "Johnson"
 msgstr "Johnson"
 
-#: src/components/layouts/EventHomepage/index.tsx:342
+#: src/components/layouts/EventHomepage/index.tsx:364
 msgid "Join from anywhere"
 msgstr "Rejoignez de n'importe où"
 
-#: src/components/layouts/EventHomepage/index.tsx:396
+#: src/components/layouts/EventHomepage/index.tsx:418
 msgid "Join us at Kamp"
 msgstr ""
 
@@ -4910,10 +4910,10 @@ msgid "Just looking for your tickets?"
 msgstr "Vous cherchez vos billets ?"
 
 #: src/components/layouts/EventHomepage/index.tsx:609
-msgid "Kamp Love"
-msgstr ""
+#~ msgid "Kamp Love"
+#~ msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:474
+#: src/components/layouts/EventHomepage/index.tsx:497
 msgid "Kamp Love merch will live here, on the same page as your ticket."
 msgstr ""
 
@@ -4921,7 +4921,7 @@ msgstr ""
 msgid "Kamp net settlement"
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:470
+#: src/components/layouts/EventHomepage/index.tsx:493
 msgid "Kamp Store"
 msgstr ""
 
@@ -5286,11 +5286,11 @@ msgstr "Maximum par commande"
 msgid "Medium"
 msgstr "Support"
 
-#: src/components/layouts/EventHomepage/index.tsx:468
+#: src/components/layouts/EventHomepage/index.tsx:491
 msgid "Merch"
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:483
+#: src/components/layouts/EventHomepage/index.tsx:506
 msgid "Merch storefront mounts here once connected."
 msgstr ""
 
@@ -5991,8 +5991,8 @@ msgstr "En cours"
 msgid "Online"
 msgstr "En ligne"
 
-#: src/components/layouts/EventHomepage/index.tsx:176
-#: src/components/layouts/EventHomepage/index.tsx:341
+#: src/components/layouts/EventHomepage/index.tsx:175
+#: src/components/layouts/EventHomepage/index.tsx:363
 #: src/components/layouts/OrganizerHomepage/EventCard/index.tsx:167
 msgid "Online Event"
 msgstr "Événement en ligne"
@@ -6317,7 +6317,7 @@ msgstr "Nom de l'organisation"
 
 #: src/components/common/AdminEventsTable/index.tsx:87
 #: src/components/common/AttendeeTicket/index.tsx:82
-#: src/components/layouts/EventHomepage/index.tsx:512
+#: src/components/layouts/EventHomepage/index.tsx:535
 #: src/components/routes/admin/Dashboard/index.tsx:257
 #: src/components/routes/admin/Dashboard/index.tsx:306
 #: src/components/routes/admin/Dashboard/index.tsx:352
@@ -6780,7 +6780,7 @@ msgstr "Veuillez vérifier que votre email est valide"
 msgid "Please check your email to confirm your email address"
 msgstr "Veuillez vérifier votre courrier électronique pour confirmer votre adresse e-mail"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:373
+#: src/components/routes/product-widget/SelectProducts/index.tsx:374
 msgid "Please continue in the new tab"
 msgstr "Veuillez continuer dans le nouvel onglet"
 
@@ -6837,7 +6837,7 @@ msgstr "Veuillez sélectionner une plage de dates"
 msgid "Please select an image."
 msgstr "Veuillez sélectionner une image."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:304
+#: src/components/routes/product-widget/SelectProducts/index.tsx:305
 msgid "Please select at least one product"
 msgstr "Veuillez sélectionner au moins un produit"
 
@@ -6991,7 +6991,7 @@ msgid "Print to PDF"
 msgstr "Imprimer en PDF"
 
 #: src/components/common/CookieConsentBanner/index.tsx:51
-#: src/components/layouts/EventHomepage/index.tsx:624
+#: src/components/layouts/EventHomepage/index.tsx:647
 #: src/components/layouts/OrganizerHomepage/index.tsx:341
 msgid "Privacy Policy"
 msgstr "Politique de confidentialité"
@@ -7096,7 +7096,7 @@ msgstr "Profil"
 msgid "Profile updated successfully"
 msgstr "Mise à jour du profil réussie"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:239
+#: src/components/routes/product-widget/SelectProducts/index.tsx:240
 msgid "Promo {promo_code} code applied"
 msgstr "Code promotionnel {promo_code} appliqué"
 
@@ -7197,8 +7197,7 @@ msgstr "Description de la question"
 msgid "Question Title"
 msgstr "titre de question"
 
-#: src/components/layouts/EventHomepage/index.tsx:490
-#: src/components/layouts/EventHomepage/index.tsx:492
+#: src/components/layouts/EventHomepage/index.tsx:515
 #: src/components/modals/DuplicateEventModal/index.tsx:25
 msgid "Questions"
 msgstr "Des questions"
@@ -7208,7 +7207,7 @@ msgstr "Des questions"
 msgid "Questions & Answers"
 msgstr "Questions et réponses"
 
-#: src/components/layouts/EventHomepage/index.tsx:493
+#: src/components/layouts/EventHomepage/index.tsx:516
 msgid "Questions about this Kamp?"
 msgstr ""
 
@@ -7240,7 +7239,7 @@ msgstr "Limite de débit dépassée. Veuillez réessayer plus tard."
 msgid "Re-offer Spot"
 msgstr "Réoffrir une place"
 
-#: src/components/layouts/EventHomepage/index.tsx:496
+#: src/components/layouts/EventHomepage/index.tsx:519
 msgid "Reach out and we'll help you get ready."
 msgstr ""
 
@@ -7390,12 +7389,12 @@ msgstr "Remboursements"
 msgid "Regional Settings"
 msgstr "Paramètres régionaux"
 
-#: src/components/layouts/EventHomepage/index.tsx:644
+#: src/components/layouts/EventHomepage/index.tsx:667
 #: src/components/routes/auth/Register/index.tsx:137
 msgid "Register"
 msgstr "Registre"
 
-#: src/components/layouts/EventHomepage/index.tsx:395
+#: src/components/layouts/EventHomepage/index.tsx:417
 msgid "Registration"
 msgstr ""
 
@@ -7408,14 +7407,14 @@ msgstr "Questions d'inscription"
 msgid "Remaining Uses"
 msgstr "Utilisations restantes"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:587
+#: src/components/routes/product-widget/SelectProducts/index.tsx:596
 msgid "remove"
 msgstr "retirer"
 
 #: src/components/common/Editor/Controls/InsertImageControl/index.tsx:146
 #: src/components/common/WaitlistTable/index.tsx:78
 #: src/components/common/WaitlistTable/index.tsx:111
-#: src/components/routes/product-widget/SelectProducts/index.tsx:588
+#: src/components/routes/product-widget/SelectProducts/index.tsx:597
 msgid "Remove"
 msgstr "Retirer"
 
@@ -7752,7 +7751,7 @@ msgstr "Enregistrer les paramètres TVA"
 msgid "Scan"
 msgstr "Scanner"
 
-#: src/components/layouts/EventHomepage/index.tsx:458
+#: src/components/layouts/EventHomepage/index.tsx:481
 msgid "Schedule"
 msgstr ""
 
@@ -8192,7 +8191,7 @@ msgid "Setup & Design"
 msgstr "Configuration et design"
 
 #: src/components/common/ShareIcon/index.tsx:30
-#: src/components/layouts/EventHomepage/index.tsx:309
+#: src/components/layouts/EventHomepage/index.tsx:341
 #: src/components/layouts/OrganizerLayout/index.tsx:246
 #: src/components/modals/ShareModal/index.tsx:37
 #: src/components/modals/ShareModal/index.tsx:165
@@ -8241,8 +8240,8 @@ msgstr "Afficher la case d'opt-in marketing"
 msgid "Show marketing opt-in checkbox by default"
 msgstr "Afficher la case d'opt-in marketing par défaut"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:443
-#: src/components/routes/product-widget/SelectProducts/index.tsx:542
+#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:551
 msgid "Show more"
 msgstr "Montre plus"
 
@@ -8291,6 +8290,10 @@ msgstr "Zone de texte sur une seule ligne"
 msgid "Skip this step"
 msgstr "Passer cette étape"
 
+#: src/components/layouts/EventHomepage/index.tsx:210
+msgid "Skip to main content"
+msgstr ""
+
 #: src/components/routes/auth/AcceptInvitation/index.tsx:103
 #: src/components/routes/auth/Register/index.tsx:97
 msgid "Smith"
@@ -8323,7 +8326,7 @@ msgid "Sold out"
 msgstr "Épuisé"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:81
-#: src/components/layouts/EventHomepage/index.tsx:162
+#: src/components/layouts/EventHomepage/index.tsx:161
 msgid "Sold Out"
 msgstr "Épuisé"
 
@@ -8368,7 +8371,7 @@ msgstr "Quelque chose s'est mal passé. Veuillez réessayer."
 msgid "Sorry for the inconvenience."
 msgstr "Désolé pour la gêne occasionnée."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:313
+#: src/components/routes/product-widget/SelectProducts/index.tsx:314
 msgid "Sorry, this promo code is not recognized"
 msgstr "Désolé, ce code promo n'est pas reconnu"
 
@@ -8745,7 +8748,7 @@ msgstr "Par défaut du système"
 msgid "T-shirt"
 msgstr "T-shirt"
 
-#: src/components/layouts/EventHomepage/index.tsx:471
+#: src/components/layouts/EventHomepage/index.tsx:494
 msgid "Take Kamp home"
 msgstr ""
 
@@ -8858,7 +8861,7 @@ msgstr "Modèle supprimé avec succès"
 msgid "Template saved successfully"
 msgstr "Modèle sauvegardé avec succès"
 
-#: src/components/layouts/EventHomepage/index.tsx:630
+#: src/components/layouts/EventHomepage/index.tsx:653
 #: src/components/layouts/OrganizerHomepage/index.tsx:348
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
@@ -8875,8 +8878,8 @@ msgstr "Merci pour votre présence !"
 msgid "Thanks for your support as we continue to grow and improve Hi.Events!"
 msgstr "Merci pour votre soutien alors que nous continuons à développer et améliorer Hi.Events !"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:199
-#: src/components/routes/product-widget/SelectProducts/index.tsx:248
+#: src/components/routes/product-widget/SelectProducts/index.tsx:200
+#: src/components/routes/product-widget/SelectProducts/index.tsx:249
 msgid "That promo code is invalid"
 msgstr "Ce code promotionnel n'est pas valide"
 
@@ -8953,7 +8956,7 @@ msgstr "Le lien sur lequel vous avez cliqué n'est pas valide."
 msgid "The locale of the customer"
 msgstr "La langue du client"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:527
+#: src/components/routes/product-widget/SelectProducts/index.tsx:536
 msgid "The maximum number of products for {0}is {1}"
 msgstr "Le nombre maximum de produits pour {0} est {1}"
 
@@ -8994,7 +8997,7 @@ msgstr ""
 msgid "The report request failed. Please try again."
 msgstr ""
 
-#: src/components/layouts/EventHomepage/index.tsx:459
+#: src/components/layouts/EventHomepage/index.tsx:482
 msgid "The schedule will appear here when it's posted."
 msgstr ""
 
@@ -9029,11 +9032,11 @@ msgstr "Théâtre"
 msgid "Theme & Colors"
 msgstr "Thème et couleurs"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:339
+#: src/components/routes/product-widget/SelectProducts/index.tsx:340
 msgid "There are no products available for this event"
 msgstr "Il n'y a pas de produits disponibles pour cet événement"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:452
+#: src/components/routes/product-widget/SelectProducts/index.tsx:461
 msgid "There are no products available in this category"
 msgstr "Il n'y a pas de produits disponibles dans cette catégorie"
 
@@ -9109,7 +9112,7 @@ msgstr "Ce code sera utilisé pour suivre les ventes. Seuls les lettres, chiffre
 msgid "This color combination may be hard to read for some users"
 msgstr "Cette combinaison de couleurs peut être difficile à lire pour certains utilisateurs"
 
-#: src/components/layouts/EventHomepage/index.tsx:334
+#: src/components/layouts/EventHomepage/index.tsx:356
 msgid "This event has ended"
 msgstr "Cet événement est terminé"
 
@@ -9391,7 +9394,7 @@ msgstr "Billets et produits"
 msgid "Tickets are automatically offered to waitlisted customers when capacity becomes available."
 msgstr "Les billets sont automatiquement proposés aux clients en liste d'attente lorsque des places se libèrent."
 
-#: src/components/layouts/EventHomepage/index.tsx:169
+#: src/components/layouts/EventHomepage/index.tsx:168
 msgid "Tickets Available"
 msgstr "Billets disponibles"
 
@@ -9639,7 +9642,7 @@ msgstr "Impossible de sortir le participant"
 msgid "Unable to create product. Please check the your details"
 msgstr "Impossible de créer le produit. Veuillez vérifier vos détails"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:182
+#: src/components/routes/product-widget/SelectProducts/index.tsx:183
 msgid "Unable to create product. Please check your details"
 msgstr "Impossible de créer le produit. Veuillez vérifier vos détails"
 
@@ -9717,7 +9720,7 @@ msgstr "Participant inconnu"
 msgid "Unlimited"
 msgstr "Illimité"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:490
+#: src/components/routes/product-widget/SelectProducts/index.tsx:499
 msgid "Unlimited available"
 msgstr "Disponible illimité"
 
@@ -10370,7 +10373,7 @@ msgstr "À quels produits cette capacité doit-elle s'appliquer ?"
 msgid "What time will you be arriving?"
 msgstr "A quelle heure arriverez-vous ?"
 
-#: src/components/layouts/EventHomepage/index.tsx:451
+#: src/components/layouts/EventHomepage/index.tsx:474
 msgid "What to bring"
 msgstr ""
 
@@ -10390,7 +10393,7 @@ msgstr "Ce que vous devez faire :"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
-#: src/components/layouts/EventHomepage/index.tsx:329
+#: src/components/layouts/EventHomepage/index.tsx:352
 msgid "When"
 msgstr ""
 
@@ -10494,8 +10497,8 @@ msgstr "Lorsqu'activé, aucun frais d'application ne sera facturé sur les trans
 msgid "When offline payments are enabled, users will be able to complete their orders and receive their tickets. Their tickets will clearly indicate the order is not paid, and the check-in tool will notify the check-in staff if an order requires payment."
 msgstr "Lorsque les paiements hors ligne sont activés, les utilisateurs pourront finaliser leurs commandes et recevoir leurs billets. Leurs billets indiqueront clairement que la commande n'est pas payée, et l'outil d'enregistrement informera le personnel si une commande nécessite un paiement."
 
-#: src/components/layouts/EventHomepage/index.tsx:340
-#: src/components/layouts/EventHomepage/index.tsx:348
+#: src/components/layouts/EventHomepage/index.tsx:362
+#: src/components/layouts/EventHomepage/index.tsx:370
 msgid "Where"
 msgstr ""
 
@@ -10802,7 +10805,7 @@ msgstr "Votre événement est en ligne !"
 msgid "Your event must be live before you can sell tickets to attendees."
 msgstr "Votre événement doit être en ligne avant que vous puissiez vendre des billets aux participants."
 
-#: src/components/layouts/EventHomepage/index.tsx:426
+#: src/components/layouts/EventHomepage/index.tsx:449
 msgid "Your Kamp"
 msgstr ""
 
