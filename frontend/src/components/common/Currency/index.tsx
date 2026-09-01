@@ -47,44 +47,44 @@ interface ProductPriceProps {
 }
 
 export const ProductPriceDisplay: React.FC<ProductPriceProps> = ({
-                                                                   product,
                                                                    price,
                                                                    currency = 'USD',
                                                                    className,
                                                                    freeLabel,
-                                                                   taxAndServiceFeeDisplayType = 'exclusive',
+                                                                   taxAndServiceFeeDisplayType = 'EXCLUSIVE',
                                                                }) => {
-    let displayPrice = price.price;
     const totalTaxAndFees = (price.tax_total || 0) + (price.fee_total || 0);
+    const isInclusive = taxAndServiceFeeDisplayType === 'INCLUSIVE';
+    const displayPrice = price.price + (isInclusive ? totalTaxAndFees : 0);
 
-    // Order taxes and service fees for display
-    const orderedFees = [...(product.taxes || [])].sort((a, b) => a.type.localeCompare(b.type));
-    const feeDescriptions = orderedFees.map(fee => fee.name).join(', ');
-
-    const getTextAppendage = () => {
-        if (taxAndServiceFeeDisplayType === 'INCLUSIVE') {
-            displayPrice += totalTaxAndFees;
-            return `incl. ${feeDescriptions}`;
-        } else {
-            const formattedFees = formatCurrency(totalTaxAndFees, currency);
-            return `excl. ${formattedFees} ${feeDescriptions}`;
-        }
-    };
-
-    const appendedText = totalTaxAndFees === 0 ? '' : (
-        <>
-            <Popover>
-                <Popover.Target>
-                    <span style={{cursor: 'pointer'}}> <IconInfoCircle size={18}/> </span>
-                </Popover.Target>
-                <Popover.Dropdown>
-                    {getTextAppendage()}
-                </Popover.Dropdown>
-            </Popover>
-        </>
-    )
-
+    const feeDescriptions = (price.tax_total || 0) > 0 && (price.fee_total || 0) > 0
+        ? t`fees and taxes`
+        : (price.tax_total || 0) > 0
+            ? t`taxes`
+            : t`fees`;
+    const formattedBasePrice = formatCurrency(price.price, currency);
+    const formattedFees = formatCurrency(totalTaxAndFees, currency);
     const formattedPrice = formatCurrency(displayPrice, currency);
+    const feeSummary = isInclusive
+        ? t`Includes ${formattedFees} ${feeDescriptions}`
+        : t`Plus ${formattedFees} ${feeDescriptions}`;
+    const priceBreakdown = isInclusive
+        ? t`Base price ${formattedBasePrice}. Fees ${formattedFees}. Total ${formattedPrice}.`
+        : t`Base price ${formattedBasePrice}. Fees ${formattedFees}.`;
+
+    const appendedText = totalTaxAndFees === 0 ? null : (
+        <div className="hi-price-fee-summary">
+            <span>{feeSummary}</span>
+            <Popover position="bottom" withArrow>
+                <Popover.Target>
+                    <button type="button" className="hi-price-breakdown-trigger" aria-label={t`Show price breakdown`}>
+                        <IconInfoCircle size={18} aria-hidden="true"/>
+                    </button>
+                </Popover.Target>
+                <Popover.Dropdown>{priceBreakdown}</Popover.Dropdown>
+            </Popover>
+        </div>
+    );
 
     if (displayPrice === 0 && totalTaxAndFees === 0) {
         return <span className={className}>{freeLabel || t`Free`}</span>;
@@ -93,7 +93,7 @@ export const ProductPriceDisplay: React.FC<ProductPriceProps> = ({
     return (
         <div className={className}>
             <div>{formattedPrice}</div>
-            <div>{appendedText}</div>
+            {appendedText}
         </div>
     );
 };

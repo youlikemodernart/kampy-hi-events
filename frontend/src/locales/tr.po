@@ -56,7 +56,7 @@ msgstr "{0} <0>başarıyla check-out yaptı</0>"
 msgid "{0} Active Webhooks"
 msgstr "{0} Aktif Webhook"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:504
+#: src/components/routes/product-widget/SelectProducts/index.tsx:516
 msgid "{0} available"
 msgstr "{0} mevcut"
 
@@ -828,7 +828,7 @@ msgstr ""
 msgid "Application Fees Configuration"
 msgstr "Uygulama Ücretleri Yapılandırması"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:592
+#: src/components/routes/product-widget/SelectProducts/index.tsx:611
 msgid "applied"
 msgstr "uygulandı"
 
@@ -844,7 +844,7 @@ msgstr "1 ürüne uygulanır"
 msgid "Apply"
 msgstr "Uygula"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:620
+#: src/components/routes/product-widget/SelectProducts/index.tsx:639
 msgid "Apply Promo Code"
 msgstr "Promosyon Kodunu Uygula"
 
@@ -1306,6 +1306,14 @@ msgstr "Arkaplan Rengi"
 msgid "Background Type"
 msgstr "Arkaplan Türü"
 
+#: src/components/common/Currency/index.tsx:73
+msgid "Base price {formattedBasePrice}. Fees {formattedFees}."
+msgstr ""
+
+#: src/components/common/Currency/index.tsx:72
+msgid "Base price {formattedBasePrice}. Fees {formattedFees}. Total {formattedPrice}."
+msgstr ""
+
 #: src/components/routes/organizer/Settings/index.tsx:30
 #: src/components/routes/organizer/Settings/Sections/BasicSettings/index.tsx:63
 msgid "Basic Information"
@@ -1694,6 +1702,10 @@ msgstr "Çince (Geleneksel)"
 msgid "Choose a color for your background"
 msgstr "Arkaplanınız için bir renk seçin"
 
+#: src/components/routes/product-widget/SelectProducts/index.tsx:332
+msgid "Choose a ticket quantity to continue"
+msgstr ""
+
 #: src/components/common/ThemeFontControl/index.tsx:66
 msgid "Choose a typeface that matches your brand. Fonts are self-hosted via Bunny Fonts."
 msgstr "Markanızla uyumlu bir yazı tipi seçin. Yazı tipleri Bunny Fonts üzerinden barındırılır."
@@ -1746,7 +1758,7 @@ msgstr "Kopyalamak için tıklayın"
 msgid "Click to view notes"
 msgstr "Notları görüntülemek için tıklayın"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:625
+#: src/components/routes/product-widget/SelectProducts/index.tsx:644
 msgid "close"
 msgstr "kapat"
 
@@ -1755,7 +1767,7 @@ msgstr "kapat"
 #: src/components/modals/JoinWaitlistModal/index.tsx:103
 #: src/components/modals/JoinWaitlistModal/index.tsx:130
 #: src/components/modals/RefundOrderModal/index.tsx:188
-#: src/components/routes/product-widget/SelectProducts/index.tsx:626
+#: src/components/routes/product-widget/SelectProducts/index.tsx:645
 msgid "Close"
 msgstr "Kapat"
 
@@ -2119,7 +2131,7 @@ msgstr "Destek için iletişim e-postası"
 
 #: src/components/common/WidgetEditor/index.tsx:29
 #: src/components/common/WidgetEditor/index.tsx:222
-#: src/components/routes/product-widget/SelectProducts/index.tsx:578
+#: src/components/routes/product-widget/SelectProducts/index.tsx:325
 msgid "Continue"
 msgstr "Devam Et"
 
@@ -2138,7 +2150,7 @@ msgstr "Kuruluma devam et"
 msgid "Continue Setup"
 msgstr "Kuruluma Devam Et"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:406
+#: src/components/routes/product-widget/SelectProducts/index.tsx:418
 msgid "Continue to Checkout"
 msgstr "Ödemeye Devam Et"
 
@@ -2850,7 +2862,7 @@ msgstr "{0} cinsinden indirim"
 msgid "Discount Type"
 msgstr "İndirim Türü"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:423
+#: src/components/routes/product-widget/SelectProducts/index.tsx:435
 msgid "Dismiss this message"
 msgstr "Bu mesajı kapat"
 
@@ -4013,12 +4025,20 @@ msgstr "Ücret Para Birimi"
 msgid "Fee Handling"
 msgstr "Ücret işleme"
 
+#: src/components/common/Currency/index.tsx:64
+msgid "fees"
+msgstr ""
+
 #: src/components/common/InlineOrderSummary/index.tsx:140
 #: src/components/common/OrdersTable/index.tsx:359
 #: src/components/forms/ProductForm/index.tsx:419
 #: src/components/routes/organizer/Reports/RevenueSummaryReport/index.tsx:54
 msgid "Fees"
 msgstr "Ücretler"
+
+#: src/components/common/Currency/index.tsx:61
+msgid "fees and taxes"
+msgstr ""
 
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:291
 msgid "Fees are subject to change. You will be notified of any changes to your fee structure."
@@ -4376,7 +4396,7 @@ msgstr "Misafir yönetimi"
 msgid "Guests"
 msgstr "Misafirler"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:587
+#: src/components/routes/product-widget/SelectProducts/index.tsx:606
 msgid "Have a promo code?"
 msgstr "Promosyon kodunuz var mı?"
 
@@ -4439,8 +4459,8 @@ msgstr "Halk görünümünden gizli"
 msgid "Hidden questions are only visible to the event organizer and not to the customer."
 msgstr "Gizli sorular yalnızca etkinlik organizatörü tarafından görülebilir, müşteri tarafından görülemez."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:452
-#: src/components/routes/product-widget/SelectProducts/index.tsx:552
+#: src/components/routes/product-widget/SelectProducts/index.tsx:464
+#: src/components/routes/product-widget/SelectProducts/index.tsx:564
 msgid "Hide"
 msgstr "Gizle"
 
@@ -4586,7 +4606,7 @@ msgstr "<0>Şartlar ve koşulları</0> kabul ediyorum"
 msgid "I confirm this is a transactional message related to this event"
 msgstr "Bunun bu etkinlikle ilgili işlemsel bir mesaj olduğunu onaylıyorum"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:383
+#: src/components/routes/product-widget/SelectProducts/index.tsx:395
 msgid "If a new tab did not open automatically, please click the button below to continue to checkout."
 msgstr "Yeni bir sekme otomatik olarak açılmadıysa, ödemeye devam etmek için lütfen aşağıdaki düğmeyi tıklayın."
 
@@ -4703,6 +4723,10 @@ msgstr "Fiyata vergi ve ücretleri dahil et"
 #: src/components/common/CheckInListList/index.tsx:101
 msgid "Includes {0} products"
 msgstr "{0} ürün içerir"
+
+#: src/components/common/Currency/index.tsx:69
+msgid "Includes {formattedFees} {feeDescriptions}"
+msgstr ""
 
 #: src/components/common/CheckInListList/index.tsx:102
 msgid "Includes 1 product"
@@ -6780,7 +6804,7 @@ msgstr "Lütfen e-postanızın geçerli olduğunu kontrol edin"
 msgid "Please check your email to confirm your email address"
 msgstr "E-posta adresinizi onaylamak için lütfen e-postanızı kontrol edin"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:374
+#: src/components/routes/product-widget/SelectProducts/index.tsx:386
 msgid "Please continue in the new tab"
 msgstr "Lütfen yeni sekmede devam edin"
 
@@ -6837,7 +6861,7 @@ msgstr "Lütfen bir tarih aralığı seçin"
 msgid "Please select an image."
 msgstr "Lütfen bir görsel seçin."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:305
+#: src/components/routes/product-widget/SelectProducts/index.tsx:306
 msgid "Please select at least one product"
 msgstr "Lütfen en az bir ürün seçin"
 
@@ -6871,6 +6895,10 @@ msgstr "Faturanızı hazırlarken lütfen bekleyin..."
 #: src/components/routes/event/orders.tsx:91
 msgid "Please wait while we prepare your orders for export..."
 msgstr "Siparişlerinizi dışa aktarma için hazırlarken lütfen bekleyin..."
+
+#: src/components/common/Currency/index.tsx:70
+msgid "Plus {formattedFees} {feeDescriptions}"
+msgstr ""
 
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:346
 msgid "Policy"
@@ -7096,7 +7124,7 @@ msgstr "Profil"
 msgid "Profile updated successfully"
 msgstr "Profil başarıyla güncellendi"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:240
+#: src/components/routes/product-widget/SelectProducts/index.tsx:241
 msgid "Promo {promo_code} code applied"
 msgstr "Promosyon {promo_code} kodu uygulandı"
 
@@ -7398,6 +7426,14 @@ msgstr "Kayıt Ol"
 msgid "Registration"
 msgstr ""
 
+#: src/components/routes/product-widget/SelectProducts/index.tsx:330
+msgid "Registration is sold out"
+msgstr ""
+
+#: src/components/routes/product-widget/SelectProducts/index.tsx:328
+msgid "Registration opens {0}"
+msgstr ""
+
 #: src/components/common/QuestionsTable/index.tsx:412
 #: src/components/layouts/Event/index.tsx:127
 msgid "Registration Questions"
@@ -7407,14 +7443,14 @@ msgstr "Kayıt soruları"
 msgid "Remaining Uses"
 msgstr "Kalan Kullanım"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:596
+#: src/components/routes/product-widget/SelectProducts/index.tsx:615
 msgid "remove"
 msgstr "kaldır"
 
 #: src/components/common/Editor/Controls/InsertImageControl/index.tsx:146
 #: src/components/common/WaitlistTable/index.tsx:78
 #: src/components/common/WaitlistTable/index.tsx:111
-#: src/components/routes/product-widget/SelectProducts/index.tsx:597
+#: src/components/routes/product-widget/SelectProducts/index.tsx:616
 msgid "Remove"
 msgstr "Kaldır"
 
@@ -8240,14 +8276,18 @@ msgstr "Pazarlama onay kutusunu göster"
 msgid "Show marketing opt-in checkbox by default"
 msgstr "Varsayılan olarak pazarlama onay kutusunu göster"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:452
-#: src/components/routes/product-widget/SelectProducts/index.tsx:551
+#: src/components/routes/product-widget/SelectProducts/index.tsx:464
+#: src/components/routes/product-widget/SelectProducts/index.tsx:563
 msgid "Show more"
 msgstr "Daha fazla göster"
 
 #: src/components/routes/organizer/Settings/Sections/SocialLinks/index.tsx:233
 msgid "Show more platforms"
 msgstr "Daha fazla platform göster"
+
+#: src/components/common/Currency/index.tsx:80
+msgid "Show price breakdown"
+msgstr ""
 
 #: src/components/routes/event/Settings/Sections/MiscSettings/index.tsx:63
 msgid "Show tax and fees separately"
@@ -8371,7 +8411,7 @@ msgstr "Bir şeyler yanlış gitti. Lütfen tekrar deneyin."
 msgid "Sorry for the inconvenience."
 msgstr "Rahatsızlık için özür dileriz."
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:314
+#: src/components/routes/product-widget/SelectProducts/index.tsx:315
 msgid "Sorry, this promo code is not recognized"
 msgstr "Üzgünüz, bu promosyon kodu tanınmıyor"
 
@@ -8798,6 +8838,10 @@ msgstr "Vergi veya Ücret başarıyla silindi"
 msgid "Tax Summary"
 msgstr "Vergi Özeti"
 
+#: src/components/common/Currency/index.tsx:63
+msgid "taxes"
+msgstr ""
+
 #: src/components/common/InlineOrderSummary/index.tsx:173
 #: src/components/forms/ProductForm/index.tsx:416
 #: src/components/routes/organizer/Reports/RevenueSummaryReport/index.tsx:48
@@ -8878,8 +8922,8 @@ msgstr "Katıldığınız için teşekkürler!"
 msgid "Thanks for your support as we continue to grow and improve Hi.Events!"
 msgstr "Hi.Events'i büyütmeye ve geliştirmeye devam ederken desteğiniz için teşekkürler!"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:200
-#: src/components/routes/product-widget/SelectProducts/index.tsx:249
+#: src/components/routes/product-widget/SelectProducts/index.tsx:201
+#: src/components/routes/product-widget/SelectProducts/index.tsx:250
 msgid "That promo code is invalid"
 msgstr "Bu promosyon kodu geçersiz"
 
@@ -8956,7 +9000,7 @@ msgstr "Tıkladığınız bağlantı geçersiz."
 msgid "The locale of the customer"
 msgstr "Müşterinin dili"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:536
+#: src/components/routes/product-widget/SelectProducts/index.tsx:548
 msgid "The maximum number of products for {0}is {1}"
 msgstr "{0} için maksimum ürün sayısı {1}"
 
@@ -9032,11 +9076,11 @@ msgstr "Tiyatro"
 msgid "Theme & Colors"
 msgstr "Tema ve Renkler"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:340
+#: src/components/routes/product-widget/SelectProducts/index.tsx:352
 msgid "There are no products available for this event"
 msgstr "Bu etkinlik için mevcut ürün yok"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:461
+#: src/components/routes/product-widget/SelectProducts/index.tsx:473
 msgid "There are no products available in this category"
 msgstr "Bu kategoride mevcut ürün yok"
 
@@ -9642,7 +9686,7 @@ msgstr "Katılımcı check-out'u yapılamadı"
 msgid "Unable to create product. Please check the your details"
 msgstr "Ürün oluşturulamadı. Lütfen bilgilerinizi kontrol edin"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:183
+#: src/components/routes/product-widget/SelectProducts/index.tsx:184
 msgid "Unable to create product. Please check your details"
 msgstr "Ürün oluşturulamadı. Lütfen bilgilerinizi kontrol edin"
 
@@ -9720,7 +9764,7 @@ msgstr "Bilinmeyen Katılımcı"
 msgid "Unlimited"
 msgstr "Sınırsız"
 
-#: src/components/routes/product-widget/SelectProducts/index.tsx:499
+#: src/components/routes/product-widget/SelectProducts/index.tsx:511
 msgid "Unlimited available"
 msgstr "Sınırsız mevcut"
 

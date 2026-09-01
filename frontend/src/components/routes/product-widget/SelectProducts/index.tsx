@@ -37,6 +37,7 @@ import {IconChevronRight, IconX} from "@tabler/icons-react"
 import {getSessionIdentifier} from "../../../../utilites/sessionIdentifier.ts";
 import {Constants} from "../../../../constants.ts";
 import {clearWaitlistJoinedForEvent} from "../../../../hooks/useWaitlistJoined.ts";
+import {prettyDate} from "../../../../utilites/dates.ts";
 
 const AFFILIATE_EXPIRY_DAYS = 30;
 
@@ -320,6 +321,17 @@ const SelectProducts = (props: SelectProductsProps) => {
         || selectedProductQuantitySum === 0
         || props.widgetMode === 'preview'
         || products?.every(product => product.is_sold_out);
+    const presaleProduct = products.find(product => product.is_before_sale_start_date && product.sale_start_date);
+    const continueButtonLabel = props.continueButtonText || event?.settings?.continue_button_text || t`Continue`;
+    const continueDisabledReason = isButtonDisabled && !productMutation.isPending
+        ? presaleProduct
+            ? t`Registration opens ${prettyDate(String(presaleProduct.sale_start_date), event.timezone)}`
+            : products.every(product => product.is_sold_out)
+                ? t`Registration is sold out`
+                : selectedProductQuantitySum === 0
+                    ? t`Choose a ticket quantity to continue`
+                    : null
+        : null;
 
     let productIndex = 0;
 
@@ -574,9 +586,16 @@ const SelectProducts = (props: SelectProductsProps) => {
                         )}
                         <Button disabled={isButtonDisabled} fullWidth className={'hi-continue-button'}
                                 type={"submit"}
-                                loading={productMutation.isPending}>
-                            {props.continueButtonText || event?.settings?.continue_button_text || t`Continue`}
+                                loading={productMutation.isPending}
+                                aria-describedby={continueDisabledReason ? 'hi-continue-disabled-reason' : undefined}
+                                aria-label={continueDisabledReason ? `${continueButtonLabel}. ${continueDisabledReason}` : continueButtonLabel}>
+                            {continueButtonLabel}
                         </Button>
+                        {continueDisabledReason && (
+                            <p id="hi-continue-disabled-reason" className="hi-continue-disabled-reason" role="status">
+                                {continueDisabledReason}
+                            </p>
+                        )}
                     </div>
                 </form>
             )}
