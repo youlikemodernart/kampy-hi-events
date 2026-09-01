@@ -33,6 +33,7 @@ const AdminAccountsTable = ({accounts, onImpersonate, isLoading}: AdminAccountsT
         switch (role) {
             case 'ADMIN':
                 return 'blue';
+            case 'UNIVERSITY_DIRECTOR':
             case 'ORGANIZER':
                 return 'green';
             case 'SUPERADMIN':

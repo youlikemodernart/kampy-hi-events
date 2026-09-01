@@ -18,6 +18,7 @@ interface SortableCategoryProps {
     children: React.ReactNode;
     isLastCategory: boolean;
     openCreateModal: () => void;
+    canCreateProducts: boolean;
     categories: ProductCategory[];
 }
 
@@ -26,6 +27,7 @@ export const SortableCategory: React.FC<SortableCategoryProps> = ({
                                                                       children,
                                                                       isLastCategory,
                                                                       openCreateModal,
+                                                                      canCreateProducts,
                                                                       categories,
                                                                   }) => {
     const [isEditModalOpen, editModal] = useDisclosure(false);
@@ -122,15 +124,17 @@ export const SortableCategory: React.FC<SortableCategoryProps> = ({
                             onSortUp={() => handleSort('up')}
                             onSortDown={() => handleSort('down')}
                         />
-                        <ActionIcon
-                            className={classes.categoryAction}
-                            onClick={openCreateModal}
-                            title={t`Create category`}
-                            aria-label={t`Create category`}
-                            variant={'transparent'}
-                        >
-                            <IconPlus size={20}/>
-                        </ActionIcon>
+                        {canCreateProducts && (
+                            <ActionIcon
+                                className={classes.categoryAction}
+                                onClick={openCreateModal}
+                                title={t`Create product`}
+                                aria-label={t`Create product`}
+                                variant={'transparent'}
+                            >
+                                <IconPlus size={20}/>
+                            </ActionIcon>
+                        )}
                         <ActionIcon
                             className={classes.categoryAction}
                             onClick={editModal.open}

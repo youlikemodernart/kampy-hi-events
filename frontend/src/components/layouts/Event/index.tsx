@@ -63,7 +63,8 @@ const EventLayout = () => {
     const {data: eventSettings, isFetched: isEventSettingsFetched} = useGetEventSettings(eventId);
     const {data: me} = useGetMe();
     const canViewReports = currentUserCan(me?.permissions, 'reports.view');
-    const canManageEvent = currentUserCan(me?.permissions, 'event.manage');
+    const canUpdateEvent = currentUserCan(me?.permissions, 'event.update');
+    const canManageEventSettings = currentUserCan(me?.permissions, 'event.settings.manage');
     const canPublishEvent = currentUserCan(me?.permissions, 'event.publish');
     const canManageContent = currentUserCan(me?.permissions, 'event.content.manage');
     const canViewAttendees = currentUserCan(me?.permissions, 'attendees.view');
@@ -71,7 +72,7 @@ const EventLayout = () => {
     const canManageMessages = currentUserCan(me?.permissions, 'messages.manage');
     const canManageIntegrations = currentUserCan(me?.permissions, 'integrations.manage');
     const canManageCheckIn = currentUserCan(me?.permissions, 'check_in.manage');
-    const hasScopedEventAccess = ['ORGANIZER', 'REPORTING', 'CHECK_IN'].includes(me?.role ?? '');
+    const hasScopedEventAccess = ['UNIVERSITY_DIRECTOR', 'ORGANIZER', 'REPORTING', 'CHECK_IN'].includes(me?.role ?? '');
     const {data: eventStats} = useGetEventStats(eventId, 'month', canViewReports || canViewOrders || canViewAttendees);
 
     const resendEmailConfirmationMutation = useResendEmailConfirmation();
@@ -119,8 +120,8 @@ const EventLayout = () => {
         },
 
         // 2. EVENT SETUP
-        {label: t`Setup & Design`, showWhen: () => canManageEvent || canManageContent},
-        {link: 'settings', label: t`Event Settings`, icon: IconSettings, showWhen: () => canManageEvent},
+        {label: t`Setup & Design`, showWhen: () => canUpdateEvent || canManageEventSettings || canManageContent},
+        {link: 'settings', label: t`Event Settings`, icon: IconSettings, showWhen: () => canUpdateEvent || canManageEventSettings},
         {link: 'homepage-designer', label: t`Homepage Designer`, icon: IconPaint, showWhen: () => canManageContent},
         {link: 'ticket-designer', label: t`Ticket Designer`, icon: IconTicket, showWhen: () => canManageContent},
         {link: 'questions', label: t`Registration Questions`, icon: IconUserQuestion, showWhen: () => canManageContent},

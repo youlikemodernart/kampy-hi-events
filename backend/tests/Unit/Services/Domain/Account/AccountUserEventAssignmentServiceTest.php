@@ -111,7 +111,7 @@ class AccountUserEventAssignmentServiceTest extends TestCase
 
         $this->assertSame($assignments, $service->replaceAssignmentsForRole(
             accountUser: $this->accountUser(),
-            role: Role::ORGANIZER,
+            role: Role::UNIVERSITY_DIRECTOR,
             eventIds: ['44', 45, 44],
             accountId: 123,
             createdByUserId: 10,

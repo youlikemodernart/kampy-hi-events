@@ -86,7 +86,7 @@ export interface LoginResponse {
     accounts: Account[];
 }
 
-export type UserRole = 'ADMIN' | 'ORGANIZER' | 'FINANCE' | 'REPORTING' | 'CHECK_IN' | 'SUPERADMIN';
+export type UserRole = 'ADMIN' | 'UNIVERSITY_DIRECTOR' | 'ORGANIZER' | 'FINANCE' | 'REPORTING' | 'CHECK_IN' | 'SUPERADMIN';
 
 export type Permission =
     | 'authenticated'
@@ -100,8 +100,11 @@ export type Permission =
     | 'event.view'
     | 'event.content.view'
     | 'event.manage'
+    | 'event.update'
     | 'event.publish'
     | 'event.content.manage'
+    | 'event.pricing.manage'
+    | 'event.settings.manage'
     | 'attendees.view'
     | 'attendees.manage'
     | 'orders.view'

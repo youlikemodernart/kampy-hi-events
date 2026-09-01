@@ -78,6 +78,8 @@ const Users = () => {
         }
 
         switch (user.role) {
+            case 'UNIVERSITY_DIRECTOR':
+                return t`University Director`;
             case 'ORGANIZER':
                 return t`Event Manager`;
             case 'CHECK_IN':

@@ -11,6 +11,7 @@ use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\AccountRepositoryInterface;
 use HiEvents\Resources\Account\AccountResource;
+use HiEvents\Resources\Account\UniversityDirectorAccountResource;
 use Illuminate\Http\JsonResponse;
 
 class GetAccountAction extends BaseAction
@@ -34,6 +35,10 @@ class GetAccountAction extends BaseAction
             ->loadRelation(AccountStripePlatformDomainObject::class)
             ->findById($this->getAuthenticatedAccountId());
 
-        return $this->resourceResponse(AccountResource::class, $account);
+        $resource = $this->getAuthenticatedUserRole() === Role::UNIVERSITY_DIRECTOR
+            ? UniversityDirectorAccountResource::class
+            : AccountResource::class;
+
+        return $this->resourceResponse($resource, $account);
     }
 }

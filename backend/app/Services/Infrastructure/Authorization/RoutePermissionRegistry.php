@@ -117,12 +117,16 @@ final class RoutePermissionRegistry
             self::ACTION . 'Events\\GetEventAction' => Permission::EVENT_VIEW,
 
             self::ACTION . 'Events\\CreateEventAction',
-            self::ACTION . 'Events\\UpdateEventAction',
             self::ACTION . 'Events\\DeleteEventAction',
             self::ACTION . 'Events\\GetEventDeletionStatusAction',
             self::ACTION . 'Events\\DuplicateEventAction' => Permission::EVENT_MANAGE,
 
+            self::ACTION . 'Events\\UpdateEventAction' => Permission::EVENT_UPDATE,
+
             self::ACTION . 'Events\\UpdateEventStatusAction' => Permission::EVENT_PUBLISH,
+
+            self::ACTION . 'Products\\CreateProductAction',
+            self::ACTION . 'EventSettings\\GetPlatformFeePreviewAction' => Permission::EVENT_PRICING_MANAGE,
 
             self::ACTION . 'ProductCategories\\CreateProductCategoryAction',
             self::ACTION . 'ProductCategories\\EditProductCategoryAction',
@@ -150,8 +154,6 @@ final class RoutePermissionRegistry
             self::ACTION . 'Affiliates\\CreateAffiliateAction',
             self::ACTION . 'Affiliates\\UpdateAffiliateAction',
             self::ACTION . 'Affiliates\\DeleteAffiliateAction',
-            self::ACTION . 'EventSettings\\EditEventSettingsAction',
-            self::ACTION . 'EventSettings\\PartialEditEventSettingsAction',
             self::ACTION . 'CapacityAssignments\\CreateCapacityAssignmentAction',
             self::ACTION . 'CapacityAssignments\\UpdateCapacityAssignmentAction',
             self::ACTION . 'CapacityAssignments\\DeleteCapacityAssignmentAction',
@@ -160,6 +162,9 @@ final class RoutePermissionRegistry
             self::ACTION . 'CheckInLists\\DeleteCheckInListAction',
             self::ACTION . 'Images\\CreateImageAction',
             self::ACTION . 'Images\\DeleteImageAction' => Permission::EVENT_CONTENT_MANAGE,
+
+            self::ACTION . 'EventSettings\\EditEventSettingsAction',
+            self::ACTION . 'EventSettings\\PartialEditEventSettingsAction' => Permission::EVENT_SETTINGS_MANAGE,
 
             self::ACTION . 'ProductCategories\\GetProductCategoriesAction',
             self::ACTION . 'ProductCategories\\GetProductCategoryAction',
@@ -177,7 +182,6 @@ final class RoutePermissionRegistry
             self::ACTION . 'Affiliates\\GetAffiliatesAction',
             self::ACTION . 'Affiliates\\GetAffiliateAction',
             self::ACTION . 'EventSettings\\GetEventSettingsAction',
-            self::ACTION . 'EventSettings\\GetPlatformFeePreviewAction',
             self::ACTION . 'CapacityAssignments\\GetCapacityAssignmentsAction',
             self::ACTION . 'CapacityAssignments\\GetCapacityAssignmentAction' => Permission::EVENT_CONTENT_VIEW,
 

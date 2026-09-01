@@ -10,7 +10,7 @@ import {IconUser, IconUserShield} from "@tabler/icons-react";
 import {showSuccess} from "../../../utilites/notifications.tsx";
 import {useGetEvents} from "../../../queries/useGetEvents.ts";
 
-const eventScopedRoles = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+const eventScopedRoles = ['UNIVERSITY_DIRECTOR', 'ORGANIZER', 'REPORTING', 'CHECK_IN'];
 const isEventScopedRole = (role?: string) => eventScopedRoles.includes(role ?? '');
 
 export const InviteUserModal = ({onClose}: GenericModalProps) => {
@@ -59,6 +59,12 @@ export const InviteUserModal = ({onClose}: GenericModalProps) => {
             label: t`Admin`,
             value: 'ADMIN',
             description: t`Full access to team, account settings, billing, events, orders, reports, and check-in.`,
+        },
+        {
+            icon: <IconUser/>,
+            label: t`University Director`,
+            value: 'UNIVERSITY_DIRECTOR',
+            description: t`Manage assigned event details, ticketing, attendees, reports, and check-in. No refunds, payment settings, integrations, or publishing.`,
         },
         {
             icon: <IconUser/>,

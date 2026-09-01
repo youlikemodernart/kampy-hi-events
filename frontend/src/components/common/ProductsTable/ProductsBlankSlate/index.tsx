@@ -5,11 +5,12 @@ import {t, Trans} from "@lingui/macro";
 
 interface ProductsBlankSlateProps {
     openCreateModal: (categoryId?: string) => void;
+    canCreateProducts: boolean;
     productCategories: any;
     searchTerm: string;
 }
 
-export const ProductsBlankSlate = ({openCreateModal, productCategories, searchTerm}: ProductsBlankSlateProps) => {
+export const ProductsBlankSlate = ({openCreateModal, canCreateProducts, productCategories, searchTerm}: ProductsBlankSlateProps) => {
     const showLargeBlankSlate = productCategories
         .every((category: any) => category.products.length === 0) && productCategories.length === 1;
 
@@ -42,14 +43,16 @@ export const ProductsBlankSlate = ({openCreateModal, productCategories, searchTe
                         <p>
                             {t`You'll need at least one product to get started. Free, paid or let the user decide what to pay.`}
                         </p>
-                        <Button
-                            size={'xs'}
-                            leftSection={<IconPlus/>}
-                            color={'green'}
-                            onClick={() => openCreateModal()}
-                        >
-                            {t`Add Product to Category`}
-                        </Button>
+                        {canCreateProducts && (
+                            <Button
+                                size={'xs'}
+                                leftSection={<IconPlus/>}
+                                color={'green'}
+                                onClick={() => openCreateModal()}
+                            >
+                                {t`Add Product to Category`}
+                            </Button>
+                        )}
                     </>
                 )}
             />
@@ -60,13 +63,15 @@ export const ProductsBlankSlate = ({openCreateModal, productCategories, searchTe
         <div style={{textAlign: 'center'}}><p style={{marginBottom: 20, marginTop: 0}}>
             {t`This category doesn't have any products yet.`}
         </p>
-            <Button
-                size={'xs'}
-                leftSection={<IconPlus/>}
-                color={'green'}
-                onClick={() => openCreateModal()}
-            >{t`Add Product`}
-            </Button>
+            {canCreateProducts && (
+                <Button
+                    size={'xs'}
+                    leftSection={<IconPlus/>}
+                    color={'green'}
+                    onClick={() => openCreateModal()}
+                >{t`Add Product`}
+                </Button>
+            )}
         </div>
     )
 }

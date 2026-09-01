@@ -24,6 +24,7 @@ const AdminUsersTable = ({users, onImpersonate, isLoading}: AdminUsersTableProps
         switch (role) {
             case 'ADMIN':
                 return 'blue';
+            case 'UNIVERSITY_DIRECTOR':
             case 'ORGANIZER':
                 return 'green';
             case 'SUPERADMIN':

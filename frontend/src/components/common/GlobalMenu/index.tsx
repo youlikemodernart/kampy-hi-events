@@ -27,7 +27,7 @@ interface Link {
     onClick?: (event: any) => void;
 }
 
-const EVENT_SCOPED_ROLES = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+const EVENT_SCOPED_ROLES = ['UNIVERSITY_DIRECTOR', 'ORGANIZER', 'REPORTING', 'CHECK_IN'];
 
 export const GlobalMenu = () => {
     const {data: me} = useGetMe();

@@ -16,6 +16,8 @@ import {SearchBar} from "../../common/SearchBar";
 import {useState} from "react";
 import {CreateProductCategoryModal} from "../../modals/CreateProductCategoryModal";
 import {IdParam} from "../../../types.ts";
+import {useGetMe} from "../../../queries/useGetMe.ts";
+import {currentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 export const Products = () => {
     const [createProductModalOpen, {
@@ -28,15 +30,20 @@ export const Products = () => {
     }] = useDisclosure(false);
     const {eventId} = useParams();
     const {data: event} = useGetEvent(eventId);
+    const {data: me} = useGetMe();
+    const canCreateProducts = currentUserCan(me?.permissions, 'event.pricing.manage');
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategoryId, setSelectedCategoryId] = useState<IdParam>(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<IdParam>();
 
     const productCategoriesQuery = useGetEventProductCategories(eventId);
     const productCategories = productCategoriesQuery?.data?.data;
 
-    useUrlHash('create-product', () => openCreateProductModal());
+    useUrlHash('create-product', () => {
+        if (canCreateProducts) openCreateProductModal();
+    });
 
     const openCreateProduct = (categoryId: IdParam) => {
+        if (!canCreateProducts) return;
         setSelectedCategoryId(() => categoryId);
         openCreateProductModal();
     }
@@ -77,16 +84,18 @@ export const Products = () => {
                         </Button>
                     </Menu.Target>
                     <Menu.Dropdown>
-                        <Menu.Item
-                            leftSection={
-                                <IconShoppingCart
-                                    stroke={1.5}
-                                />
-                            }
-                            onClick={() => openCreateProduct(undefined)}
-                        >
-                            {t`Ticket or Product`}
-                        </Menu.Item>
+                        {canCreateProducts && (
+                            <Menu.Item
+                                leftSection={
+                                    <IconShoppingCart
+                                        stroke={1.5}
+                                    />
+                                }
+                                onClick={() => openCreateProduct(undefined)}
+                            >
+                                {t`Ticket or Product`}
+                            </Menu.Item>
+                        )}
                         <Menu.Item
                             leftSection={
                                 <IconCategory
@@ -109,10 +118,11 @@ export const Products = () => {
                         event={event}
                         searchTerm={searchTerm}
                         onCreateOpen={openCreateProduct}
+                        canCreateProducts={canCreateProducts}
                     />
                 )}
 
-            {createProductModalOpen &&
+            {canCreateProducts && createProductModalOpen &&
                 <CreateProductModal selectedCategoryId={selectedCategoryId} onClose={closeCreateProductModal}
                                     isOpen={createProductModalOpen}/>}
             {createProductCategoryModalOpen && <CreateProductCategoryModal onClose={closeCreateProductCategoryModal}

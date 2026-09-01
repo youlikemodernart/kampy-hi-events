@@ -28,10 +28,16 @@ import {PlatformFeesSettings} from "./Sections/PlatformFeesSettings";
 import {WaitlistSettings} from "./Sections/WaitlistSettings";
 import {DangerZoneSettings} from "./Sections/DangerZoneSettings";
 import {useGetAccount} from "../../../../queries/useGetAccount.ts";
+import {useGetMe} from "../../../../queries/useGetMe.ts";
+import {currentUserCan} from "../../../../hooks/useIsCurrentUserAdmin.ts";
 
 export const Settings = () => {
     const {data: account} = useGetAccount();
+    const {data: me} = useGetMe();
     const isSaasMode = account?.is_saas_mode_enabled;
+    const canUpdateEvent = currentUserCan(me?.permissions, 'event.update');
+    const canManageEvent = currentUserCan(me?.permissions, 'event.manage');
+    const canManageEventSettings = currentUserCan(me?.permissions, 'event.settings.manage');
 
     const SECTIONS = useMemo(() => {
         const baseSections = [
@@ -101,8 +107,12 @@ export const Settings = () => {
             });
         }
 
-        return baseSections;
-    }, [isSaasMode]);
+        return baseSections.filter(({component}) => {
+            if (component === EventDetailsForm) return canUpdateEvent;
+            if (component === DangerZoneSettings) return canManageEvent;
+            return canManageEventSettings;
+        });
+    }, [canManageEvent, canManageEventSettings, canUpdateEvent, isSaasMode]);
 
     const isLargeScreen = useMediaQuery('(min-width: 1200px)', true);
     const [activeSection, setActiveSection] = useState(() => {

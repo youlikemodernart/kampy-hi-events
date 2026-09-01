@@ -8,22 +8,26 @@ use HiEvents\DomainObjects\Enums\Permission;
 use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\Http\Actions\Accounts\UpdateAccountAction;
 use HiEvents\Http\Actions\Admin\Stats\GetAdminStatsAction;
+use HiEvents\Http\Actions\Affiliates\GetAffiliatesAction;
 use HiEvents\Http\Actions\Attendees\CheckInAttendeeAction;
+use HiEvents\Http\Actions\CheckInLists\GetCheckInListAction;
+use HiEvents\Http\Actions\CheckInLists\GetCheckInListsAction;
 use HiEvents\Http\Actions\Events\CreateEventAction;
+use HiEvents\Http\Actions\Events\DeleteEventAction;
 use HiEvents\Http\Actions\Events\GetEventAction;
+use HiEvents\Http\Actions\Events\UpdateEventAction;
 use HiEvents\Http\Actions\Events\UpdateEventStatusAction;
+use HiEvents\Http\Actions\EventSettings\EditEventSettingsAction;
 use HiEvents\Http\Actions\EventSettings\GetEventSettingsAction;
 use HiEvents\Http\Actions\EventSettings\GetPlatformFeePreviewAction;
 use HiEvents\Http\Actions\Financial\ExportFinancialReportAction;
 use HiEvents\Http\Actions\Financial\GetFinancialReportAction;
 use HiEvents\Http\Actions\Messages\SendMessageAction;
-use HiEvents\Http\Actions\CheckInLists\GetCheckInListAction;
-use HiEvents\Http\Actions\CheckInLists\GetCheckInListsAction;
 use HiEvents\Http\Actions\Orders\Payment\RefundOrderAction;
 use HiEvents\Http\Actions\Organizers\CreateOrganizerAction;
+use HiEvents\Http\Actions\Products\CreateProductAction;
 use HiEvents\Http\Actions\Products\GetProductsAction;
 use HiEvents\Http\Actions\PromoCodes\GetPromoCodesAction;
-use HiEvents\Http\Actions\Affiliates\GetAffiliatesAction;
 use HiEvents\Http\Actions\Users\GetMeAction;
 use HiEvents\Services\Infrastructure\Authorization\RoutePermissionRegistry;
 use PHPUnit\Framework\TestCase;
@@ -47,12 +51,37 @@ class RoutePermissionRegistryTest extends TestCase
         $this->assertSame(Permission::ACCOUNT_MANAGE, RoutePermissionRegistry::permissionForAction(UpdateAccountAction::class));
         $this->assertSame(Permission::ORGANIZER_MANAGE, RoutePermissionRegistry::permissionForAction(CreateOrganizerAction::class));
         $this->assertSame(Permission::EVENT_MANAGE, RoutePermissionRegistry::permissionForAction(CreateEventAction::class));
+        $this->assertSame(Permission::EVENT_UPDATE, RoutePermissionRegistry::permissionForAction(UpdateEventAction::class));
         $this->assertSame(Permission::EVENT_PUBLISH, RoutePermissionRegistry::permissionForAction(UpdateEventStatusAction::class));
+        $this->assertSame(Permission::EVENT_PRICING_MANAGE, RoutePermissionRegistry::permissionForAction(CreateProductAction::class));
+        $this->assertSame(Permission::EVENT_PRICING_MANAGE, RoutePermissionRegistry::permissionForAction(GetPlatformFeePreviewAction::class));
+        $this->assertSame(Permission::EVENT_SETTINGS_MANAGE, RoutePermissionRegistry::permissionForAction(EditEventSettingsAction::class));
         $this->assertSame(Permission::ORDERS_REFUND, RoutePermissionRegistry::permissionForAction(RefundOrderAction::class));
         $this->assertSame(Permission::MESSAGES_MANAGE, RoutePermissionRegistry::permissionForAction(SendMessageAction::class));
         $this->assertSame(Permission::CHECK_IN_MANAGE, RoutePermissionRegistry::permissionForAction(CheckInAttendeeAction::class));
         $this->assertSame(Permission::REPORTS_VIEW, RoutePermissionRegistry::permissionForAction(GetFinancialReportAction::class));
         $this->assertSame(Permission::REPORTS_EXPORT, RoutePermissionRegistry::permissionForAction(ExportFinancialReportAction::class));
+    }
+
+    public function test_university_director_can_update_but_not_create_delete_publish_or_change_financial_settings(): void
+    {
+        $allowedPermission = RoutePermissionRegistry::permissionForAction(UpdateEventAction::class);
+        $this->assertSame(Permission::EVENT_UPDATE, $allowedPermission);
+        $this->assertTrue(Role::UNIVERSITY_DIRECTOR->hasPermission($allowedPermission));
+
+        foreach ([
+            CreateEventAction::class,
+            DeleteEventAction::class,
+            UpdateEventStatusAction::class,
+            CreateProductAction::class,
+            GetPlatformFeePreviewAction::class,
+            EditEventSettingsAction::class,
+        ] as $actionClass) {
+            $permission = RoutePermissionRegistry::permissionForAction($actionClass);
+
+            $this->assertNotNull($permission);
+            $this->assertFalse(Role::UNIVERSITY_DIRECTOR->hasPermission($permission), $actionClass);
+        }
     }
 
     public function test_check_in_staff_is_denied_from_event_setup_read_surfaces(): void
@@ -62,7 +91,6 @@ class RoutePermissionRegistryTest extends TestCase
             GetPromoCodesAction::class,
             GetAffiliatesAction::class,
             GetEventSettingsAction::class,
-            GetPlatformFeePreviewAction::class,
         ];
 
         foreach ($blockedActions as $actionClass) {
@@ -96,7 +124,7 @@ class RoutePermissionRegistryTest extends TestCase
     private function getAuthenticatedAndAdminRouteActionClasses(): array
     {
         $backendRoot = dirname(__DIR__, 5);
-        $routes = file_get_contents($backendRoot . '/routes/api.php');
+        $routes = file_get_contents($backendRoot.'/routes/api.php');
         $useMap = [];
 
         preg_match_all('/^use\\s+(HiEvents\\\\Http\\\\Actions\\\\[^;]+);/m', $routes, $uses);
@@ -122,7 +150,7 @@ class RoutePermissionRegistryTest extends TestCase
 
         $classes = [];
         foreach ($aliases[1] as $alias) {
-            $classes[] = $useMap[$alias] ?? 'UNRESOLVED:' . $alias;
+            $classes[] = $useMap[$alias] ?? 'UNRESOLVED:'.$alias;
         }
 
         $classes = array_values(array_unique($classes));
@@ -134,13 +162,13 @@ class RoutePermissionRegistryTest extends TestCase
     private function extractRouteGroupBody(string $routes, string $marker): string
     {
         $markerOffset = strpos($routes, $marker);
-        $this->assertNotFalse($markerOffset, 'Route group marker not found: ' . $marker);
+        $this->assertNotFalse($markerOffset, 'Route group marker not found: '.$marker);
 
         $functionOffset = strpos($routes, 'function (Router $router): void {', $markerOffset);
-        $this->assertNotFalse($functionOffset, 'Route group function not found: ' . $marker);
+        $this->assertNotFalse($functionOffset, 'Route group function not found: '.$marker);
 
         $bodyStart = strpos($routes, '{', $functionOffset);
-        $this->assertNotFalse($bodyStart, 'Route group body not found: ' . $marker);
+        $this->assertNotFalse($bodyStart, 'Route group body not found: '.$marker);
 
         $depth = 0;
         $length = strlen($routes);
@@ -159,7 +187,7 @@ class RoutePermissionRegistryTest extends TestCase
             }
         }
 
-        $this->fail('Could not extract route group body: ' . $marker);
+        $this->fail('Could not extract route group body: '.$marker);
     }
 
     /**
@@ -168,12 +196,12 @@ class RoutePermissionRegistryTest extends TestCase
     private function getRegistryActionClasses(): array
     {
         $backendRoot = dirname(__DIR__, 5);
-        $registry = file_get_contents($backendRoot . '/app/Services/Infrastructure/Authorization/RoutePermissionRegistry.php');
+        $registry = file_get_contents($backendRoot.'/app/Services/Infrastructure/Authorization/RoutePermissionRegistry.php');
 
         preg_match_all("/self::ACTION\\s*\\.\\s*'([^']+)'/", $registry, $matches);
 
         $classes = array_map(
-            fn(string $suffix): string => 'HiEvents\\Http\\Actions\\' . stripcslashes($suffix),
+            fn (string $suffix): string => 'HiEvents\\Http\\Actions\\'.stripcslashes($suffix),
             $matches[1],
         );
 

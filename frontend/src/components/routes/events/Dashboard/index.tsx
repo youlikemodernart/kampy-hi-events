@@ -30,7 +30,7 @@ import {getConfig} from "../../../../utilites/config.ts";
 import {useGetMe} from "../../../../queries/useGetMe.ts";
 import {currentUserCan} from "../../../../hooks/useIsCurrentUserAdmin.ts";
 
-const EVENT_SCOPED_ROLES = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+const EVENT_SCOPED_ROLES = ['UNIVERSITY_DIRECTOR', 'ORGANIZER', 'REPORTING', 'CHECK_IN'];
 
 const DashboardSkeleton = () => {
     return (

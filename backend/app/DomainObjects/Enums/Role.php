@@ -8,6 +8,7 @@ enum Role: string
 
     case SUPERADMIN = 'SUPERADMIN';
     case ADMIN = 'ADMIN';
+    case UNIVERSITY_DIRECTOR = 'UNIVERSITY_DIRECTOR';
     case ORGANIZER = 'ORGANIZER';
     case FINANCE = 'FINANCE';
     case REPORTING = 'REPORTING';
@@ -17,6 +18,7 @@ enum Role: string
     {
         return [
             self::ADMIN->value,
+            self::UNIVERSITY_DIRECTOR->value,
             self::ORGANIZER->value,
             self::FINANCE->value,
             self::REPORTING->value,
@@ -27,12 +29,13 @@ enum Role: string
     public function getDisplayName(): string
     {
         return match ($this) {
-            self::SUPERADMIN => 'Super Admin',
-            self::ADMIN => 'Admin',
-            self::ORGANIZER => 'Event Manager',
-            self::FINANCE => 'Finance',
-            self::REPORTING => 'Reporting',
-            self::CHECK_IN => 'Check-in Staff',
+            self::SUPERADMIN => __('Super Admin'),
+            self::ADMIN => __('Admin'),
+            self::UNIVERSITY_DIRECTOR => __('University Director'),
+            self::ORGANIZER => __('Event Manager'),
+            self::FINANCE => __('Finance'),
+            self::REPORTING => __('Reporting'),
+            self::CHECK_IN => __('Check-in Staff'),
         };
     }
 
@@ -45,8 +48,23 @@ enum Role: string
             self::SUPERADMIN => Permission::cases(),
             self::ADMIN => array_values(array_filter(
                 Permission::cases(),
-                fn(Permission $permission) => $permission !== Permission::SYSTEM_ADMIN,
+                fn (Permission $permission) => $permission !== Permission::SYSTEM_ADMIN,
             )),
+            self::UNIVERSITY_DIRECTOR => [
+                Permission::AUTHENTICATED,
+                Permission::ACCOUNT_VIEW,
+                Permission::ORGANIZER_VIEW,
+                Permission::EVENT_VIEW,
+                Permission::EVENT_CONTENT_VIEW,
+                Permission::EVENT_UPDATE,
+                Permission::EVENT_CONTENT_MANAGE,
+                Permission::ATTENDEES_VIEW,
+                Permission::ATTENDEES_MANAGE,
+                Permission::ORDERS_VIEW,
+                Permission::REPORTS_VIEW,
+                Permission::REPORTS_EXPORT,
+                Permission::CHECK_IN_MANAGE,
+            ],
             self::ORGANIZER => [
                 Permission::AUTHENTICATED,
                 Permission::ACCOUNT_VIEW,
@@ -55,8 +73,11 @@ enum Role: string
                 Permission::EVENT_VIEW,
                 Permission::EVENT_CONTENT_VIEW,
                 Permission::EVENT_MANAGE,
+                Permission::EVENT_UPDATE,
                 Permission::EVENT_PUBLISH,
                 Permission::EVENT_CONTENT_MANAGE,
+                Permission::EVENT_PRICING_MANAGE,
+                Permission::EVENT_SETTINGS_MANAGE,
                 Permission::ATTENDEES_VIEW,
                 Permission::ATTENDEES_MANAGE,
                 Permission::ORDERS_VIEW,
@@ -111,6 +132,7 @@ enum Role: string
     public function allowsEventAssignments(): bool
     {
         return in_array($this, [
+            self::UNIVERSITY_DIRECTOR,
             self::ORGANIZER,
             self::REPORTING,
             self::CHECK_IN,
@@ -137,7 +159,7 @@ enum Role: string
     public function getPermissionValues(): array
     {
         return array_map(
-            fn(Permission $permission) => $permission->value,
+            fn (Permission $permission) => $permission->value,
             $this->getPermissions(),
         );
     }

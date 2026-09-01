@@ -13,12 +13,12 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "Plural-Forms: \n"
 
-#: src/components/layouts/Event/index.tsx:211
+#: src/components/layouts/Event/index.tsx:212
 #: src/components/layouts/OrganizerLayout/index.tsx:225
 msgid "- Click to Publish"
 msgstr "- Yayınlamak için Tıklayın"
 
-#: src/components/layouts/Event/index.tsx:213
+#: src/components/layouts/Event/index.tsx:214
 #: src/components/layouts/OrganizerLayout/index.tsx:227
 msgid "- Click to Unpublish"
 msgstr "- Yayından Kaldırmak için Tıklayın"
@@ -142,7 +142,7 @@ msgstr "<0>Giriş listeleri, etkinlik girişini güne, alana veya bilet türüne
 msgid "<0>https://</0>your-website.com"
 msgstr "<0>https://</0>siteniz.com"
 
-#: src/components/forms/ProductForm/index.tsx:309
+#: src/components/forms/ProductForm/index.tsx:316
 msgid "<0>Please enter the price excluding taxes and fees.</0><1>Taxes and fees can be added below.</1>"
 msgstr "<0>Lütfen vergiler ve ücretler hariç fiyatı girin.</0><1>Vergi ve ücretler aşağıdan eklenebilir.</1>"
 
@@ -150,7 +150,7 @@ msgstr "<0>Lütfen vergiler ve ücretler hariç fiyatı girin.</0><1>Vergi ve ü
 msgid "<0>Set a single total attendance limit that applies to multiple ticket types at once.</0><1>For example, if you link a <2>Day Pass</2> and a <3>Full Weekend</3> ticket, they will both draw from the same pool of spots. Once the limit is reached, all linked tickets automatically stop selling.</1>"
 msgstr "<0>Birden fazla bilet türüne aynı anda uygulanan tek bir toplam katılımcı limiti belirleyin.</0><1>Örneğin, <2>Günlük Geçiş</2> ve <3>Tam Hafta Sonu</3> biletini bağlarsanız, her ikisi de aynı kontenjan havuzundan çekilecektir. Limit dolduğunda, bağlı tüm biletler otomatik olarak satıştan kaldırılır.</1>"
 
-#: src/components/forms/ProductForm/index.tsx:326
+#: src/components/forms/ProductForm/index.tsx:333
 msgid "<0>The number of products available for this product</0><1>This value can be overridden if there are <2>Capacity Limits</2> associated with this product.</1>"
 msgstr "<0>Bu ürün için mevcut ürün sayısı</0><1>Bu değer, bu ürünle ilişkili <2>Kapasite Sınırları</2> varsa geçersiz kılınabilir.</1>"
 
@@ -312,7 +312,7 @@ msgstr "KDV veya ÖTV gibi standart vergi"
 msgid "Abandoned"
 msgstr "Terk edildi"
 
-#: src/components/layouts/EventHomepage/index.tsx:413
+#: src/components/layouts/EventHomepage/index.tsx:406
 msgid "About"
 msgstr "Hakkında"
 
@@ -399,7 +399,7 @@ msgstr "Hesap Ayarları"
 msgid "Account updated successfully"
 msgstr "Hesap başarıyla güncellendi"
 
-#: src/components/common/AdminUsersTable/index.tsx:127
+#: src/components/common/AdminUsersTable/index.tsx:128
 #: src/components/layouts/Admin/index.tsx:14
 #: src/components/routes/admin/Accounts/index.tsx:57
 #: src/components/routes/admin/Attribution/index.tsx:132
@@ -439,7 +439,7 @@ msgstr "Etkinleştirme tarihi"
 #: src/components/common/EmailTemplateSettings/EmailTemplateSettingsBase.tsx:267
 #: src/components/forms/AffiliateForm/index.tsx:21
 #: src/components/forms/CapaciyAssigmentForm/index.tsx:19
-#: src/components/modals/EditUserModal/index.tsx:161
+#: src/components/modals/EditUserModal/index.tsx:167
 #: src/components/routes/event/attendees.tsx:26
 msgid "Active"
 msgstr "Etkin"
@@ -496,11 +496,11 @@ msgstr "Yeni Ekle"
 msgid "Add Option"
 msgstr "Seçenek Ekle"
 
-#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:68
+#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:72
 msgid "Add Product"
 msgstr "Ürün Ekle"
 
-#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:51
+#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:53
 msgid "Add Product to Category"
 msgstr "Kategoriye Ürün Ekle"
 
@@ -521,13 +521,13 @@ msgstr "Bu etkinliği takviminize ekleyin"
 msgid "Add tickets"
 msgstr "Bilet ekle"
 
-#: src/components/forms/ProductForm/index.tsx:360
+#: src/components/forms/ProductForm/index.tsx:368
 msgid "Add tier"
 msgstr "Kademe ekle"
 
 #: src/components/common/AddEventToCalendarButton/index.tsx:14
 #: src/components/common/AddToCalendarCTA/index.tsx:24
-#: src/components/layouts/EventHomepage/index.tsx:346
+#: src/components/layouts/EventHomepage/index.tsx:339
 msgid "Add to Calendar"
 msgstr "Takvime Ekle"
 
@@ -590,7 +590,7 @@ msgstr ""
 #: src/components/layouts/Admin/index.tsx:12
 #: src/components/modals/EditUserModal/index.tsx:69
 #: src/components/modals/InviteUserModal/index.tsx:59
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:90
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:92
 msgid "Admin"
 msgstr "Yönetici"
 
@@ -638,7 +638,7 @@ msgstr "Bağlı kuruluş satışları izlenmeyecek. Bu, bağlı kuruluşu devre 
 msgid "Affiliate updated successfully"
 msgstr "Bağlı kuruluş başarıyla güncellendi"
 
-#: src/components/layouts/Event/index.tsx:133
+#: src/components/layouts/Event/index.tsx:134
 #: src/components/modals/DuplicateEventModal/index.tsx:33
 #: src/components/routes/event/Affiliates/index.tsx:63
 msgid "Affiliates"
@@ -717,7 +717,7 @@ msgstr "Ödenmemiş siparişlerle ilişkili katılımcıların check-in yapması
 msgid "Allow attendees to update their ticket information (name, email) via a secure link sent with their order confirmation."
 msgstr "Katılımcıların sipariş onayıyla gönderilen güvenli bir bağlantı üzerinden bilet bilgilerini (ad, e-posta) güncellemelerine izin verin."
 
-#: src/components/forms/ProductForm/index.tsx:491
+#: src/components/forms/ProductForm/index.tsx:502
 msgid "Allow customers to join a waitlist when this product is sold out"
 msgstr "Bu ürün tükendiğinde müşterilerin bekleme listesine katılmasına izin ver"
 
@@ -792,7 +792,7 @@ msgstr "Dışa aktarma durumu kontrol edilirken bir hata oluştu."
 msgid "An error occurred while loading the page"
 msgstr "Sayfa yüklenirken bir hata oluştu"
 
-#: src/components/forms/ProductForm/index.tsx:514
+#: src/components/forms/ProductForm/index.tsx:525
 msgid "An optional message to display on the highlighted product, e.g. \"Selling fast 🔥\" or \"Best value\""
 msgstr "Vurgulanan üründe görüntülenecek isteğe bağlı bir mesaj, örn. \"Hızlı satılıyor 🔥\" veya \"En iyi değer\""
 
@@ -941,16 +941,16 @@ msgstr "Bu şablonu silmek istediğinizden emin misiniz? Bu işlem geri alınama
 msgid "Are you sure you want to delete this webhook?"
 msgstr "Bu webhook'u silmek istediğinizden emin misiniz?"
 
-#: src/components/layouts/Checkout/index.tsx:312
+#: src/components/layouts/Checkout/index.tsx:307
 msgid "Are you sure you want to leave?"
 msgstr "Ayrılmak istediğinizden emin misiniz?"
 
-#: src/components/layouts/Event/index.tsx:173
+#: src/components/layouts/Event/index.tsx:174
 #: src/components/routes/event/EventDashboard/index.tsx:81
 msgid "Are you sure you want to make this event draft? This will make the event invisible to the public"
 msgstr "Bu etkinliği taslak yapmak istediğinizden emin misiniz? Bu işlem etkinliği halka görünmez yapacaktır"
 
-#: src/components/layouts/Event/index.tsx:174
+#: src/components/layouts/Event/index.tsx:175
 #: src/components/routes/event/EventDashboard/index.tsx:82
 msgid "Are you sure you want to make this event public? This will make the event visible to the public"
 msgstr "Bu etkinliği herkese açık yapmak istediğinizden emin misiniz? Bu işlem etkinliği halka görünür yapacaktır"
@@ -1052,8 +1052,8 @@ msgstr "Ürün başına bir kez sor"
 msgid "Assigned Configuration"
 msgstr "Atanmış Yapılandırma"
 
-#: src/components/modals/EditUserModal/index.tsx:143
-#: src/components/modals/InviteUserModal/index.tsx:110
+#: src/components/modals/EditUserModal/index.tsx:149
+#: src/components/modals/InviteUserModal/index.tsx:116
 msgid "Assigned events"
 msgstr ""
 
@@ -1152,7 +1152,7 @@ msgstr "Katılımcının bileti bu listede yok"
 #: src/components/common/EventCard/index.tsx:264
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:382
 #: src/components/common/StatBoxes/index.tsx:45
-#: src/components/layouts/Event/index.tsx:137
+#: src/components/layouts/Event/index.tsx:138
 #: src/components/modals/ManageOrderModal/index.tsx:126
 #: src/components/routes/admin/Messages/index.tsx:90
 #: src/components/routes/admin/Messages/index.tsx:139
@@ -1274,7 +1274,7 @@ msgstr "Hesaplara Dön"
 msgid "Back to Event"
 msgstr "Etkinliğe Dön"
 
-#: src/components/layouts/Checkout/index.tsx:200
+#: src/components/layouts/Checkout/index.tsx:195
 msgid "Back to event page"
 msgstr "Etkinlik sayfasına dön"
 
@@ -1415,8 +1415,8 @@ msgstr "Kamera Tarayıcı"
 msgid "Campaign"
 msgstr "Kampanya"
 
-#: src/components/modals/EditUserModal/index.tsx:95
-#: src/components/modals/InviteUserModal/index.tsx:85
+#: src/components/modals/EditUserModal/index.tsx:101
+#: src/components/modals/InviteUserModal/index.tsx:91
 msgid "Can access check-in lists and check attendees in or out."
 msgstr ""
 
@@ -1504,7 +1504,7 @@ msgstr "Kapasite ataması başarıyla silindi"
 msgid "Capacity Assignments"
 msgstr "Kapasite Atamaları"
 
-#: src/components/layouts/Event/index.tsx:141
+#: src/components/layouts/Event/index.tsx:142
 msgid "Capacity Management"
 msgstr "Kapasite yönetimi"
 
@@ -1512,15 +1512,15 @@ msgstr "Kapasite yönetimi"
 msgid "Categories allow you to group products together. For example, you might have a category for \"Tickets\" and another for \"Merchandise\"."
 msgstr "Kategoriler ürünleri birlikte gruplandırmanızı sağlar. Örneğin, \"Biletler\" için bir kategori ve \"Ürünler\" için başka bir kategori oluşturabilirsiniz."
 
-#: src/components/forms/ProductForm/index.tsx:289
+#: src/components/forms/ProductForm/index.tsx:296
 msgid "Categories help you organize your products. This title will be displayed on the public event page."
 msgstr "Kategoriler ürünlerinizi düzenlemenize yardımcı olur. Bu başlık halka açık etkinlik sayfasında gösterilecektir."
 
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:91
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:93
 msgid "Categories reordered successfully."
 msgstr "Kategoriler başarıyla yeniden sıralandı."
 
-#: src/components/routes/event/products.tsx:98
+#: src/components/routes/event/products.tsx:107
 #: src/components/routes/event/Settings/Sections/EventDetailsForm/index.tsx:82
 msgid "Category"
 msgstr "Kategori"
@@ -1561,7 +1561,7 @@ msgstr "Sadece check-in yap"
 msgid "Check Out"
 msgstr "Check-out Yap"
 
-#: src/components/layouts/Checkout/index.tsx:240
+#: src/components/layouts/Checkout/index.tsx:235
 msgid "Check out this event!"
 msgstr "Bu etkinliğe göz atın!"
 
@@ -1607,7 +1607,7 @@ msgstr "Check-in listesi bulunamadı"
 msgid "Check-in Lists"
 msgstr "Giriş Listeleri"
 
-#: src/components/layouts/Event/index.tsx:138
+#: src/components/layouts/Event/index.tsx:139
 #: src/components/modals/DuplicateEventModal/index.tsx:29
 #: src/components/routes/event/CheckInLists/index.tsx:34
 msgid "Check-In Lists"
@@ -1621,9 +1621,9 @@ msgstr "Giriş listeleri, günler, alanlar veya bilet türleri arasında girişi
 msgid "Check-in Rate"
 msgstr "Giriş Oranı"
 
-#: src/components/modals/EditUserModal/index.tsx:93
-#: src/components/modals/InviteUserModal/index.tsx:83
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:84
+#: src/components/modals/EditUserModal/index.tsx:99
+#: src/components/modals/InviteUserModal/index.tsx:89
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:86
 msgid "Check-in Staff"
 msgstr ""
 
@@ -1660,7 +1660,7 @@ msgstr "Onay Kutuları"
 msgid "Checked In"
 msgstr "Giriş Yapıldı"
 
-#: src/components/routes/event/Settings/index.tsx:52
+#: src/components/routes/event/Settings/index.tsx:58
 msgid "Checkout"
 msgstr "Ödeme"
 
@@ -1779,7 +1779,7 @@ msgstr "Kod en fazla 20 karakter olmalıdır"
 msgid "Collaborate with your team to create amazing events together."
 msgstr "Birlikte harika etkinlikler oluşturmak için ekibinizle işbirliği yapın."
 
-#: src/components/forms/ProductForm/index.tsx:473
+#: src/components/forms/ProductForm/index.tsx:484
 msgid "Collapse this product when the event page is initially loaded"
 msgstr "Etkinlik sayfası ilk yüklendiğinde bu ürünü daralt"
 
@@ -1923,7 +1923,7 @@ msgstr "Yapılandırma başarıyla güncellendi"
 msgid "Configurations"
 msgstr "Yapılandırmalar"
 
-#: src/components/routes/event/Settings/index.tsx:158
+#: src/components/routes/event/Settings/index.tsx:168
 msgid "Configure event details, location, checkout options, and email notifications."
 msgstr "Etkinlik ayrıntılarını, konumu, ödeme seçeneklerini ve e-posta bildirimlerini yapılandırın."
 
@@ -1974,7 +1974,7 @@ msgstr "Şifreyi onayla"
 msgid "Confirm Password"
 msgstr "Şifreyi Onayla"
 
-#: src/components/layouts/Event/index.tsx:276
+#: src/components/layouts/Event/index.tsx:277
 msgid "Confirm your email to access all features."
 msgstr "Tüm özelliklere erişmek için e-postanızı onaylayın."
 
@@ -2069,7 +2069,7 @@ msgid "Connection Details"
 msgstr "Bağlantı Detayları"
 
 #: src/components/common/WaitlistTable/index.tsx:149
-#: src/components/layouts/EventHomepage/index.tsx:607
+#: src/components/layouts/EventHomepage/index.tsx:600
 #: src/components/layouts/OrganizerHomepage/index.tsx:258
 msgid "Contact"
 msgstr "İletişim"
@@ -2236,7 +2236,7 @@ msgid "Cover image will be displayed at the top of your organizer page"
 msgstr "Kapak görseli organizatör sayfanızın üstünde gösterilecektir"
 
 #: src/components/routes/event/attendees.tsx:196
-#: src/components/routes/event/products.tsx:76
+#: src/components/routes/event/products.tsx:83
 msgid "Create"
 msgstr "Oluştur"
 
@@ -2283,7 +2283,7 @@ msgstr "Bağlı Kuruluş Oluştur"
 msgid "create an organizer"
 msgstr "organizatör oluştur"
 
-#: src/components/routes/event/products.tsx:47
+#: src/components/routes/event/products.tsx:54
 msgid "Create and configure tickets and merchandise for sale."
 msgstr "Satış için bilet ve ürünler oluşturup yapılandırın."
 
@@ -2300,8 +2300,8 @@ msgstr "Kapasite Ataması Oluştur"
 
 #: src/components/common/ProductsTable/SortableCategory/index.tsx:128
 #: src/components/common/ProductsTable/SortableCategory/index.tsx:129
-msgid "Create category"
-msgstr "Kategori oluştur"
+#~ msgid "Create category"
+#~ msgstr "Kategori oluştur"
 
 #: src/components/modals/CreateProductCategoryModal/index.tsx:45
 #: src/components/modals/CreateProductCategoryModal/index.tsx:60
@@ -2355,6 +2355,11 @@ msgstr "Yeni şifre oluştur"
 msgid "Create Organizer"
 msgstr "Organizatör Oluştur"
 
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:131
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:132
+msgid "Create product"
+msgstr ""
+
 #: src/components/modals/CreateProductModal/index.tsx:89
 msgid "Create Product"
 msgstr "Ürün Oluştur"
@@ -2369,7 +2374,7 @@ msgstr "Promosyon Kodu Oluştur"
 msgid "Create Question"
 msgstr "Soru Oluştur"
 
-#: src/components/forms/ProductForm/index.tsx:420
+#: src/components/forms/ProductForm/index.tsx:430
 #: src/components/modals/CreateTaxOrFeeModal/index.tsx:53
 msgid "Create Tax or Fee"
 msgstr "Vergi veya Ücret Oluştur"
@@ -2629,7 +2634,7 @@ msgstr "Tehlike bölgesi"
 
 #: src/components/common/AttendeeTable/index.tsx:367
 #: src/components/common/DangerZone/index.tsx:30
-#: src/components/routes/event/Settings/index.tsx:88
+#: src/components/routes/event/Settings/index.tsx:94
 #: src/components/routes/organizer/Settings/index.tsx:78
 msgid "Danger Zone"
 msgstr "Tehlike Bölgesi"
@@ -2639,7 +2644,7 @@ msgid "Dark"
 msgstr "Koyu"
 
 #: src/components/layouts/Admin/index.tsx:13
-#: src/components/layouts/Event/index.tsx:110
+#: src/components/layouts/Event/index.tsx:111
 #: src/components/routes/organizer/OrganizerDashboard/index.tsx:160
 msgid "Dashboard"
 msgstr "Gösterge Paneli"
@@ -2718,8 +2723,8 @@ msgstr "Tümünü sil"
 msgid "Delete Capacity"
 msgstr "Kapasiteyi Sil"
 
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:146
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:147
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:150
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:151
 msgid "Delete category"
 msgstr "Kategoriyi sil"
 
@@ -2762,7 +2767,7 @@ msgstr "Bu soruyu sil? Bu işlem geri alınamaz."
 msgid "Delete webhook"
 msgstr "Webhook'u sil"
 
-#: src/components/forms/ProductForm/index.tsx:280
+#: src/components/forms/ProductForm/index.tsx:287
 #: src/components/forms/TaxAndFeeForm/index.tsx:81
 #: src/components/modals/DuplicateEventModal/index.tsx:115
 #: src/components/routes/event/Settings/Sections/EventDetailsForm/index.tsx:93
@@ -2843,7 +2848,7 @@ msgstr "Hesabınız yok mu? <0>Kaydolun</0>"
 msgid "Donation"
 msgstr "Bağış"
 
-#: src/components/forms/ProductForm/index.tsx:166
+#: src/components/forms/ProductForm/index.tsx:171
 msgid "Donation / Pay what you'd like product"
 msgstr "Bağış / İstediğiniz kadar öde ürünü"
 
@@ -2871,7 +2876,7 @@ msgstr "CSV İndir"
 msgid "Download invoice"
 msgstr "Faturayı indir"
 
-#: src/components/layouts/Checkout/index.tsx:260
+#: src/components/layouts/Checkout/index.tsx:255
 msgid "Download Invoice"
 msgstr "Faturayı İndir"
 
@@ -2884,12 +2889,12 @@ msgid "Download sales, attendee, and financial reports for all completed orders.
 msgstr "Tamamlanan tüm siparişler için satış, katılımcı ve mali raporları indirin."
 
 #: src/components/common/OrdersTable/index.tsx:98
-#: src/components/layouts/Checkout/index.tsx:87
+#: src/components/layouts/Checkout/index.tsx:84
 msgid "Downloading Invoice"
 msgstr "Fatura İndiriliyor"
 
 #: src/components/common/EventCard/index.tsx:93
-#: src/components/layouts/Event/index.tsx:210
+#: src/components/layouts/Event/index.tsx:211
 #: src/components/layouts/OrganizerLayout/index.tsx:224
 msgid "Draft"
 msgstr "Taslak"
@@ -2954,7 +2959,7 @@ msgstr "örn., Standart, Premium, Kurumsal"
 msgid "Each person will receive an email with a reserved spot to complete their purchase."
 msgstr "Her kişi, satın alma işlemini tamamlamak için ayrılmış bir yer içeren bir e-posta alacaktır."
 
-#: src/components/forms/ProductForm/index.tsx:86
+#: src/components/forms/ProductForm/index.tsx:89
 msgid "Early bird"
 msgstr "Erken kuş"
 
@@ -3007,8 +3012,8 @@ msgstr "Kapasiteyi Düzenle"
 msgid "Edit Capacity Assignment"
 msgstr "Kapasite Atamasını Düzenle"
 
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:137
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:138
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:141
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:142
 msgid "Edit category"
 msgstr "Kategoriyi düzenle"
 
@@ -3054,12 +3059,12 @@ msgstr "Promosyon Kodunu Düzenle"
 msgid "Edit Question"
 msgstr "Soruyu Düzenle"
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:141
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:143
 msgid "Edit user"
 msgstr "Kullanıcıyı düzenle"
 
-#: src/components/modals/EditUserModal/index.tsx:100
-#: src/components/modals/EditUserModal/index.tsx:171
+#: src/components/modals/EditUserModal/index.tsx:106
+#: src/components/modals/EditUserModal/index.tsx:177
 msgid "Edit User"
 msgstr "Kullanıcıyı Düzenle"
 
@@ -3115,8 +3120,8 @@ msgstr ""
 #: src/components/common/OrderDetails/index.tsx:31
 #: src/components/common/QuestionsTable/index.tsx:253
 #: src/components/forms/AffiliateForm/index.tsx:89
-#: src/components/modals/EditUserModal/index.tsx:118
-#: src/components/modals/InviteUserModal/index.tsx:97
+#: src/components/modals/EditUserModal/index.tsx:124
+#: src/components/modals/InviteUserModal/index.tsx:103
 #: src/components/modals/JoinWaitlistModal/index.tsx:171
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:128
 #: src/components/routes/admin/Dashboard/index.tsx:401
@@ -3136,7 +3141,7 @@ msgstr "E-posta"
 msgid "Email & Notification Settings"
 msgstr "E-posta ve Bildirim Ayarları"
 
-#: src/components/routes/event/Settings/index.tsx:64
+#: src/components/routes/event/Settings/index.tsx:70
 msgid "Email & Templates"
 msgstr "E-posta ve Şablonlar"
 
@@ -3179,7 +3184,7 @@ msgstr "E-posta değişikliği beklemede"
 msgid "Email confirmation resent"
 msgstr "E-posta onayı yeniden gönderildi"
 
-#: src/components/layouts/Event/index.tsx:85
+#: src/components/layouts/Event/index.tsx:86
 #: src/components/layouts/OrganizerLayout/index.tsx:112
 #: src/components/routes/profile/ManageProfile/index.tsx:100
 msgid "Email confirmation resent successfully"
@@ -3249,7 +3254,7 @@ msgstr "Limite ulaşıldığında ürün satışlarını durdurmak için bu kapa
 msgid "Enable this template for sending emails"
 msgstr "E-posta göndermek için bu şablonu etkinleştirin"
 
-#: src/components/forms/ProductForm/index.tsx:493
+#: src/components/forms/ProductForm/index.tsx:504
 msgid "Enable Waitlist"
 msgstr "Bekleme listesini etkinleştir"
 
@@ -3381,7 +3386,7 @@ msgstr "Müşteriler tükenmiş ürünler için bekleme listesine katıldığın
 
 #: src/components/common/OrdersTable/index.tsx:106
 #: src/components/common/OrganizerWebhookTable/index.tsx:149
-#: src/components/layouts/Checkout/index.tsx:95
+#: src/components/layouts/Checkout/index.tsx:92
 msgid "Error"
 msgstr "Hata"
 
@@ -3490,7 +3495,7 @@ msgstr "Etkinlik Açıklaması"
 msgid "Event details"
 msgstr "Etkinlik detayları"
 
-#: src/components/routes/event/Settings/index.tsx:40
+#: src/components/routes/event/Settings/index.tsx:46
 #: src/components/routes/event/Settings/Sections/EventDetailsForm/index.tsx:68
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:606
 msgid "Event Details"
@@ -3504,7 +3509,7 @@ msgstr "Etkinlik başarıyla çoğaltıldı"
 msgid "Event Full Address"
 msgstr "Etkinlik Tam Adresi"
 
-#: src/components/layouts/Checkout/index.tsx:205
+#: src/components/layouts/Checkout/index.tsx:200
 msgid "Event Homepage"
 msgstr "Etkinlik Ana Sayfası"
 
@@ -3520,9 +3525,9 @@ msgstr "Etkinlik konumu ve mekan detayları"
 msgid "Event Management Platform"
 msgstr "Etkinlik Yönetim Platformu"
 
-#: src/components/modals/EditUserModal/index.tsx:75
-#: src/components/modals/InviteUserModal/index.tsx:65
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:82
+#: src/components/modals/EditUserModal/index.tsx:81
+#: src/components/modals/InviteUserModal/index.tsx:71
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:84
 msgid "Event Manager"
 msgstr ""
 
@@ -3552,7 +3557,7 @@ msgstr "Etkinlik Mevcut Değil"
 msgid "Event organizer name"
 msgstr "Etkinlik organizatör adı"
 
-#: src/components/layouts/Event/index.tsx:265
+#: src/components/layouts/Event/index.tsx:266
 msgid "Event Page"
 msgstr "Etkinlik Sayfası"
 
@@ -3560,14 +3565,14 @@ msgstr "Etkinlik Sayfası"
 msgid "Event restored successfully"
 msgstr "Etkinlik başarıyla geri yüklendi"
 
-#: src/components/layouts/Event/index.tsx:123
-#: src/components/routes/event/Settings/index.tsx:159
+#: src/components/layouts/Event/index.tsx:124
+#: src/components/routes/event/Settings/index.tsx:169
 msgid "Event Settings"
 msgstr "Etkinlik ayarları"
 
 #: src/components/common/EventCard/index.tsx:79
 #: src/components/common/StatusToggle/index.tsx:63
-#: src/components/layouts/Event/index.tsx:189
+#: src/components/layouts/Event/index.tsx:190
 #: src/components/routes/event/EventDashboard/index.tsx:96
 #: src/components/routes/event/GettingStarted/index.tsx:68
 msgid "Event status update failed. Please try again later"
@@ -3575,7 +3580,7 @@ msgstr "Etkinlik durumu güncellenemedi. Lütfen daha sonra tekrar deneyin"
 
 #: src/components/common/EventCard/index.tsx:76
 #: src/components/common/StatusToggle/index.tsx:55
-#: src/components/layouts/Event/index.tsx:185
+#: src/components/layouts/Event/index.tsx:186
 #: src/components/routes/event/EventDashboard/index.tsx:93
 #: src/components/routes/event/GettingStarted/index.tsx:65
 msgid "Event status updated"
@@ -3621,7 +3626,7 @@ msgstr ""
 msgid "Event Venue"
 msgstr "Etkinlik Mekanı"
 
-#: src/components/common/AdminAccountsTable/index.tsx:82
+#: src/components/common/AdminAccountsTable/index.tsx:83
 #: src/components/layouts/Admin/index.tsx:16
 #: src/components/layouts/OrganizerLayout/index.tsx:97
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:159
@@ -3735,7 +3740,7 @@ msgstr "Başarısız oldu"
 msgid "Failed Jobs"
 msgstr "Başarısız işler"
 
-#: src/components/layouts/Checkout/index.tsx:110
+#: src/components/layouts/Checkout/index.tsx:107
 msgid "Failed to abandon order. Please try again."
 msgstr "Sipariş terk edilemedi. Lütfen tekrar deneyin."
 
@@ -3798,7 +3803,7 @@ msgid "Failed to delete template"
 msgstr "Şablon silinemedi"
 
 #: src/components/common/OrdersTable/index.tsx:107
-#: src/components/layouts/Checkout/index.tsx:96
+#: src/components/layouts/Checkout/index.tsx:93
 msgid "Failed to download invoice. Please try again."
 msgstr "Fatura indirilemedi. Lütfen tekrar deneyin."
 
@@ -3980,7 +3985,7 @@ msgstr "Ücret işleme"
 
 #: src/components/common/InlineOrderSummary/index.tsx:140
 #: src/components/common/OrdersTable/index.tsx:359
-#: src/components/forms/ProductForm/index.tsx:409
+#: src/components/forms/ProductForm/index.tsx:419
 #: src/components/routes/organizer/Reports/RevenueSummaryReport/index.tsx:54
 msgid "Fees"
 msgstr "Ücretler"
@@ -4027,9 +4032,9 @@ msgstr "Filtreler"
 msgid "Filters ({activeFilterCount})"
 msgstr "Filtreler ({activeFilterCount})"
 
-#: src/components/modals/EditUserModal/index.tsx:81
-#: src/components/modals/InviteUserModal/index.tsx:71
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:86
+#: src/components/modals/EditUserModal/index.tsx:87
+#: src/components/modals/InviteUserModal/index.tsx:77
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:88
 msgid "Finance"
 msgstr ""
 
@@ -4088,8 +4093,8 @@ msgid "First name"
 msgstr "Ad"
 
 #: src/components/common/QuestionsTable/index.tsx:251
-#: src/components/modals/EditUserModal/index.tsx:109
-#: src/components/modals/InviteUserModal/index.tsx:93
+#: src/components/modals/EditUserModal/index.tsx:115
+#: src/components/modals/InviteUserModal/index.tsx:99
 #: src/components/modals/JoinWaitlistModal/index.tsx:161
 #: src/components/routes/auth/AcceptInvitation/index.tsx:97
 #: src/components/routes/auth/Register/index.tsx:90
@@ -4182,11 +4187,11 @@ msgstr "Şifrenizi mi unuttunuz?"
 msgid "Free"
 msgstr "Ücretsiz"
 
-#: src/components/forms/ProductForm/index.tsx:160
+#: src/components/forms/ProductForm/index.tsx:165
 msgid "Free Product"
 msgstr "Ücretsiz Ürün"
 
-#: src/components/forms/ProductForm/index.tsx:162
+#: src/components/forms/ProductForm/index.tsx:167
 msgid "Free product, no payment information required"
 msgstr "Ücretsiz ürün, ödeme bilgisi gerekli değil"
 
@@ -4223,7 +4228,7 @@ msgstr ""
 msgid "Fundraising gross"
 msgstr ""
 
-#: src/components/forms/ProductForm/index.tsx:145
+#: src/components/forms/ProductForm/index.tsx:150
 msgid "General"
 msgstr "Genel"
 
@@ -4252,7 +4257,7 @@ msgstr "Kod oluştur"
 msgid "German"
 msgstr "Almanca"
 
-#: src/components/layouts/EventHomepage/index.tsx:444
+#: src/components/layouts/EventHomepage/index.tsx:437
 msgid "Get Directions"
 msgstr "Yol Tarifi Al"
 
@@ -4264,7 +4269,7 @@ msgstr "Stripe Connect üzerinden anında ödeme alın"
 msgid "Get started"
 msgstr "Başlayın"
 
-#: src/components/layouts/EventHomepage/index.tsx:643
+#: src/components/layouts/EventHomepage/index.tsx:636
 msgid "Get Tickets"
 msgstr "Bilet Al"
 
@@ -4272,7 +4277,7 @@ msgstr "Bilet Al"
 msgid "Get your event ready"
 msgstr "Etkinliğinizi hazırlayın"
 
-#: src/components/layouts/Event/index.tsx:106
+#: src/components/layouts/Event/index.tsx:107
 msgid "Getting Started"
 msgstr "Başlarken"
 
@@ -4324,7 +4329,7 @@ msgstr "Brüt satışlar"
 msgid "Gross Sales"
 msgstr "Brüt Satışlar"
 
-#: src/components/layouts/Event/index.tsx:136
+#: src/components/layouts/Event/index.tsx:137
 msgid "Guest Management"
 msgstr "Misafir yönetimi"
 
@@ -4408,23 +4413,23 @@ msgstr "Cevapları Gizle"
 msgid "Hide getting started page"
 msgstr "Başlarken sayfasını gizle"
 
-#: src/components/forms/ProductForm/index.tsx:376
+#: src/components/forms/ProductForm/index.tsx:385
 msgid "Hide Options"
 msgstr "Seçenekleri Gizle"
 
-#: src/components/forms/ProductForm/index.tsx:471
+#: src/components/forms/ProductForm/index.tsx:482
 msgid "Hide product after sale end date"
 msgstr "Satış bitiş tarihinden sonra ürünü gizle"
 
-#: src/components/forms/ProductForm/index.tsx:469
+#: src/components/forms/ProductForm/index.tsx:480
 msgid "Hide product before sale start date"
 msgstr "Satış başlama tarihinden önce ürünü gizle"
 
-#: src/components/forms/ProductForm/index.tsx:483
+#: src/components/forms/ProductForm/index.tsx:494
 msgid "Hide product unless user has applicable promo code"
 msgstr "Kullanıcının uygun promosyon kodu yoksa ürünü gizle"
 
-#: src/components/forms/ProductForm/index.tsx:477
+#: src/components/forms/ProductForm/index.tsx:488
 msgid "Hide product when sold out"
 msgstr "Tükendiğinde ürünü gizle"
 
@@ -4432,7 +4437,7 @@ msgstr "Tükendiğinde ürünü gizle"
 msgid "Hide the getting started page from the sidebar"
 msgstr "Başlarken sayfasını kenar çubuğundan gizle"
 
-#: src/components/forms/ProductForm/index.tsx:488
+#: src/components/forms/ProductForm/index.tsx:499
 msgid "Hide this product from customers"
 msgstr "Bu ürünü müşterilerden gizle"
 
@@ -4440,32 +4445,32 @@ msgstr "Bu ürünü müşterilerden gizle"
 msgid "Hide this question"
 msgstr "Bu soruyu gizle"
 
-#: src/components/forms/ProductForm/index.tsx:112
+#: src/components/forms/ProductForm/index.tsx:115
 msgid "Hide this tier from users"
 msgstr "Bu katmanı kullanıcılardan gizle"
 
-#: src/components/forms/ProductForm/index.tsx:110
+#: src/components/forms/ProductForm/index.tsx:113
 msgid "Hiding a product will prevent users from seeing it on the event page."
 msgstr "Bir ürünü gizlemek, kullanıcıların onu etkinlik sayfasında görmesini engeller."
 
-#: src/components/forms/ProductForm/index.tsx:501
+#: src/components/forms/ProductForm/index.tsx:512
 msgid "Highlight"
 msgstr "Vurgula"
 
-#: src/components/forms/ProductForm/index.tsx:513
+#: src/components/forms/ProductForm/index.tsx:524
 msgid "Highlight Message"
 msgstr "Vurgu Mesajı"
 
-#: src/components/forms/ProductForm/index.tsx:506
+#: src/components/forms/ProductForm/index.tsx:517
 msgid "Highlight this product"
 msgstr "Bu ürünü vurgula"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:336
-#: src/components/forms/ProductForm/index.tsx:386
+#: src/components/forms/ProductForm/index.tsx:395
 msgid "Highlighted"
 msgstr "Vurgulandı"
 
-#: src/components/forms/ProductForm/index.tsx:507
+#: src/components/forms/ProductForm/index.tsx:518
 msgid "Highlighted products will have a different background color to make them stand out on the event page."
 msgstr "Vurgulanan ürünler, etkinlik sayfasında öne çıkmaları için farklı bir arka plan rengine sahip olacaktır."
 
@@ -4474,7 +4479,7 @@ msgstr "Vurgulanan ürünler, etkinlik sayfasında öne çıkmaları için farkl
 msgid "Homepage Design"
 msgstr "Ana Sayfa Tasarımı"
 
-#: src/components/layouts/Event/index.tsx:124
+#: src/components/layouts/Event/index.tsx:125
 #: src/components/layouts/OrganizerLayout/index.tsx:101
 msgid "Homepage Designer"
 msgstr "Ana Sayfa Tasarımcısı"
@@ -4595,9 +4600,9 @@ msgstr "Görseller"
 msgid "Immediate adjustments"
 msgstr ""
 
-#: src/components/common/AdminAccountsTable/index.tsx:133
-#: src/components/common/AdminUsersTable/index.tsx:84
-#: src/components/common/AdminUsersTable/index.tsx:96
+#: src/components/common/AdminAccountsTable/index.tsx:134
+#: src/components/common/AdminUsersTable/index.tsx:85
+#: src/components/common/AdminUsersTable/index.tsx:97
 msgid "Impersonate"
 msgstr "Taklit Et"
 
@@ -4640,11 +4645,11 @@ msgstr "{diffMinutes} dakika içinde"
 #: src/components/common/EmailTemplateSettings/EmailTemplateSettingsBase.tsx:267
 #: src/components/forms/AffiliateForm/index.tsx:27
 #: src/components/forms/CapaciyAssigmentForm/index.tsx:25
-#: src/components/modals/EditUserModal/index.tsx:162
+#: src/components/modals/EditUserModal/index.tsx:168
 msgid "Inactive"
 msgstr "Pasif"
 
-#: src/components/modals/EditUserModal/index.tsx:158
+#: src/components/modals/EditUserModal/index.tsx:164
 msgid "Inactive users cannot log in."
 msgstr "Pasif kullanıcılar giriş yapamazlar."
 
@@ -4696,7 +4701,7 @@ msgstr "Instagram"
 msgid "Instant Payouts"
 msgstr "Anında Ödemeler"
 
-#: src/components/layouts/Event/index.tsx:144
+#: src/components/layouts/Event/index.tsx:145
 #: src/components/layouts/OrganizerLayout/index.tsx:103
 msgid "Integrations"
 msgstr "Entegrasyonlar"
@@ -4737,11 +4742,11 @@ msgstr "Davet yeniden gönderildi!"
 msgid "Invitation revoked!"
 msgstr "Davet iptal edildi!"
 
-#: src/components/modals/InviteUserModal/index.tsx:90
+#: src/components/modals/InviteUserModal/index.tsx:96
 msgid "Invite a team member"
 msgstr "Bir ekip üyesi davet et"
 
-#: src/components/modals/InviteUserModal/index.tsx:122
+#: src/components/modals/InviteUserModal/index.tsx:128
 msgid "Invite Team Member"
 msgstr "Ekip Üyesi Davet Et"
 
@@ -4753,7 +4758,7 @@ msgstr "Ekip Üyelerini Davet Et"
 msgid "Invite unlimited team members with custom roles"
 msgstr "Özel rollerle sınırsız takım üyesi davet edin"
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:166
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:168
 msgid "Invite User"
 msgstr "Kullanıcı Davet Et"
 
@@ -4766,7 +4771,7 @@ msgid "Invoice"
 msgstr "Fatura"
 
 #: src/components/common/OrdersTable/index.tsx:103
-#: src/components/layouts/Checkout/index.tsx:92
+#: src/components/layouts/Checkout/index.tsx:89
 msgid "Invoice downloaded successfully"
 msgstr "Fatura başarıyla indirildi"
 
@@ -4835,7 +4840,7 @@ msgstr "John"
 msgid "Johnson"
 msgstr "Johnson"
 
-#: src/components/layouts/EventHomepage/index.tsx:372
+#: src/components/layouts/EventHomepage/index.tsx:365
 msgid "Join from anywhere"
 msgstr "Her yerden katılın"
 
@@ -4869,7 +4874,7 @@ msgstr ""
 msgid "Keep me updated on news and events from {0}"
 msgstr "{0} adresinden haberler ve etkinlikler hakkında beni bilgilendirin"
 
-#: src/components/forms/ProductForm/index.tsx:85
+#: src/components/forms/ProductForm/index.tsx:88
 msgid "Label"
 msgstr "Etiket"
 
@@ -4924,7 +4929,7 @@ msgstr "Son 7 gün"
 msgid "Last 90 days"
 msgstr "Son 90 gün"
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:178
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:180
 msgid "Last login"
 msgstr "Son giriş"
 
@@ -4935,8 +4940,8 @@ msgid "Last name"
 msgstr "Soyad"
 
 #: src/components/common/QuestionsTable/index.tsx:252
-#: src/components/modals/EditUserModal/index.tsx:110
-#: src/components/modals/InviteUserModal/index.tsx:94
+#: src/components/modals/EditUserModal/index.tsx:116
+#: src/components/modals/InviteUserModal/index.tsx:100
 #: src/components/modals/JoinWaitlistModal/index.tsx:166
 #: src/components/routes/auth/AcceptInvitation/index.tsx:102
 #: src/components/routes/auth/Register/index.tsx:96
@@ -5010,7 +5015,7 @@ msgid "List event publicly"
 msgstr ""
 
 #: src/components/common/EventCard/index.tsx:96
-#: src/components/layouts/Event/index.tsx:212
+#: src/components/layouts/Event/index.tsx:213
 #: src/components/layouts/OrganizerLayout/index.tsx:226
 msgid "Live"
 msgstr "Canlı"
@@ -5028,8 +5033,8 @@ msgstr "Canlı Etkinlikler"
 msgid "Load report"
 msgstr ""
 
-#: src/components/modals/EditUserModal/index.tsx:145
-#: src/components/modals/InviteUserModal/index.tsx:112
+#: src/components/modals/EditUserModal/index.tsx:151
+#: src/components/modals/InviteUserModal/index.tsx:118
 msgid "Loading events..."
 msgstr ""
 
@@ -5063,8 +5068,8 @@ msgid "Loading..."
 msgstr "Yükleniyor..."
 
 #: src/components/common/AttendeeTicket/index.tsx:91
-#: src/components/layouts/EventHomepage/index.tsx:426
-#: src/components/routes/event/Settings/index.tsx:46
+#: src/components/layouts/EventHomepage/index.tsx:419
+#: src/components/routes/event/Settings/index.tsx:52
 #: src/components/routes/event/Settings/Sections/LocationSettings/index.tsx:84
 #: src/components/routes/my-tickets/index.tsx:73
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:313
@@ -5136,6 +5141,11 @@ msgstr "Etkinliğinizi canlı yapın"
 msgid "Manage"
 msgstr "Yönet"
 
+#: src/components/modals/EditUserModal/index.tsx:77
+#: src/components/modals/InviteUserModal/index.tsx:67
+msgid "Manage assigned event details, ticketing, attendees, reports, and check-in. No refunds, payment settings, integrations, or publishing."
+msgstr ""
+
 #: src/components/common/AttendeeTable/index.tsx:349
 msgid "Manage attendee"
 msgstr "Katılımcıyı yönet"
@@ -5144,8 +5154,8 @@ msgstr "Katılımcıyı yönet"
 msgid "Manage event"
 msgstr "Etkinliği yönet"
 
-#: src/components/modals/EditUserModal/index.tsx:77
-#: src/components/modals/InviteUserModal/index.tsx:67
+#: src/components/modals/EditUserModal/index.tsx:83
+#: src/components/modals/InviteUserModal/index.tsx:73
 msgid "Manage event setup, ticketing, guest operations, reports, messages, integrations, and check-in."
 msgstr ""
 
@@ -5181,7 +5191,7 @@ msgstr ""
 msgid "Manage your payment processing and view platform fees"
 msgstr "Ödeme işlemenizi yönetin ve platform ücretlerini görüntüleyin"
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:165
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:167
 msgid "Manage your users and their permissions"
 msgstr "Kullanıcılarınızı ve izinlerini yönetin"
 
@@ -5214,7 +5224,7 @@ msgstr "Maks Mesaj / 24s"
 msgid "Max Recipients / Message"
 msgstr "Maks Alıcı / Mesaj"
 
-#: src/components/forms/ProductForm/index.tsx:442
+#: src/components/forms/ProductForm/index.tsx:453
 msgid "Maximum Per Order"
 msgstr "Sipariş Başına Maksimum"
 
@@ -5286,12 +5296,12 @@ msgid "Message Sent"
 msgstr "Mesaj Gönderildi"
 
 #: src/components/layouts/Admin/index.tsx:18
-#: src/components/layouts/Event/index.tsx:139
+#: src/components/layouts/Event/index.tsx:140
 #: src/components/routes/event/messages.tsx:225
 msgid "Messages"
 msgstr "Mesajlar"
 
-#: src/components/common/AdminAccountsTable/index.tsx:96
+#: src/components/common/AdminAccountsTable/index.tsx:97
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:215
 msgid "Messaging Tier"
 msgstr "Mesajlaşma Seviyesi"
@@ -5300,11 +5310,11 @@ msgstr "Mesajlaşma Seviyesi"
 msgid "Messaging tier updated successfully"
 msgstr "Mesajlaşma seviyesi başarıyla güncellendi"
 
-#: src/components/forms/ProductForm/index.tsx:440
+#: src/components/forms/ProductForm/index.tsx:451
 msgid "Minimum Per Order"
 msgstr "Sipariş Başına Minimum"
 
-#: src/components/forms/ProductForm/index.tsx:307
+#: src/components/forms/ProductForm/index.tsx:314
 msgid "Minimum Price"
 msgstr "Minimum Fiyat"
 
@@ -5312,7 +5322,7 @@ msgstr "Minimum Fiyat"
 msgid "minutes"
 msgstr "dakika"
 
-#: src/components/routes/event/Settings/index.tsx:70
+#: src/components/routes/event/Settings/index.tsx:76
 msgid "Miscellaneous"
 msgstr "Çeşitli"
 
@@ -5352,7 +5362,7 @@ msgstr "En Çok Görüntülenen Etkinlikler (Son 14 Gün)"
 msgid "Multi line text box"
 msgstr "Çok satırlı metin kutusu"
 
-#: src/components/forms/ProductForm/index.tsx:174
+#: src/components/forms/ProductForm/index.tsx:179
 msgid "Multiple price options. Perfect for early bird products etc."
 msgstr "Çoklu fiyat seçenekleri. Erken kayıt ürünleri vb. için mükemmel."
 
@@ -5391,7 +5401,7 @@ msgstr "Nam placerat elementum..."
 #: src/components/forms/AffiliateForm/index.tsx:81
 #: src/components/forms/CapaciyAssigmentForm/index.tsx:37
 #: src/components/forms/CheckInListForm/index.tsx:37
-#: src/components/forms/ProductForm/index.tsx:274
+#: src/components/forms/ProductForm/index.tsx:281
 #: src/components/forms/TaxAndFeeForm/index.tsx:61
 #: src/components/modals/DuplicateEventModal/index.tsx:109
 #: src/components/routes/account/ManageAccount/sections/AccountSettings/index.tsx:63
@@ -5430,7 +5440,7 @@ msgstr "Net Gelir"
 #: src/components/common/OrganizerWebhookTable/index.tsx:266
 #: src/components/common/PromoCodeTable/index.tsx:158
 #: src/components/common/WebhookTable/index.tsx:266
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:123
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:125
 msgid "Never"
 msgstr "Asla"
 
@@ -5457,7 +5467,7 @@ msgstr "Hayır"
 msgid "No - I'm an individual or non-VAT registered business"
 msgstr "Hayır - Bireyim veya KDV kayıtlı olmayan bir işletmeyim"
 
-#: src/components/common/AdminUsersTable/index.tsx:143
+#: src/components/common/AdminUsersTable/index.tsx:144
 msgid "No accounts"
 msgstr "Hesap yok"
 
@@ -5655,7 +5665,7 @@ msgstr "Bu kategoride mevcut ürün yok."
 msgid "No products have waiting entries"
 msgstr "Hiçbir ürünün bekleme listesi kaydı yok"
 
-#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:39
+#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:40
 msgid "No Products Yet"
 msgstr "Henüz Ürün Yok"
 
@@ -5705,7 +5715,7 @@ msgstr "Henüz yanıt yok"
 msgid "No results"
 msgstr "Sonuç yok"
 
-#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:20
+#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:21
 msgid "No Search Results"
 msgstr "Arama Sonucu Yok"
 
@@ -5751,7 +5761,7 @@ msgstr "Bu uç nokta için henüz webhook olayı kaydedilmedi. Olaylar tetiklend
 msgid "No Webhooks"
 msgstr "Webhook Yok"
 
-#: src/components/layouts/Checkout/index.tsx:322
+#: src/components/layouts/Checkout/index.tsx:317
 msgid "No, keep me here"
 msgstr "Hayır, beni burada tut"
 
@@ -5919,7 +5929,7 @@ msgstr "Devam Eden"
 msgid "Online"
 msgstr "Çevrimiçi"
 
-#: src/components/layouts/EventHomepage/index.tsx:370
+#: src/components/layouts/EventHomepage/index.tsx:363
 #: src/components/layouts/OrganizerHomepage/EventCard/index.tsx:167
 msgid "Online Event"
 msgstr "Çevrimiçi Etkinlik"
@@ -6087,11 +6097,11 @@ msgstr "Sipariş Çevrimdışı Ödeme Bekliyor"
 msgid "Order Last Name"
 msgstr "Sipariş Soyadı"
 
-#: src/components/forms/ProductForm/index.tsx:436
+#: src/components/forms/ProductForm/index.tsx:447
 msgid "Order Limits"
 msgstr "Sipariş Limitleri"
 
-#: src/components/forms/ProductForm/index.tsx:384
+#: src/components/forms/ProductForm/index.tsx:393
 msgid "Order limits set"
 msgstr "Sipariş limitleri ayarlandı"
 
@@ -6192,7 +6202,7 @@ msgid "Order was cancelled"
 msgstr "Sipariş iptal edildi"
 
 #: src/components/layouts/Admin/index.tsx:17
-#: src/components/layouts/Event/index.tsx:131
+#: src/components/layouts/Event/index.tsx:132
 #: src/components/routes/admin/Attribution/index.tsx:138
 #: src/components/routes/admin/Orders/index.tsx:44
 #: src/components/routes/event/orders.tsx:115
@@ -6244,7 +6254,7 @@ msgstr "Organizasyon Adı"
 
 #: src/components/common/AdminEventsTable/index.tsx:87
 #: src/components/common/AttendeeTicket/index.tsx:82
-#: src/components/layouts/EventHomepage/index.tsx:519
+#: src/components/layouts/EventHomepage/index.tsx:512
 #: src/components/routes/admin/Dashboard/index.tsx:257
 #: src/components/routes/admin/Dashboard/index.tsx:306
 #: src/components/routes/admin/Dashboard/index.tsx:352
@@ -6257,7 +6267,7 @@ msgstr "Organizatör"
 msgid "Organizer archived successfully"
 msgstr "Organizatör başarıyla arşivlendi"
 
-#: src/components/layouts/Event/index.tsx:97
+#: src/components/layouts/Event/index.tsx:98
 #: src/components/layouts/OrganizerLayout/index.tsx:87
 #: src/components/routes/organizer/OrganizerDashboard/index.tsx:160
 msgid "Organizer Dashboard"
@@ -6337,7 +6347,7 @@ msgstr "Diğer Listeler (Bilet Dahil Değil)"
 msgid "Outgoing Messages"
 msgstr "Giden mesajlar"
 
-#: src/components/layouts/Event/index.tsx:103
+#: src/components/layouts/Event/index.tsx:104
 msgid "Overview"
 msgstr "Genel Bakış"
 
@@ -6377,7 +6387,7 @@ msgstr "ödendi"
 msgid "Paid Accounts"
 msgstr "Ücretli Hesaplar"
 
-#: src/components/forms/ProductForm/index.tsx:154
+#: src/components/forms/ProductForm/index.tsx:159
 msgid "Paid Product"
 msgstr "Ücretli Ürün"
 
@@ -6479,7 +6489,7 @@ msgstr "Yük"
 msgid "Payment"
 msgstr "Ödeme"
 
-#: src/components/routes/event/Settings/index.tsx:82
+#: src/components/routes/event/Settings/index.tsx:88
 msgid "Payment & Invoicing"
 msgstr "Ödeme ve Faturalama"
 
@@ -6670,7 +6680,7 @@ msgid "Platform fee of {0} deducted from your payout"
 msgstr "Ödemenizden {0} platform ücreti düşülür"
 
 #: src/components/routes/account/ManageAccount/sections/PaymentSettings/index.tsx:248
-#: src/components/routes/event/Settings/index.tsx:98
+#: src/components/routes/event/Settings/index.tsx:104
 #: src/components/routes/event/Settings/Sections/PlatformFeesSettings/index.tsx:46
 #: src/components/routes/organizer/Reports/index.tsx:41
 #: src/components/routes/organizer/Settings/index.tsx:88
@@ -6752,7 +6762,7 @@ msgstr "Lütfen bir görsel sağlayın."
 msgid "Please restart the checkout process."
 msgstr "Lütfen ödeme işlemini yeniden başlatın."
 
-#: src/components/layouts/Checkout/index.tsx:291
+#: src/components/layouts/Checkout/index.tsx:286
 msgid "Please return to the event page to start over."
 msgstr "Baştan başlamak için lütfen etkinlik sayfasına dönün."
 
@@ -6791,7 +6801,7 @@ msgid "Please wait while we prepare your attendees for export..."
 msgstr "Katılımcılarınızı dışa aktarma için hazırlarken lütfen bekleyin..."
 
 #: src/components/common/OrdersTable/index.tsx:99
-#: src/components/layouts/Checkout/index.tsx:88
+#: src/components/layouts/Checkout/index.tsx:85
 msgid "Please wait while we prepare your invoice..."
 msgstr "Faturanızı hazırlarken lütfen bekleyin..."
 
@@ -6857,14 +6867,14 @@ msgstr "Önizleme"
 msgid "Preview checkout form"
 msgstr "Ödeme formunu önizle"
 
-#: src/components/layouts/Event/index.tsx:258
-#: src/components/layouts/Event/index.tsx:262
+#: src/components/layouts/Event/index.tsx:259
+#: src/components/layouts/Event/index.tsx:263
 msgid "Preview Event page"
 msgstr "Etkinlik sayfasını önizle"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:360
-#: src/components/forms/ProductForm/index.tsx:81
-#: src/components/forms/ProductForm/index.tsx:307
+#: src/components/forms/ProductForm/index.tsx:84
+#: src/components/forms/ProductForm/index.tsx:314
 msgid "Price"
 msgstr "Fiyat"
 
@@ -6880,11 +6890,11 @@ msgstr "Fiyat belirlenmedi"
 msgid "Price of the ticket"
 msgstr "Bilet fiyatı"
 
-#: src/components/forms/ProductForm/index.tsx:343
+#: src/components/forms/ProductForm/index.tsx:350
 msgid "Price Tiers"
 msgstr "Fiyat Kademeleri"
 
-#: src/components/forms/ProductForm/index.tsx:249
+#: src/components/forms/ProductForm/index.tsx:256
 msgid "Price Type"
 msgstr "Fiyat Türü"
 
@@ -6908,7 +6918,7 @@ msgstr "Yazdırma Önizlemesi"
 msgid "Print Ticket"
 msgstr "Bileti Yazdır"
 
-#: src/components/layouts/Checkout/index.tsx:248
+#: src/components/layouts/Checkout/index.tsx:243
 #: src/components/routes/my-tickets/index.tsx:119
 msgid "Print Tickets"
 msgstr "Biletleri Yazdır"
@@ -6918,7 +6928,7 @@ msgid "Print to PDF"
 msgstr "PDF'ye Yazdır"
 
 #: src/components/common/CookieConsentBanner/index.tsx:51
-#: src/components/layouts/EventHomepage/index.tsx:623
+#: src/components/layouts/EventHomepage/index.tsx:616
 #: src/components/layouts/OrganizerHomepage/index.tsx:341
 msgid "Privacy Policy"
 msgstr "Gizlilik Politikası"
@@ -6944,7 +6954,7 @@ msgstr "Sipariş işleniyor"
 msgid "Product"
 msgstr "Ürün"
 
-#: src/components/forms/ProductForm/index.tsx:288
+#: src/components/forms/ProductForm/index.tsx:295
 msgid "Product Category"
 msgstr "Ürün Kategorisi"
 
@@ -6964,7 +6974,7 @@ msgstr "Ürün Silindi"
 msgid "Product deleted successfully"
 msgstr "Ürün başarıyla silindi"
 
-#: src/components/forms/ProductForm/index.tsx:257
+#: src/components/forms/ProductForm/index.tsx:264
 msgid "Product Price Type"
 msgstr "Ürün Fiyat Türü"
 
@@ -6981,8 +6991,8 @@ msgstr "Ürün satışları, gelir ve vergi dökümü"
 msgid "Product Tier"
 msgstr "Ürün Katmanı"
 
-#: src/components/forms/ProductForm/index.tsx:234
-#: src/components/forms/ProductForm/index.tsx:242
+#: src/components/forms/ProductForm/index.tsx:241
+#: src/components/forms/ProductForm/index.tsx:249
 msgid "Product Type"
 msgstr "Ürün Türü"
 
@@ -7035,7 +7045,7 @@ msgstr "Promosyon kodu"
 msgid "Promo Code"
 msgstr "Promosyon Kodu"
 
-#: src/components/forms/ProductForm/index.tsx:481
+#: src/components/forms/ProductForm/index.tsx:492
 msgid "Promo Code page"
 msgstr "Promosyon Kodu sayfası"
 
@@ -7043,7 +7053,7 @@ msgstr "Promosyon Kodu sayfası"
 msgid "Promo code usage and discount breakdown"
 msgstr "Promosyon kodu kullanımı ve indirim dökümü"
 
-#: src/components/layouts/Event/index.tsx:132
+#: src/components/layouts/Event/index.tsx:133
 #: src/components/modals/DuplicateEventModal/index.tsx:27
 #: src/components/routes/event/promo-codes.tsx:33
 msgid "Promo Codes"
@@ -7103,8 +7113,8 @@ msgstr "QR Kod Giriş"
 msgid "Qty"
 msgstr "Adet"
 
-#: src/components/forms/ProductForm/index.tsx:93
-#: src/components/forms/ProductForm/index.tsx:324
+#: src/components/forms/ProductForm/index.tsx:96
+#: src/components/forms/ProductForm/index.tsx:331
 msgid "Quantity Available"
 msgstr "Mevcut Miktar"
 
@@ -7161,8 +7171,8 @@ msgstr "Hız sınırı aşıldı. Lütfen daha sonra tekrar deneyin."
 msgid "Re-offer Spot"
 msgstr "Yeri Yeniden Teklif Et"
 
-#: src/components/modals/EditUserModal/index.tsx:89
-#: src/components/modals/InviteUserModal/index.tsx:79
+#: src/components/modals/EditUserModal/index.tsx:95
+#: src/components/modals/InviteUserModal/index.tsx:85
 msgid "Read-only access to event data, orders, attendees, reports, and exports."
 msgstr ""
 
@@ -7312,7 +7322,7 @@ msgid "Register"
 msgstr "Kayıt Ol"
 
 #: src/components/common/QuestionsTable/index.tsx:412
-#: src/components/layouts/Event/index.tsx:126
+#: src/components/layouts/Event/index.tsx:127
 msgid "Registration Questions"
 msgstr "Kayıt soruları"
 
@@ -7347,13 +7357,13 @@ msgstr ""
 msgid "Report scope required"
 msgstr ""
 
-#: src/components/modals/EditUserModal/index.tsx:87
-#: src/components/modals/InviteUserModal/index.tsx:77
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:88
+#: src/components/modals/EditUserModal/index.tsx:93
+#: src/components/modals/InviteUserModal/index.tsx:83
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:90
 msgid "Reporting"
 msgstr ""
 
-#: src/components/layouts/Event/index.tsx:113
+#: src/components/layouts/Event/index.tsx:114
 #: src/components/layouts/OrganizerLayout/index.tsx:90
 #: src/components/routes/event/Reports/index.tsx:46
 #: src/components/routes/organizer/Reports/index.tsx:51
@@ -7384,7 +7394,7 @@ msgstr "Onayı yeniden gönder"
 msgid "Resend Confirmation Email"
 msgstr "Onay E-postasını Yeniden Gönder"
 
-#: src/components/layouts/Event/index.tsx:278
+#: src/components/layouts/Event/index.tsx:279
 msgid "Resend email"
 msgstr "E-postayı yeniden gönder"
 
@@ -7396,7 +7406,7 @@ msgstr "E-posta onayını tekrar gönder"
 msgid "Resend in {resendCooldown}s"
 msgstr "{resendCooldown}s içinde yeniden gönder"
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:146
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:148
 msgid "Resend invitation"
 msgstr "Daveti tekrar gönder"
 
@@ -7489,7 +7499,7 @@ msgstr "İşi yeniden dene"
 msgid "Return to Event"
 msgstr "Etkinliğe Dön"
 
-#: src/components/layouts/Checkout/index.tsx:298
+#: src/components/layouts/Checkout/index.tsx:293
 msgid "Return to Event Page"
 msgstr "Etkinlik Sayfasına Dön"
 
@@ -7509,7 +7519,7 @@ msgstr "Gelir Özeti"
 msgid "Review required"
 msgstr ""
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:152
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:154
 msgid "Revoke invitation"
 msgstr "Daveti iptal et"
 
@@ -7521,14 +7531,14 @@ msgstr ""
 msgid "RFC 3339, including seconds and offset"
 msgstr ""
 
-#: src/components/modals/EditUserModal/index.tsx:131
-#: src/components/modals/InviteUserModal/index.tsx:100
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:177
+#: src/components/modals/EditUserModal/index.tsx:137
+#: src/components/modals/InviteUserModal/index.tsx:106
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:179
 msgid "Role"
 msgstr "Rol"
 
-#: src/components/forms/ProductForm/index.tsx:104
-#: src/components/forms/ProductForm/index.tsx:457
+#: src/components/forms/ProductForm/index.tsx:107
+#: src/components/forms/ProductForm/index.tsx:468
 msgid "Sale End Date"
 msgstr "Satış Bitiş Tarihi"
 
@@ -7541,20 +7551,20 @@ msgid "Sale ends {0}"
 msgstr "Satış bitiyor {0}"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:414
-#: src/components/forms/ProductForm/index.tsx:450
+#: src/components/forms/ProductForm/index.tsx:461
 msgid "Sale Period"
 msgstr "Satış Dönemi"
 
-#: src/components/forms/ProductForm/index.tsx:385
+#: src/components/forms/ProductForm/index.tsx:394
 msgid "Sale period set"
 msgstr "Satış dönemi ayarlandı"
 
-#: src/components/forms/ProductForm/index.tsx:387
+#: src/components/forms/ProductForm/index.tsx:396
 msgid "Sale period, order limits, visibility"
 msgstr "Satış dönemi, sipariş limitleri, görünürlük"
 
-#: src/components/forms/ProductForm/index.tsx:99
-#: src/components/forms/ProductForm/index.tsx:455
+#: src/components/forms/ProductForm/index.tsx:102
+#: src/components/forms/ProductForm/index.tsx:466
 msgid "Sale Start Date"
 msgstr "Satış Başlangıç Tarihi"
 
@@ -7747,7 +7757,7 @@ msgstr "Check-in listelerini ara..."
 msgid "Search messages..."
 msgstr "Mesajlarda ara..."
 
-#: src/components/routes/event/products.tsx:54
+#: src/components/routes/event/products.tsx:61
 msgid "Search products"
 msgstr "Ürünleri ara"
 
@@ -7789,7 +7799,7 @@ msgstr "İçeriğini görüntülemek için bir mesaj seçin"
 msgid "Select a tier"
 msgstr "Bir seviye seçin"
 
-#: src/components/common/AdminUsersTable/index.tsx:100
+#: src/components/common/AdminUsersTable/index.tsx:101
 msgid "Select Account"
 msgstr "Hesap Seç"
 
@@ -7814,7 +7824,7 @@ msgstr "Katılımcı grubu seçin"
 msgid "Select Camera"
 msgstr "Kamera Seç"
 
-#: src/components/forms/ProductForm/index.tsx:291
+#: src/components/forms/ProductForm/index.tsx:298
 msgid "Select category..."
 msgstr "Kategori seç..."
 
@@ -7842,8 +7852,8 @@ msgstr "Etkinlik kategorisi seçin"
 msgid "Select event types"
 msgstr "Etkinlik türlerini seçin"
 
-#: src/components/modals/EditUserModal/index.tsx:145
-#: src/components/modals/InviteUserModal/index.tsx:112
+#: src/components/modals/EditUserModal/index.tsx:151
+#: src/components/modals/InviteUserModal/index.tsx:118
 msgid "Select events"
 msgstr ""
 
@@ -7876,7 +7886,7 @@ msgstr "Başlangıç tarih ve saatini seçin"
 msgid "Select start time"
 msgstr "Başlangıç saatini seçin"
 
-#: src/components/modals/EditUserModal/index.tsx:155
+#: src/components/modals/EditUserModal/index.tsx:161
 msgid "Select status"
 msgstr "Durum seç"
 
@@ -7919,7 +7929,7 @@ msgstr "Bu webhook'u tetikleyecek etkinlikleri seçin"
 msgid "Select which fee configuration applies to this account. Fixed fees are converted to the order currency at checkout."
 msgstr "Bu hesaba hangi ücret yapılandırmasının uygulanacağını seçin. Sabit ücretler ödeme sırasında sipariş para birimine dönüştürülür."
 
-#: src/components/forms/ProductForm/index.tsx:404
+#: src/components/forms/ProductForm/index.tsx:414
 msgid "Select..."
 msgstr "Seç..."
 
@@ -7932,7 +7942,7 @@ msgstr "Seçildi"
 msgid "Selection"
 msgstr ""
 
-#: src/components/forms/ProductForm/index.tsx:515
+#: src/components/forms/ProductForm/index.tsx:526
 msgid "Selling fast 🔥"
 msgstr "Hızlı satılıyor 🔥"
 
@@ -8015,7 +8025,7 @@ msgstr "Müşterilere sipariş verdiklerinde gönderilir"
 msgid "Sent to each attendee with their ticket details"
 msgstr "Her katılımcıya bilet detaylarıyla birlikte gönderilir"
 
-#: src/components/routes/event/Settings/index.tsx:58
+#: src/components/routes/event/Settings/index.tsx:64
 #: src/components/routes/organizer/Settings/index.tsx:60
 msgid "SEO"
 msgstr "SEO"
@@ -8044,7 +8054,7 @@ msgstr "SEO Başlığı"
 msgid "Service Fee"
 msgstr "Hizmet Ücreti"
 
-#: src/components/forms/ProductForm/index.tsx:168
+#: src/components/forms/ProductForm/index.tsx:173
 msgid "Set a minimum price and let users pay more if they choose"
 msgstr "Minimum fiyat belirleyin ve kullanıcılar isterlerse daha fazla ödesin"
 
@@ -8095,12 +8105,12 @@ msgstr "Ayarlar"
 msgid "Settlement after adjustments"
 msgstr ""
 
-#: src/components/layouts/Event/index.tsx:122
+#: src/components/layouts/Event/index.tsx:123
 msgid "Setup & Design"
 msgstr "Kurulum ve Tasarım"
 
 #: src/components/common/ShareIcon/index.tsx:30
-#: src/components/layouts/EventHomepage/index.tsx:319
+#: src/components/layouts/EventHomepage/index.tsx:312
 #: src/components/layouts/OrganizerLayout/index.tsx:246
 #: src/components/modals/ShareModal/index.tsx:37
 #: src/components/modals/ShareModal/index.tsx:165
@@ -8113,8 +8123,8 @@ msgstr "Paylaş"
 msgid "Share Affiliate Link"
 msgstr "Bağlı Kuruluş Bağlantısını Paylaş"
 
-#: src/components/layouts/Event/index.tsx:228
-#: src/components/layouts/Event/index.tsx:234
+#: src/components/layouts/Event/index.tsx:229
+#: src/components/layouts/Event/index.tsx:235
 #: src/components/modals/EventLiveCelebrationModal/index.tsx:102
 #: src/components/modals/EventLiveCelebrationModal/index.tsx:131
 msgid "Share Event"
@@ -8133,7 +8143,7 @@ msgstr "Paylaşımlı Kapasite Yönetimi"
 msgid "Show all platforms ({0} more with values)"
 msgstr "Tüm platformları göster ({0} değerli daha fazla)"
 
-#: src/components/forms/ProductForm/index.tsx:475
+#: src/components/forms/ProductForm/index.tsx:486
 msgid "Show available product quantity"
 msgstr "Mevcut ürün miktarını göster"
 
@@ -8231,7 +8241,7 @@ msgid "Sold out"
 msgstr "Tükendi"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:81
-#: src/components/layouts/EventHomepage/index.tsx:169
+#: src/components/layouts/EventHomepage/index.tsx:162
 msgid "Sold Out"
 msgstr "Tükendi"
 
@@ -8263,7 +8273,7 @@ msgstr "Bir şeyler yanlış gitti."
 msgid "Something went wrong. Please try again later."
 msgstr "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin."
 
-#: src/components/layouts/Event/index.tsx:89
+#: src/components/layouts/Event/index.tsx:90
 #: src/components/layouts/OrganizerLayout/index.tsx:116
 #: src/components/routes/auth/Login/index.tsx:72
 #: src/components/routes/my-tickets/index.tsx:145
@@ -8309,7 +8319,7 @@ msgstr "İspanyolca"
 msgid "Sports"
 msgstr "Spor"
 
-#: src/components/forms/ProductForm/index.tsx:156
+#: src/components/forms/ProductForm/index.tsx:161
 msgid "Standard product with a fixed price"
 msgstr "Sabit fiyatlı standart ürün"
 
@@ -8364,8 +8374,8 @@ msgstr "İstatistikler hesap oluşturma tarihine göre hesaplanır"
 #: src/components/forms/AffiliateForm/index.tsx:98
 #: src/components/forms/CapaciyAssigmentForm/index.tsx:56
 #: src/components/forms/WebhookForm/index.tsx:157
-#: src/components/modals/EditUserModal/index.tsx:154
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:179
+#: src/components/modals/EditUserModal/index.tsx:160
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:181
 #: src/components/routes/admin/Dashboard/index.tsx:405
 #: src/components/routes/admin/Messages/index.tsx:120
 #: src/components/routes/admin/Messages/index.tsx:167
@@ -8451,7 +8461,7 @@ msgstr "Ara Toplam"
 
 #: src/components/common/OrdersTable/index.tsx:102
 #: src/components/common/OrganizerWebhookTable/index.tsx:149
-#: src/components/layouts/Checkout/index.tsx:91
+#: src/components/layouts/Checkout/index.tsx:88
 msgid "Success"
 msgstr "Başarılı"
 
@@ -8627,7 +8637,7 @@ msgstr "Yaz Müzik Festivali {0}"
 msgid "Summer Music Festival 2025"
 msgstr "Yaz Müzik Festivali 2025"
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:92
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:94
 msgid "Super Admin"
 msgstr ""
 
@@ -8650,7 +8660,7 @@ msgstr "Organizatör Değiştir"
 msgid "System Default"
 msgstr "Sistem Varsayılanı"
 
-#: src/components/forms/ProductForm/index.tsx:275
+#: src/components/forms/ProductForm/index.tsx:282
 msgid "T-shirt"
 msgstr "Tişört"
 
@@ -8701,7 +8711,7 @@ msgid "Tax Summary"
 msgstr "Vergi Özeti"
 
 #: src/components/common/InlineOrderSummary/index.tsx:173
-#: src/components/forms/ProductForm/index.tsx:406
+#: src/components/forms/ProductForm/index.tsx:416
 #: src/components/routes/organizer/Reports/RevenueSummaryReport/index.tsx:48
 msgid "Taxes"
 msgstr "Vergiler"
@@ -8710,16 +8720,16 @@ msgstr "Vergiler"
 msgid "Taxes & fees applied"
 msgstr "Uygulanan vergiler ve ücretler"
 
-#: src/components/forms/ProductForm/index.tsx:398
-#: src/components/forms/ProductForm/index.tsx:403
+#: src/components/forms/ProductForm/index.tsx:408
+#: src/components/forms/ProductForm/index.tsx:413
 msgid "Taxes and Fees"
 msgstr "Vergiler ve Ücretler"
 
-#: src/components/forms/ProductForm/index.tsx:383
+#: src/components/forms/ProductForm/index.tsx:392
 msgid "Taxes configured"
 msgstr "Vergiler yapılandırıldı"
 
-#: src/components/forms/ProductForm/index.tsx:376
+#: src/components/forms/ProductForm/index.tsx:385
 msgid "Taxes, Fees, Visibility, Sale Period, Product Highlight & Order Limits"
 msgstr "Vergiler, Ücretler, Görünürlük, Satış Dönemi, Ürün Vurgulama ve Sipariş Limitleri"
 
@@ -8763,7 +8773,7 @@ msgstr "Şablon başarıyla silindi"
 msgid "Template saved successfully"
 msgstr "Şablon başarıyla kaydedildi"
 
-#: src/components/layouts/EventHomepage/index.tsx:629
+#: src/components/layouts/EventHomepage/index.tsx:622
 #: src/components/layouts/OrganizerHomepage/index.tsx:348
 msgid "Terms of Service"
 msgstr "Hizmet Koşulları"
@@ -8974,11 +8984,11 @@ msgstr "Bu şablonlar yalnızca bu etkinlik için organizatör varsayılanların
 msgid "This attendee has an unpaid order."
 msgstr "Bu katılımcının ödenmemiş siparişi var."
 
-#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:61
+#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:64
 msgid "This category doesn't have any products yet."
 msgstr "Bu kategoride henüz hiç ürün yok."
 
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:112
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:114
 msgid "This category is hidden from public view"
 msgstr "Bu kategori halktan gizli"
 
@@ -9010,7 +9020,7 @@ msgstr "Bu kod satışları izlemek için kullanılacaktır. Yalnızca harfler, 
 msgid "This color combination may be hard to read for some users"
 msgstr "Bu renk kombinasyonu bazı kullanıcılar için okunması zor olabilir"
 
-#: src/components/layouts/EventHomepage/index.tsx:358
+#: src/components/layouts/EventHomepage/index.tsx:351
 msgid "This event has ended"
 msgstr "Bu etkinlik sona erdi"
 
@@ -9022,7 +9032,7 @@ msgstr "Bu etkinlik henüz yayınlanmadı"
 msgid "This information will be shown on the payment page, order summary page, and order confirmation email."
 msgstr "Bu bilgiler ödeme sayfasında, sipariş özeti sayfasında ve sipariş onayı e-postasında gösterilecektir."
 
-#: src/components/forms/ProductForm/index.tsx:147
+#: src/components/forms/ProductForm/index.tsx:152
 msgid "This is a general product, like a t-shirt or a mug. No ticket will be issued"
 msgstr "Bu genel bir üründür, tişört veya kupa gibi. Hiçbir bilet düzenlenmeyecek"
 
@@ -9099,7 +9109,7 @@ msgstr "Bu sipariş iptal edildi. İstediğiniz zaman yeni bir sipariş başlata
 msgid "This organizer profile is not published yet"
 msgstr "Bu organizatör profili henüz yayınlanmadı"
 
-#: src/components/forms/ProductForm/index.tsx:486
+#: src/components/forms/ProductForm/index.tsx:497
 msgid "This overrides all visibility settings and will hide the product from all customers."
 msgstr "Bu tüm görünürlük ayarlarını geçersiz kılar ve ürünü tüm müşterilerden gizler."
 
@@ -9111,7 +9121,7 @@ msgstr "Bu önizleme, e-postanızın örnek verilerle nasıl görüneceğini gö
 msgid "This product cannot be deleted because it is associated with an order. You can hide it instead."
 msgstr "Bu ürün bir siparişle ilişkili olduğu için silinemez. Bunun yerine gizleyebilirsiniz."
 
-#: src/components/forms/ProductForm/index.tsx:141
+#: src/components/forms/ProductForm/index.tsx:146
 msgid "This product is a ticket. Buyers will be issued a ticket upon purchase"
 msgstr "Bu ürün bir bilettir. Alıcılara satın alma sonrasında bilet verilecek"
 
@@ -9135,12 +9145,12 @@ msgstr "Bu şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş."
 msgid "This ticket was just scanned. Please wait before scanning again."
 msgstr "Bu bilet az önce tarandı. Tekrar taramadan önce lütfen bekleyin."
 
-#: src/components/modals/EditUserModal/index.tsx:103
+#: src/components/modals/EditUserModal/index.tsx:109
 msgid "This user is not active, as they have not accepted their invitation."
 msgstr "Bu kullanıcı davetini kabul etmediği için aktif değil."
 
-#: src/components/modals/EditUserModal/index.tsx:144
-#: src/components/modals/InviteUserModal/index.tsx:111
+#: src/components/modals/EditUserModal/index.tsx:150
+#: src/components/modals/InviteUserModal/index.tsx:117
 msgid "This user will only see and operate on the selected events."
 msgstr ""
 
@@ -9162,7 +9172,7 @@ msgstr "bilet"
 #: src/components/common/Editor/Controls/InsertLiquidVariableControl.tsx:60
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:276
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:482
-#: src/components/forms/ProductForm/index.tsx:139
+#: src/components/forms/ProductForm/index.tsx:144
 #: src/components/modals/CreateAttendeeModal/index.tsx:162
 msgid "Ticket"
 msgstr "Bilet"
@@ -9179,7 +9189,7 @@ msgstr "Bilet Tasarımı"
 msgid "Ticket design saved successfully"
 msgstr "Bilet tasarımı başarıyla kaydedildi"
 
-#: src/components/layouts/Event/index.tsx:125
+#: src/components/layouts/Event/index.tsx:126
 msgid "Ticket Designer"
 msgstr "Bilet Tasarımcısı"
 
@@ -9228,7 +9238,7 @@ msgstr "Bilet Adı"
 msgid "Ticket Not Found"
 msgstr "Bilet Bulunamadı"
 
-#: src/components/routes/event/products.tsx:88
+#: src/components/routes/event/products.tsx:96
 msgid "Ticket or Product"
 msgstr "Bilet veya Ürün"
 
@@ -9270,7 +9280,7 @@ msgstr "Bilet Türü"
 msgid "Ticket URL"
 msgstr "Bilet URL'si"
 
-#: src/components/layouts/Event/index.tsx:129
+#: src/components/layouts/Event/index.tsx:130
 msgid "Ticketing & Sales"
 msgstr "Biletleme ve Satış"
 
@@ -9283,8 +9293,8 @@ msgstr "bilet"
 msgid "Tickets"
 msgstr "Biletler"
 
-#: src/components/layouts/Event/index.tsx:130
-#: src/components/routes/event/products.tsx:48
+#: src/components/layouts/Event/index.tsx:131
+#: src/components/routes/event/products.tsx:55
 msgid "Tickets & Products"
 msgstr "Biletler ve Ürünler"
 
@@ -9292,7 +9302,7 @@ msgstr "Biletler ve Ürünler"
 msgid "Tickets are automatically offered to waitlisted customers when capacity becomes available."
 msgstr "Kapasite uygun olduğunda biletler bekleme listesindeki müşterilere otomatik olarak sunulur."
 
-#: src/components/layouts/EventHomepage/index.tsx:176
+#: src/components/layouts/EventHomepage/index.tsx:169
 msgid "Tickets Available"
 msgstr "Mevcut Biletler"
 
@@ -9304,15 +9314,15 @@ msgstr "Biletler"
 msgid "Tickets Sold"
 msgstr "Satılan Biletler"
 
-#: src/components/forms/ProductForm/index.tsx:74
+#: src/components/forms/ProductForm/index.tsx:76
 msgid "Tier {0}"
 msgstr "Seviye {0}"
 
-#: src/components/forms/ProductForm/index.tsx:172
+#: src/components/forms/ProductForm/index.tsx:177
 msgid "Tiered Product"
 msgstr "Kademeli Ürün"
 
-#: src/components/forms/ProductForm/index.tsx:264
+#: src/components/forms/ProductForm/index.tsx:271
 msgid "Tiered products allow you to offer multiple price options for the same product. This is perfect for early bird products, or offering different price options for different groups of people."
 msgstr "Kademeli ürünler aynı ürün için birden fazla fiyat seçeneği sunmanıza olanak tanır. Bu erken rezervasyon ürünleri veya farklı insan grupları için farklı fiyat seçenekleri sunmak için mükemmeldir."
 
@@ -9320,7 +9330,7 @@ msgstr "Kademeli ürünler aynı ürün için birden fazla fiyat seçeneği sunm
 msgid "TikTok"
 msgstr "TikTok"
 
-#: src/components/layouts/Checkout/index.tsx:224
+#: src/components/layouts/Checkout/index.tsx:219
 msgid "Time left:"
 msgstr "Kalan süre:"
 
@@ -9585,6 +9595,12 @@ msgstr "Benzersiz sipariş referansı"
 msgid "United States"
 msgstr "Amerika Birleşik Devletleri"
 
+#: src/components/modals/EditUserModal/index.tsx:75
+#: src/components/modals/InviteUserModal/index.tsx:65
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:82
+msgid "University Director"
+msgstr ""
+
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:570
 msgid "University ID"
 msgstr ""
@@ -9603,8 +9619,8 @@ msgstr "Bilinmeyen Katılımcı"
 
 #: src/components/common/ProductsTable/SortableProduct/index.tsx:406
 #: src/components/forms/CapaciyAssigmentForm/index.tsx:43
-#: src/components/forms/ProductForm/index.tsx:91
-#: src/components/forms/ProductForm/index.tsx:321
+#: src/components/forms/ProductForm/index.tsx:94
+#: src/components/forms/ProductForm/index.tsx:328
 #: src/components/forms/PromoCodeForm/index.tsx:112
 #: src/components/modals/OfferWaitlistModal/index.tsx:189
 #: src/components/routes/event/Reports/PromoCodesReport/index.tsx:78
@@ -9628,7 +9644,7 @@ msgstr "Ödenmemiş Sipariş"
 msgid "Unpublish Event"
 msgstr "Etkinliği Yayından Kaldır"
 
-#: src/components/common/AdminAccountsTable/index.tsx:101
+#: src/components/common/AdminAccountsTable/index.tsx:102
 msgid "Untrusted"
 msgstr "Güvenilmez"
 
@@ -9750,17 +9766,17 @@ msgstr "Tüm katılımcılar için alıcının bilgilerini kullanın"
 msgid "Used for borders, highlights, and QR code styling"
 msgstr "Kenarlıklar, vurgular ve QR kod stillemesi için kullanılır"
 
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:176
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:178
 msgid "User"
 msgstr "Kullanıcı"
 
 #: src/components/common/GlobalMenu/index.tsx:59
-#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:164
+#: src/components/routes/account/ManageAccount/sections/Users/index.tsx:166
 msgid "User Management"
 msgstr "Kullanıcı Yönetimi"
 
-#: src/components/common/AdminAccountsTable/index.tsx:89
-#: src/components/common/AdminAccountsTable/index.tsx:109
+#: src/components/common/AdminAccountsTable/index.tsx:90
+#: src/components/common/AdminAccountsTable/index.tsx:110
 #: src/components/layouts/Admin/index.tsx:15
 #: src/components/routes/account/ManageAccount/index.tsx:38
 #: src/components/routes/admin/Accounts/AccountDetail/index.tsx:166
@@ -9770,7 +9786,7 @@ msgstr "Kullanıcı Yönetimi"
 msgid "Users"
 msgstr "Kullanıcılar"
 
-#: src/components/modals/EditUserModal/index.tsx:119
+#: src/components/modals/EditUserModal/index.tsx:125
 msgid "Users can change their email in <0>Profile Settings</0>"
 msgstr "Kullanıcılar e-postalarını <0>Profil Ayarları</0>'nda değiştirebilir"
 
@@ -9917,7 +9933,7 @@ msgstr "Doğrulandı"
 msgid "Verify Email"
 msgstr "E-postayı Doğrula"
 
-#: src/components/layouts/Event/index.tsx:275
+#: src/components/layouts/Event/index.tsx:276
 msgid "Verify your email"
 msgstr "E-postanızı doğrulayın"
 
@@ -9950,7 +9966,7 @@ msgstr "Cevapları Görüntüle"
 msgid "View Attendee Details"
 msgstr "Katılımcı Detaylarını Görüntüle"
 
-#: src/components/common/AdminAccountsTable/index.tsx:73
+#: src/components/common/AdminAccountsTable/index.tsx:74
 #: src/components/routes/admin/FailedJobs/index.tsx:190
 msgid "View Details"
 msgstr "Detayları Görüntüle"
@@ -9973,7 +9989,7 @@ msgstr "Etkinlik sayfasını görüntüle"
 msgid "View logs"
 msgstr "Günlükleri görüntüle"
 
-#: src/components/layouts/EventHomepage/index.tsx:485
+#: src/components/layouts/EventHomepage/index.tsx:478
 msgid "View Map"
 msgstr "Haritayı Görüntüle"
 
@@ -9981,7 +9997,7 @@ msgstr "Haritayı Görüntüle"
 msgid "View Message"
 msgstr "Mesajı görüntüle"
 
-#: src/components/layouts/EventHomepage/index.tsx:398
+#: src/components/layouts/EventHomepage/index.tsx:391
 msgid "View on Google Maps"
 msgstr "Google Haritalar'da görüntüle"
 
@@ -10002,8 +10018,8 @@ msgstr "Sipariş Detaylarını Görüntüle"
 msgid "View order details, issue refunds, and resend confirmations."
 msgstr "Sipariş detaylarını görüntüleyin, iade yapın ve onayları yeniden gönderin."
 
-#: src/components/modals/EditUserModal/index.tsx:83
-#: src/components/modals/InviteUserModal/index.tsx:73
+#: src/components/modals/EditUserModal/index.tsx:89
+#: src/components/modals/InviteUserModal/index.tsx:79
 msgid "View orders, attendees, reports, and exports. Can refund, cancel, and mark orders as paid."
 msgstr ""
 
@@ -10030,11 +10046,11 @@ msgstr "Vimeo"
 msgid "VIP check-in list"
 msgstr "VIP check-in listesi"
 
-#: src/components/forms/ProductForm/index.tsx:275
+#: src/components/forms/ProductForm/index.tsx:282
 msgid "VIP Ticket"
 msgstr "VIP Bilet"
 
-#: src/components/forms/ProductForm/index.tsx:464
+#: src/components/forms/ProductForm/index.tsx:475
 msgid "Visibility"
 msgstr "Görünürlük"
 
@@ -10057,8 +10073,8 @@ msgstr "Bekliyor"
 msgid "Waiting for payment"
 msgstr "Ödeme bekleniyor"
 
-#: src/components/layouts/Event/index.tsx:140
-#: src/components/routes/event/Settings/index.tsx:76
+#: src/components/layouts/Event/index.tsx:141
+#: src/components/routes/event/Settings/index.tsx:82
 #: src/components/routes/event/Settings/Sections/WaitlistSettings/index.tsx:51
 #: src/components/routes/event/SoldOutWaitlist/index.tsx:49
 msgid "Waitlist"
@@ -10080,7 +10096,7 @@ msgstr "Uyarı: Bu sistem varsayılan yapılandırmasıdır. Değişiklikler, be
 msgid "We could not process your payment. Please try again or contact support."
 msgstr "Ödemenizi işleyemedik. Lütfen tekrar deneyin veya destek ile iletişime geçin."
 
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:53
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:55
 msgid "We couldn't delete the category. Please try again."
 msgstr "Kategoriyi silemedik. Lütfen tekrar deneyin."
 
@@ -10088,7 +10104,7 @@ msgstr "Kategoriyi silemedik. Lütfen tekrar deneyin."
 msgid "We couldn't find any orders associated with this email address."
 msgstr "Bu e-posta adresiyle ilişkili herhangi bir sipariş bulamadık."
 
-#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:24
+#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:25
 msgid "We couldn't find any tickets matching {0}"
 msgstr "{0} ile eşleşen herhangi bir bilet bulamadık"
 
@@ -10108,7 +10124,7 @@ msgstr "Bu siparişi bulamadık. Kaldırılmış olabilir."
 msgid "We couldn't load the data. Please try again."
 msgstr "Verileri yükleyemedik. Lütfen tekrar deneyin."
 
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:94
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:96
 msgid "We couldn't reorder the categories. Please try again."
 msgstr "Kategorileri yeniden sıralayamadık. Lütfen tekrar deneyin."
 
@@ -10201,7 +10217,7 @@ msgstr "Webhook bildirim göndermeyecek"
 msgid "Webhook will send notifications"
 msgstr "Webhook bildirim gönderecek"
 
-#: src/components/layouts/Event/index.tsx:146
+#: src/components/layouts/Event/index.tsx:147
 #: src/components/layouts/OrganizerLayout/index.tsx:104
 #: src/components/modals/DuplicateEventModal/index.tsx:32
 #: src/components/routes/event/Webhooks/index.tsx:32
@@ -10241,7 +10257,7 @@ msgstr "{0}'e Hoş Geldiniz, {1} 👋"
 msgid "Welcome to {0}, here's a listing of all your events"
 msgstr "{0}'e hoş geldiniz, işte tüm etkinliklerinizin listesi"
 
-#: src/components/forms/ProductForm/index.tsx:263
+#: src/components/forms/ProductForm/index.tsx:270
 msgid "What are Tiered Products?"
 msgstr "Kademeli Ürünler nedir?"
 
@@ -10393,7 +10409,7 @@ msgstr "Bu etkinliği kim organize ediyor?"
 msgid "Who should be asked this question?"
 msgstr "Bu soru kime sorulmalı?"
 
-#: src/components/layouts/Event/index.tsx:145
+#: src/components/layouts/Event/index.tsx:146
 msgid "Widget Embed"
 msgstr "Widget Yerleştirme"
 
@@ -10462,11 +10478,11 @@ msgstr "Evet"
 msgid "Yes - I have a valid EU VAT registration number"
 msgstr "Evet - Geçerli bir AB KDV kayıt numaram var"
 
-#: src/components/layouts/Checkout/index.tsx:330
+#: src/components/layouts/Checkout/index.tsx:325
 msgid "Yes, cancel my order"
 msgstr "Evet, siparişimi iptal et"
 
-#: src/components/forms/ProductForm/index.tsx:428
+#: src/components/forms/ProductForm/index.tsx:438
 msgid "Yes, remove them"
 msgstr "Evet, kaldır"
 
@@ -10495,7 +10511,7 @@ msgstr "Çevrimdışısınız"
 msgid "You can configure additional service fees and taxes in your account settings."
 msgstr "Hesap ayarlarınızda ek hizmet ücretleri ve vergileri yapılandırabilirsiniz."
 
-#: src/components/forms/ProductForm/index.tsx:479
+#: src/components/forms/ProductForm/index.tsx:490
 msgid "You can create a promo code which targets this product on the"
 msgstr "Bu ürünü hedefleyen bir promosyon kodu oluşturabilirsiniz"
 
@@ -10507,7 +10523,7 @@ msgstr "Gerekirse biletleri manuel olarak da sunabilirsiniz."
 msgid "You cannot archive the last active organizer on your account."
 msgstr "Hesabınızdaki son aktif organizatörü arşivleyemezsiniz."
 
-#: src/components/forms/ProductForm/index.tsx:228
+#: src/components/forms/ProductForm/index.tsx:235
 msgid "You cannot change the product type as there are attendees associated with this product."
 msgstr "Bu ürünle ilişkili katılımcılar olduğu için ürün türünü değiştiremezsiniz."
 
@@ -10516,15 +10532,15 @@ msgstr "Bu ürünle ilişkili katılımcılar olduğu için ürün türünü de�
 msgid "You cannot check in attendees with unpaid orders. This setting can be changed in the event settings."
 msgstr "Ödenmemiş siparişleri olan katılımcıları check-in yaptıramazsınız. Bu ayar etkinlik ayarlarından değiştirilebilir."
 
-#: src/components/common/ProductsTable/SortableCategory/index.tsx:40
+#: src/components/common/ProductsTable/SortableCategory/index.tsx:42
 msgid "You cannot delete the last category."
 msgstr "Son kategoriyi silemezsiniz."
 
-#: src/components/forms/ProductForm/index.tsx:64
+#: src/components/forms/ProductForm/index.tsx:66
 msgid "You cannot delete this price tier because there are already products sold for this tier. You can hide it instead."
 msgstr "Bu fiyat seviyesini silemezsiniz çünkü bu seviye için zaten satılmış ürünler var. Bunun yerine gizleyebilirsiniz."
 
-#: src/components/modals/EditUserModal/index.tsx:126
+#: src/components/modals/EditUserModal/index.tsx:132
 msgid "You cannot edit the role or status of the account owner."
 msgstr "Hesap sahibinin rolünü veya durumunu düzenleyemezsiniz."
 
@@ -10548,11 +10564,11 @@ msgstr "Bekleyen e-posta değişikliğiniz yok."
 msgid "You have reached your messaging limit."
 msgstr "Mesajlaşma limitinize ulaştınız."
 
-#: src/components/layouts/Checkout/index.tsx:288
+#: src/components/layouts/Checkout/index.tsx:283
 msgid "You have run out of time to complete your order."
 msgstr "Siparişinizi tamamlamak için zamanınız doldu."
 
-#: src/components/forms/ProductForm/index.tsx:426
+#: src/components/forms/ProductForm/index.tsx:436
 msgid "You have taxes and fees added to a Free Product. Would you like to remove them?"
 msgstr "Ücretsiz Bir Ürüne eklenen vergiler ve ücretleriniz var. Bunları kaldırmak ister misiniz?"
 
@@ -10576,7 +10592,7 @@ msgstr "Şartlar ve koşulları kabul etmelisiniz"
 msgid "You must create a ticket before you can manually add an attendee."
 msgstr "Elle katılımcı ekleyebilmek için önce bir bilet oluşturmalısınız."
 
-#: src/components/forms/ProductForm/index.tsx:67
+#: src/components/forms/ProductForm/index.tsx:69
 msgid "You must have at least one price tier"
 msgstr "En az bir fiyat seviyeniz olmalı"
 
@@ -10612,7 +10628,7 @@ msgstr "Giriş listesi oluşturabilmek için önce bir bilete ihtiyacınız var.
 msgid "You'll need at a product before you can create a capacity assignment."
 msgstr "Kapasite ataması oluşturabilmek için önce bir ürüne ihtiyacınız var."
 
-#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:43
+#: src/components/common/ProductsTable/ProductsBlankSlate/index.tsx:44
 msgid "You'll need at least one product to get started. Free, paid or let the user decide what to pay."
 msgstr "Başlamak için en az bir ürüne ihtiyacınız var. Ücretsiz, ücretli veya kullanıcının ne kadar ödeyeceğine karar vermesine izin verin."
 
@@ -10660,7 +10676,7 @@ msgstr "Harika web siteniz 🎉"
 msgid "Your check-in list has been created successfully. Share the link below with your check-in staff."
 msgstr "Giriş listeniz başarıyla oluşturuldu. Aşağıdaki bağlantıyı giriş personelinizle paylaşın."
 
-#: src/components/layouts/Checkout/index.tsx:315
+#: src/components/layouts/Checkout/index.tsx:310
 msgid "Your current order will be lost."
 msgstr "Mevcut siparişiniz kaybolacak."
 
@@ -10708,7 +10724,7 @@ msgstr "Adınız"
 msgid "Your new password must be at least 8 characters long."
 msgstr "Yeni şifreniz en az 8 karakter uzunluğunda olmalıdır."
 
-#: src/components/layouts/Checkout/index.tsx:217
+#: src/components/layouts/Checkout/index.tsx:212
 msgid "Your Order"
 msgstr "Siparişiniz"
 
@@ -10720,7 +10736,7 @@ msgstr "Sipariş bilgileriniz güncellendi. Yeni e-posta adresine bir onay e-pos
 msgid "Your order has been cancelled"
 msgstr "Siparişiniz iptal edildi"
 
-#: src/components/layouts/Checkout/index.tsx:113
+#: src/components/layouts/Checkout/index.tsx:110
 msgid "Your order has been cancelled."
 msgstr "Siparişiniz iptal edildi."
 

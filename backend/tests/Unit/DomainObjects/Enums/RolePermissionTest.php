@@ -14,11 +14,60 @@ class RolePermissionTest extends TestCase
     {
         $this->assertSame([
             Role::ADMIN->value,
+            Role::UNIVERSITY_DIRECTOR->value,
             Role::ORGANIZER->value,
             Role::FINANCE->value,
             Role::REPORTING->value,
             Role::CHECK_IN->value,
         ], Role::getAssignableRoles());
+    }
+
+    public function test_university_director_can_operate_assigned_events_without_financial_or_administrative_power(): void
+    {
+        $role = Role::UNIVERSITY_DIRECTOR;
+
+        foreach ([
+            Permission::ACCOUNT_VIEW,
+            Permission::ORGANIZER_VIEW,
+            Permission::EVENT_VIEW,
+            Permission::EVENT_CONTENT_VIEW,
+            Permission::EVENT_UPDATE,
+            Permission::EVENT_CONTENT_MANAGE,
+            Permission::ATTENDEES_VIEW,
+            Permission::ATTENDEES_MANAGE,
+            Permission::ORDERS_VIEW,
+            Permission::REPORTS_VIEW,
+            Permission::REPORTS_EXPORT,
+            Permission::CHECK_IN_MANAGE,
+        ] as $permission) {
+            $this->assertTrue($role->hasPermission($permission), $permission->value);
+        }
+
+        foreach ([
+            Permission::SYSTEM_ADMIN,
+            Permission::ACCOUNT_MANAGE,
+            Permission::TEAM_MANAGE,
+            Permission::BILLING_MANAGE,
+            Permission::ORGANIZER_MANAGE,
+            Permission::EVENT_MANAGE,
+            Permission::EVENT_PUBLISH,
+            Permission::EVENT_PRICING_MANAGE,
+            Permission::EVENT_SETTINGS_MANAGE,
+            Permission::ORDERS_MANAGE,
+            Permission::ORDERS_REFUND,
+            Permission::FINANCIAL_RECONCILIATION_VIEW,
+            Permission::MESSAGES_MANAGE,
+            Permission::INTEGRATIONS_MANAGE,
+        ] as $permission) {
+            $this->assertFalse($role->hasPermission($permission), $permission->value);
+        }
+    }
+
+    public function test_event_manager_retains_update_and_event_settings_permissions(): void
+    {
+        $this->assertTrue(Role::ORGANIZER->hasPermission(Permission::EVENT_UPDATE));
+        $this->assertTrue(Role::ORGANIZER->hasPermission(Permission::EVENT_PRICING_MANAGE));
+        $this->assertTrue(Role::ORGANIZER->hasPermission(Permission::EVENT_SETTINGS_MANAGE));
     }
 
     public function test_finance_can_handle_orders_and_reports_without_account_or_event_configuration_power(): void
@@ -74,7 +123,7 @@ class RolePermissionTest extends TestCase
 
     public function test_event_assignment_scope_helpers_match_launch_model(): void
     {
-        foreach ([Role::ORGANIZER, Role::REPORTING, Role::CHECK_IN] as $role) {
+        foreach ([Role::UNIVERSITY_DIRECTOR, Role::ORGANIZER, Role::REPORTING, Role::CHECK_IN] as $role) {
             $this->assertTrue($role->allowsEventAssignments());
             $this->assertTrue($role->requiresEventAssignments());
             $this->assertFalse($role->hasAccountWideEventAccess());

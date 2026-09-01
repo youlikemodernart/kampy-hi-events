@@ -37,7 +37,7 @@ const placeholderGradients = [
     'linear-gradient(135deg, var(--mantine-color-cyan-5) 0%, var(--mantine-color-teal-5) 100%)',
 ];
 
-const EVENT_SCOPED_ROLES = ['ORGANIZER', 'REPORTING', 'CHECK_IN'];
+const EVENT_SCOPED_ROLES = ['UNIVERSITY_DIRECTOR', 'ORGANIZER', 'REPORTING', 'CHECK_IN'];
 
 interface EventCardProps {
     event: Event;

@@ -9,6 +9,7 @@ export interface ProductCategoryListProps {
     initialCategories: ProductCategory[];
     event: any;
     onCreateOpen: (categoryId: IdParam) => void;
+    canCreateProducts: boolean;
     searchTerm: string;
 }
 
@@ -16,6 +17,7 @@ export const ProductCategoryList: React.FC<ProductCategoryListProps> = ({
                                                                             initialCategories,
                                                                             event,
                                                                             onCreateOpen,
+                                                                            canCreateProducts,
                                                                             searchTerm
                                                                         }) => {
     const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
@@ -70,6 +72,7 @@ export const ProductCategoryList: React.FC<ProductCategoryListProps> = ({
                                 key={category.id}
                                 category={category}
                                 openCreateModal={() => onCreateOpen(category.id)}
+                                canCreateProducts={canCreateProducts}
                                 isLastCategory={filteredCategories.length === 1}
                                 categories={categories}
                             >
@@ -78,6 +81,7 @@ export const ProductCategoryList: React.FC<ProductCategoryListProps> = ({
                                         productCategories={categories}
                                         searchTerm={searchTerm}
                                         openCreateModal={() => onCreateOpen(category.id)}
+                                        canCreateProducts={canCreateProducts}
                                     />
                                 )}
                                 {category.products.length > 0 && (
@@ -102,6 +106,7 @@ export const ProductCategoryList: React.FC<ProductCategoryListProps> = ({
                     productCategories={categories}
                     searchTerm={searchTerm}
                     openCreateModal={onCreateOpen}
+                    canCreateProducts={canCreateProducts}
                 />
             )}
         </div>

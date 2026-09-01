@@ -35,6 +35,8 @@ import {
 import {useDisclosure} from "@mantine/hooks";
 import {NavLink, useParams} from "react-router";
 import {useEffect} from "react";
+import {useGetMe} from "../../../queries/useGetMe.ts";
+import {currentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 import {CustomSelect, ItemProps} from "../../common/CustomSelect";
 import {formatCurrency, getCurrencySymbol} from "../../../utilites/currency.ts";
 import {useGetEvent} from "../../../queries/useGetEvent.ts";
@@ -55,7 +57,7 @@ interface ProductFormProps {
     event?: Event,
 }
 
-const ProductPriceTierForm = ({form, product, event}: ProductFormProps) => {
+const ProductPriceTierForm = ({form, product, event, canManagePricing}: ProductFormProps & {canManagePricing: boolean}) => {
     return form?.values?.prices?.map((price, index) => {
         const existingPrice = product?.prices?.find((p) => Number(p.id) === Number(price.id));
         const deleteDisabled = form?.values?.prices?.length === 1 || (existingPrice && Number(existingPrice?.quantity_sold) > 0);
@@ -76,6 +78,7 @@ const ProductPriceTierForm = ({form, product, event}: ProductFormProps) => {
                     <NumberInput decimalScale={2}
                                  min={0}
                                  fixedDecimalScale
+                                 disabled={!canManagePricing}
                                  leftSection={event?.currency ? getCurrencySymbol(event.currency) : ''}
                                  {...form.getInputProps(`prices.${index}.price`)}
                                  label={t`Price`}
@@ -112,21 +115,23 @@ const ProductPriceTierForm = ({form, product, event}: ProductFormProps) => {
                     label={t`Hide this tier from users`}
                 />
 
-                <ActionIcon
-                    variant={'light'}
-                    className={classNames([classes.removeTier, deleteDisabled && classes.disabled])}
-                    title={cannotDeleteTitle}
-                    onClick={() => {
-                        if (deleteDisabled) {
-                            showError(cannotDeleteTitle);
-                            return;
-                        }
-                        form.removeListItem('prices', index)
-                    }}
-                >
-                    {!deleteDisabled && <IconTrash size="1rem"/>}
-                    {deleteDisabled && <IconTrashOff size="1rem"/>}
-                </ActionIcon>
+                {canManagePricing && (
+                    <ActionIcon
+                        variant={'light'}
+                        className={classNames([classes.removeTier, deleteDisabled && classes.disabled])}
+                        title={cannotDeleteTitle}
+                        onClick={() => {
+                            if (deleteDisabled) {
+                                showError(cannotDeleteTitle);
+                                return;
+                            }
+                            form.removeListItem('prices', index)
+                        }}
+                    >
+                        {!deleteDisabled && <IconTrash size="1rem"/>}
+                        {deleteDisabled && <IconTrashOff size="1rem"/>}
+                    </ActionIcon>
+                )}
             </Card>
         );
     })
@@ -178,10 +183,12 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
     const {eventId} = useParams();
     const [opened, {toggle}] = useDisclosure(false);
     const [taxFeeModalOpen, {open: openTaxFeeModal, close: closeTaxFeeModal}] = useDisclosure(false);
+    const {data: me} = useGetMe();
+    const canManagePricing = currentUserCan(me?.permissions, 'event.pricing.manage');
     const isFreeProduct = form.values.type === 'FREE';
     const isDonationProduct = form.values.type === 'DONATION';
     const {data: event} = useGetEvent(eventId);
-    const {data: taxesAndFees} = useGetTaxesAndFees();
+    const {data: taxesAndFees} = useGetTaxesAndFees(canManagePricing);
 
     const handleTaxOrFeeCreated = (taxOrFee: TaxAndFee) => {
         const currentIds = form.values.tax_and_fee_ids || [];
@@ -245,7 +252,7 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
             )}
 
             <CustomSelect
-                disabled={Number(product?.quantity_sold) > 0}
+                disabled={!canManagePricing || Number(product?.quantity_sold) > 0}
                 label={t`Price Type`}
                 required
                 form={form}
@@ -300,7 +307,7 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
                     <NumberInput decimalScale={2}
                                  min={0}
                                  fixedDecimalScale
-                                 disabled={isFreeProduct}
+                                 disabled={!canManagePricing || isFreeProduct}
                                  leftSection={event?.currency ? getCurrencySymbol(event.currency) : ''}
                                  {...form.getInputProps('prices.0.price')}
                                  label={<InputLabelWithHelp
@@ -342,23 +349,25 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
             {form.values.type === ProductPriceType.Tiered && (
                 <Fieldset legend={t`Price Tiers`} mt={20} mb={20}>
                     <div className={classes.priceTiers}>
-                        <ProductPriceTierForm product={product} form={form} event={event}/>
-                        <Button
-                            className={classes.addTierButton}
-                            size={'xs'}
-                            variant={'light'}
-                            leftSection={<IconPlus size={14}/>}
-                            onClick={() =>
-                                form.insertListItem('prices', {
-                                    price: 0,
-                                    label: undefined,
-                                    sale_end_date: undefined,
-                                    sale_start_date: undefined
-                                })
-                            }
-                        >
-                            {t`Add tier`}
-                        </Button>
+                        <ProductPriceTierForm product={product} form={form} event={event} canManagePricing={canManagePricing}/>
+                        {canManagePricing && (
+                            <Button
+                                className={classes.addTierButton}
+                                size={'xs'}
+                                variant={'light'}
+                                leftSection={<IconPlus size={14}/>}
+                                onClick={() =>
+                                    form.insertListItem('prices', {
+                                        price: 0,
+                                        label: undefined,
+                                        sale_end_date: undefined,
+                                        sale_start_date: undefined
+                                    })
+                                }
+                            >
+                                {t`Add tier`}
+                            </Button>
+                        )}
                     </div>
                 </Fieldset>
             )}
@@ -392,43 +401,45 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
 
             <Collapse in={opened}>
                 <div className={classes.additionalOptionsContent}>
-                    <Fieldset legend={
-                        <span className={classes.fieldsetLegend}>
-                            <IconReceipt size={16}/>
-                            {t`Taxes and Fees`}
-                        </span>
-                    }>
-                        <MultiSelect
-                            {...form.getInputProps('tax_and_fee_ids')}
-                            label={t`Taxes and Fees`}
-                            placeholder={t`Select...`}
-                            data={[{
-                                group: t`Taxes`,
-                                items: taxAndFeeOptions(TaxAndFeeType.Tax),
-                            }, {
-                                group: t`Fees`,
-                                items: taxAndFeeOptions(TaxAndFeeType.Fee),
-                            }]}
-                        />
-                        <Button
-                            variant="subtle"
-                            size="compact-sm"
-                            leftSection={<IconPlus size={14}/>}
-                            onClick={openTaxFeeModal}
-                            className={classes.addTaxFeeButton}
-                        >
-                            {t`Create Tax or Fee`}
-                        </Button>
+                    {canManagePricing && (
+                        <Fieldset legend={
+                            <span className={classes.fieldsetLegend}>
+                                <IconReceipt size={16}/>
+                                {t`Taxes and Fees`}
+                            </span>
+                        }>
+                            <MultiSelect
+                                {...form.getInputProps('tax_and_fee_ids')}
+                                label={t`Taxes and Fees`}
+                                placeholder={t`Select...`}
+                                data={[{
+                                    group: t`Taxes`,
+                                    items: taxAndFeeOptions(TaxAndFeeType.Tax),
+                                }, {
+                                    group: t`Fees`,
+                                    items: taxAndFeeOptions(TaxAndFeeType.Fee),
+                                }]}
+                            />
+                            <Button
+                                variant="subtle"
+                                size="compact-sm"
+                                leftSection={<IconPlus size={14}/>}
+                                onClick={openTaxFeeModal}
+                                className={classes.addTaxFeeButton}
+                            >
+                                {t`Create Tax or Fee`}
+                            </Button>
 
-                        {(form.values.type === ProductPriceType.Free && !!form.values.tax_and_fee_ids?.length) && (
-                            <Alert mt={15}>
-                                <p>
-                                    {t`You have taxes and fees added to a Free Product. Would you like to remove them?`}
-                                </p>
-                                <Button onClick={removeTaxesAndFees} size={'xs'}>{t`Yes, remove them`}</Button>
-                            </Alert>
-                        )}
-                    </Fieldset>
+                            {(form.values.type === ProductPriceType.Free && !!form.values.tax_and_fee_ids?.length) && (
+                                <Alert mt={15}>
+                                    <p>
+                                        {t`You have taxes and fees added to a Free Product. Would you like to remove them?`}
+                                    </p>
+                                    <Button onClick={removeTaxesAndFees} size={'xs'}>{t`Yes, remove them`}</Button>
+                                </Alert>
+                            )}
+                        </Fieldset>
+                    )}
 
                     <Fieldset legend={
                         <span className={classes.fieldsetLegend}>
@@ -520,7 +531,7 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
                 </div>
             </Collapse>
 
-            {taxFeeModalOpen && (
+            {canManagePricing && taxFeeModalOpen && (
                 <CreateTaxOrFeeModal
                     onClose={closeTaxFeeModal}
                     onCreated={handleTaxOrFeeCreated}
