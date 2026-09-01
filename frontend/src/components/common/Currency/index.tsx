@@ -2,7 +2,6 @@ import React from 'react';
 import {formatCurrency} from "../../../utilites/currency.ts";
 import {Product, ProductPrice} from "../../../types.ts";
 import {t} from "@lingui/macro";
-import {Popover} from "@mantine/core";
 import {IconInfoCircle} from "@tabler/icons-react";
 
 interface CurrencyProps {
@@ -75,14 +74,12 @@ export const ProductPriceDisplay: React.FC<ProductPriceProps> = ({
     const appendedText = totalTaxAndFees === 0 ? null : (
         <div className="hi-price-fee-summary">
             <span>{feeSummary}</span>
-            <Popover position="bottom" withArrow>
-                <Popover.Target>
-                    <button type="button" className="hi-price-breakdown-trigger" aria-label={t`Show price breakdown`}>
-                        <IconInfoCircle size={18} aria-hidden="true"/>
-                    </button>
-                </Popover.Target>
-                <Popover.Dropdown>{priceBreakdown}</Popover.Dropdown>
-            </Popover>
+            <details className="hi-price-breakdown">
+                <summary className="hi-price-breakdown-trigger" aria-label={t`Show price breakdown`}>
+                    <IconInfoCircle size={18} aria-hidden="true"/>
+                </summary>
+                <span className="hi-price-breakdown-content">{priceBreakdown}</span>
+            </details>
         </div>
     );
 
