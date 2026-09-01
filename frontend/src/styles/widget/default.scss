@@ -163,6 +163,7 @@
   .hi-price-fee-summary {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 4px;
     margin-top: 3px;
     color: var(--kamp-muted, #585254);
@@ -174,6 +175,10 @@
 
   .hi-price-breakdown {
     position: relative;
+  }
+
+  .hi-price-breakdown[open] {
+    flex-basis: 100%;
   }
 
   .hi-price-breakdown-trigger {
@@ -200,12 +205,8 @@
   }
 
   .hi-price-breakdown-content {
-    position: absolute;
-    z-index: 10;
-    top: 100%;
-    right: 0;
-    width: max-content;
-    max-width: min(260px, 75vw);
+    display: block;
+    margin-top: 4px;
     padding: 10px 12px;
     border: 1px solid var(--kamp-line-control, #8a8a8a);
     border-radius: 10px;
