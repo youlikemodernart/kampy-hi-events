@@ -179,12 +179,14 @@ const Checkout = () => {
         }
     }, [order?.status, order?.short_id, consentGranted]);
 
-    // Kamp Love uses one fixed, high-contrast checkout foundation. Event content and
-    // transaction behavior remain dynamic; organizer theme settings do not restyle checkout.
+    // Kamp Love uses one fixed, high-contrast checkout foundation. The dominant action carries
+    // forest green from the Kamper page so the invitation and the transaction feel like one
+    // material. Event content and transaction behavior remain dynamic; organizer theme settings
+    // do not restyle checkout.
     const checkoutMode = 'light' as const;
 
     return (
-        <CheckoutThemeProvider accentColor="#171717" mode={checkoutMode}>
+        <CheckoutThemeProvider accentColor="#2f5147" mode={checkoutMode}>
             <div className={classes.container} data-mode={checkoutMode}>
                 <div className={classes.mainContent}>
                     <header className={classes.header}>

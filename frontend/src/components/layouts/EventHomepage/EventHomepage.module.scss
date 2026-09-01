@@ -1,84 +1,61 @@
 @use "../../../styles/mixins.scss";
 
-// Design tokens
-$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
-$font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
+// Kamp Love Kamper page. Method transferred from the accepted Special Olympics reference
+// (Blink UX): oversized plainspoken type, full-width material bands with organic contours,
+// cream panels overlapping band edges, logistics expressed visually, one dominant action per
+// band, large touch targets, mobile-first. Substituted into Kamp Love's outdoors palette:
+// cream ground, deep ink + forest green material fields, restrained burnt orange (non-text
+// accent), PT Serif for editorial, Lato for logistics. No gradients.
 
-$radius-xl: 10px;
-$radius-lg: 10px;
-$radius-md: 10px;
-$radius-sm: 8px;
-$radius-xs: 6px;
+$serif: 'PT Serif', Georgia, 'Times New Roman', serif;
+$util: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$radius-panel: 16px;
+$radius-card: 12px;
+$radius-pill: 999px;
+$feedback: 140ms ease-out;
 
-$transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-$transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-$transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+@mixin band($py: 76px) {
+  padding: $py max(20px, calc((100% - 1120px) / 2));
 
-// Background styles
-.background {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: blur(24px) saturate(1.3);
-  z-index: -1;
-  transform: scale(1.08);
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--background-overlay);
+  @include mixins.respond-below(md) {
+    padding: 48px 20px;
   }
 }
 
-.backgroundOverlay {
+// A broad, gentle cream landscape ridge flowing into a dark material band.
+@mixin contour-top {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 46px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 72' preserveAspectRatio='none'%3E%3Cpath fill='%23f9f4f0' d='M0,0 H1440 V28 C1180,66 940,6 700,30 C470,53 240,66 0,38 Z'/%3E%3C/svg%3E") no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+  }
+}
+
+// Page ground -------------------------------------------------------------
+.background {
   position: fixed;
   inset: 0;
   z-index: -1;
-
-  // Color overlay for MIRROR_COVER_IMAGE mode
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: var(--overlay-color, transparent);
-    opacity: 0.4;
-    pointer-events: none;
-  }
-
-  // Noise texture
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    z-index: 1;
-  }
+  background-color: var(--kamp-cream, #f9f4f0);
 }
 
-// Main page wrapper
 .pageWrapper {
   min-height: 100vh;
-  --background-overlay: #{rgba(white, 0.5)};
-
-  &[data-mode="dark"] {
-    --background-overlay: #{rgba(black, 0.6)};
-  }
+  background-color: var(--kamp-cream, #f9f4f0);
 }
 
 .container {
   min-height: 100vh;
-  font-family: $font-body;
+  font-family: $serif;
 
-  // Theme variables from EventHomepage component
   --primary-color: var(--event-primary-color);
   --primary-text-color: var(--event-primary-text-color);
   --secondary-color: var(--event-secondary-color);
@@ -91,59 +68,42 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   --border-color: var(--event-border-color);
 }
 
+// Full-width now: bands own their own edges.
 .wrapper {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 24px 24px 16px;
-
-  @include mixins.respond-below(md) {
-    padding: 0;
-  }
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-// Main unified card
 .mainCard {
-  background-color: var(--content-bg-color);
-  border-radius: $radius-xl;
-  border: 1px solid var(--border-color);
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 10px 15px -3px rgba(0, 0, 0, 0.08),
-    0 20px 40px -5px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  margin-bottom: 16px;
-  animation: fadeInUp 0.5s ease-out backwards;
-
-  @include mixins.respond-below(md) {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    box-shadow: none;
-    margin-bottom: 0;
-  }
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  margin: 0;
 }
 
-// Hero section
+// Hero: a full-bleed Kamp photograph with an oversized editorial identity ---
 .heroSection {
   position: relative;
-  overflow: hidden;
 }
 
 .coverWrapper {
   position: relative;
   width: 100%;
-  max-height: 560px;
+  min-height: 62vh;
+  max-height: 760px;
   overflow: hidden;
-  background-color: var(--accent-soft);
+  background-color: var(--kamp-forest, #2f5147);
 
-  // When aspect ratio is provided via CSS custom property, use it
-  // Otherwise fall back to auto sizing based on image
   &[style*="--cover-aspect-ratio"] {
     aspect-ratio: var(--cover-aspect-ratio);
+    min-height: 62vh;
   }
 
   @include mixins.respond-below(md) {
-    max-height: 400px;
+    min-height: 68vh;
   }
 }
 
@@ -159,26 +119,12 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .coverImage {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  display: block;
-  transition: transform $transition-slow;
+  height: 100%;
+  object-fit: cover;
   z-index: 1;
-
-  // When wrapper has aspect ratio, image should fill it
-  .coverWrapper[style*="--cover-aspect-ratio"] & {
-    position: relative;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  // When no aspect ratio, let image determine height naturally
-  .coverWrapper:not([style*="--cover-aspect-ratio"]) & {
-    height: auto;
-  }
-
-  .mainCard:hover & {
-    transform: scale(1.02);
-  }
 }
 
 .heroGradient {
@@ -186,99 +132,133 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.3) 40%,
-    transparent 100%
+    rgba(23, 23, 23, 0.82) 0%,
+    rgba(23, 23, 23, 0.5) 30%,
+    rgba(23, 23, 23, 0.1) 60%,
+    rgba(23, 23, 23, 0.05) 100%
   );
   pointer-events: none;
+  z-index: 2;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 3;
+  padding: 0 0 clamp(28px, 5vw, 56px);
+  padding-inline: max(20px, calc((100% - 1120px) / 2));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .statusBadges {
-  position: absolute;
-  top: 20px;
-  left: 20px;
   display: flex;
   gap: 8px;
-  z-index: 2;
 }
 
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(20px);
-  border-radius: $radius-sm;
-  padding: 8px 14px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+  align-self: flex-start;
+  background: rgba(249, 244, 240, 0.95);
+  border-radius: $radius-pill;
+  padding: 9px 16px;
+  font-family: $util;
+  font-size: 0.8125rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--kamp-ink, #171717);
 
   svg {
-    width: 0.7rem;
-    height: 0.7rem;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+    width: 0.9rem;
+    height: 0.9rem;
   }
 }
 
-// Event header section
-.eventHeader {
-  padding: 28px 32px 24px;
-
-  @include mixins.respond-below(md) {
-    padding: 24px 20px;
-  }
+.heroKicker {
+  font-family: $util;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: clamp(0.8125rem, 0.7rem + 0.4vw, 0.95rem);
+  color: var(--kamp-cream, #f9f4f0);
 }
 
-.headerTopRow {
+.eventTitle {
+  font-family: $serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.75rem, 1rem + 7vw, 5.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  max-width: 16ch;
+  margin: 0;
+  color: var(--primary-text-color);
+  text-wrap: balance;
+}
+
+.heroOverlay .eventTitle {
+  color: var(--kamp-cream, #f9f4f0);
+  text-shadow: 0 2px 30px rgba(23, 23, 23, 0.45);
+}
+
+// Byline strip: who is inviting you --------------------------------------
+.bylineStrip {
+  @include band(18px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 12px;
+  background: var(--kamp-cream, #f9f4f0);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .organizerPill {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: var(--accent-soft);
-  border-radius: 100px;
-  padding: 6px 14px 6px 6px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-pill;
+  padding: 6px 16px 6px 6px;
   text-decoration: none;
-  transition: all $transition-fast;
-  cursor: pointer;
+  min-height: 44px;
+}
 
-  &:hover {
-    transform: translateY(-1px) scale(1.02);
-  }
+a.organizerPill:hover {
+  border-color: var(--kamp-ink, #171717);
 }
 
 .organizerPillAvatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--content-bg-color);
 }
 
 .organizerPillAvatarPlaceholder {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: var(--primary-color);
+  background: var(--kamp-forest, #2f5147);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-contrast);
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 2px solid var(--content-bg-color);
+  color: var(--kamp-cream, #f9f4f0);
+  font-family: $util;
+  font-size: 0.85rem;
+  font-weight: 900;
 }
 
 .organizerPillName {
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-family: $util;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--primary-text-color);
 }
 
@@ -288,17 +268,110 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .actionButton {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--content-bg-color);
+  background: transparent;
   border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--secondary-color);
-  transition: all $transition-fast;
+  color: var(--primary-text-color);
+  transition: border-color $feedback, background $feedback;
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  &:hover {
+    border-color: var(--kamp-ink, #171717);
+    background: var(--accent-soft);
+  }
+}
+
+// Essentials: logistics made delightfully simple (forest material field) --
+.essentialsBand {
+  @include band(clamp(48px, 6vw, 84px));
+  @include contour-top;
+  background: var(--kamp-forest, #2f5147);
+  color: var(--kamp-cream, #f9f4f0);
+  padding-top: clamp(60px, 7vw, 104px);
+}
+
+.essentialsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(24px, 5vw, 64px) clamp(32px, 6vw, 88px);
+  align-items: flex-start;
+}
+
+.essentialBlock {
+  min-width: 0;
+}
+
+.essentialLabel {
+  font-family: $util;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8125rem;
+  color: rgba(249, 244, 240, 0.72);
+  margin-bottom: 10px;
+}
+
+.essentialValue {
+  font-family: $serif;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 1rem + 3vw, 3.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: var(--kamp-cream, #f9f4f0);
+}
+
+.essentialSub {
+  margin-top: 8px;
+  font-size: 1.0625rem;
+  color: rgba(249, 244, 240, 0.82);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+  }
+}
+
+.essentialActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: clamp(24px, 4vw, 40px);
+  width: 100%;
+}
+
+// Light pill for actions on a dark material field.
+.lightPill {
+  min-height: 52px;
+  padding: 0 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--kamp-cream, #f9f4f0);
+  color: var(--kamp-ink, #171717);
+  border: 1px solid var(--kamp-cream, #f9f4f0);
+  border-radius: $radius-pill;
+  font-family: $util;
+  font-weight: 900;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background $feedback, color $feedback;
 
   svg {
     width: 1rem;
@@ -306,163 +379,58 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:hover {
-    background: var(--accent-soft);
-    color: var(--primary-text-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  &.favoriteButton:hover {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+    background: transparent;
+    color: var(--kamp-cream, #f9f4f0);
   }
 }
 
-.eventTitle {
-  font-family: $font-display;
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--primary-text-color);
-  margin: 0 0 20px;
-}
-
-.eventMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.metaItem {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.metaIconBox {
-  width: 44px;
-  height: 44px;
-  border-radius: $radius-md;
-  background: var(--accent-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--primary-color);
-  transition: all $transition-fast;
-
-  svg {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
-
-  &:hover {
-    background: var(--primary-color);
-    color: var(--accent-contrast);
-    transform: scale(1.05);
-  }
-}
-
-.metaContent {
-  flex: 1;
-  min-width: 0;
-}
-
-.metaPrimary {
-  font-weight: 600;
-  color: var(--primary-text-color);
-  font-size: 1rem;
-  margin-bottom: 2px;
-}
-
-.metaSecondary {
-  color: var(--secondary-color);
-  font-size: 0.9rem;
-}
-
-.metaLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--primary-color);
-  font-weight: 500;
-  font-size: 0.85rem;
-  text-decoration: none;
-  margin-top: 4px;
-
-  svg {
-    width: 0.7rem;
-    height: 0.7rem;
-  }
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.addToCalendarButton {
-  margin-left: auto;
-  padding: 8px 16px;
+.ghostPill {
   background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: $radius-sm;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--secondary-color);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all $transition-fast;
-
-  svg {
-    width: 0.9rem;
-    height: 0.9rem;
-  }
+  color: var(--kamp-cream, #f9f4f0);
+  border-color: rgba(249, 244, 240, 0.55);
 
   &:hover {
-    background: var(--accent-soft);
-    color: var(--primary-text-color);
-    border-color: var(--primary-color);
-  }
-
-  @include mixins.respond-below(md) {
-    display: none;
+    background: var(--kamp-cream, #f9f4f0);
+    color: var(--kamp-ink, #171717);
+    border-color: var(--kamp-cream, #f9f4f0);
   }
 }
 
-// Section dividers
+// Editorial bands (About, generic sections) -------------------------------
 .section {
-  padding: 28px 32px;
-  border-top: 1px solid var(--border-color);
-
-  @include mixins.respond-below(md) {
-    padding: 24px 20px;
-  }
+  @include band(clamp(44px, 5vw, 72px));
+  background: var(--kamp-cream, #f9f4f0);
 }
 
 .sectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
-  font-family: $font-display;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-family: $serif;
+  font-weight: 400;
+  font-size: clamp(1.75rem, 1rem + 2.4vw, 2.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
   color: var(--primary-text-color);
   margin: 0;
 }
 
-// Description / About section
+.eyebrow {
+  font-family: $util;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8125rem;
+  color: var(--kamp-forest, #2f5147);
+  margin-bottom: 10px;
+}
+
 .description {
-  color: var(--secondary-color);
+  color: var(--primary-text-color);
   line-height: 1.7;
-  font-size: 0.95rem;
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  max-width: 62ch;
 
   p {
     margin-bottom: 1em;
@@ -473,37 +441,35 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   a {
-    color: var(--primary-color);
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
+    color: var(--kamp-forest, #2f5147);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   h1, h2, h3, h4, h5, h6 {
     margin-top: 1.25em;
     margin-bottom: 0.5em;
     color: var(--primary-text-color);
-    font-weight: 600;
-    font-family: $font-display;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    font-family: $serif;
 
     &:first-child {
       margin-top: 0;
     }
   }
 
-  h1 { font-size: 1.375rem; }
-  h2 { font-size: 1.25rem; }
-  h3 { font-size: 1.125rem; }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.2rem; }
 
   ul, ol {
-    padding-left: 1.5em;
+    padding-left: 1.4em;
     margin-bottom: 1em;
   }
 
   blockquote {
-    border-left: 3px solid var(--primary-color);
+    border-left: 3px solid var(--kamp-orange, #ff7b00);
     padding-left: 1em;
     margin: 1em 0;
     color: var(--secondary-color);
@@ -513,14 +479,15 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   img {
     max-width: 100%;
     height: auto;
-    border-radius: $radius-md;
+    border-radius: $radius-card;
     margin: 1em 0;
   }
 }
 
 .readMoreToggle {
-  color: var(--primary-color);
-  font-weight: 500;
+  color: var(--kamp-forest, #2f5147);
+  font-family: $util;
+  font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
   display: inline-flex;
@@ -530,173 +497,87 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   background: none;
   border: none;
   padding: 0;
-
-  svg {
-    transition: transform $transition-fast;
-  }
+  text-decoration: underline;
+  text-underline-offset: 3px;
 
   &[data-expanded="true"] svg {
     transform: rotate(180deg);
   }
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
-// Location section
-.locationContent {
-  display: grid;
-  grid-template-columns: 1fr 200px;
-  gap: 20px;
-  align-items: start;
-
-  @include mixins.respond-below(md) {
-    grid-template-columns: 1fr;
-  }
+// Tickets: one substantial cream panel, part of the invitation ------------
+.ticketsBand {
+  @include band(clamp(44px, 5vw, 72px));
+  background: var(--kamp-sand, #efe7db);
 }
 
-.venueDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.venueName {
-  font-weight: 600;
-  color: var(--primary-text-color);
-  font-size: 1.05rem;
-}
-
-.venueAddress {
-  color: var(--secondary-color);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.directionsLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--primary-color);
-  font-weight: 500;
-  font-size: 0.9rem;
-  text-decoration: none;
-  margin-top: 8px;
-
-  svg {
-    width: 0.85rem;
-    height: 0.85rem;
-  }
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.mapContainer {
-  border-radius: $radius-md;
-  overflow: hidden;
-  height: 120px;
-  cursor: pointer;
-  position: relative;
-  transition: all $transition-fast;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  @include mixins.respond-below(md) {
-    display: none;
-  }
-
-  &:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.mapPin {
-  color: var(--primary-color);
-  position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  transition: opacity $transition-fast;
-
-  .mapContainer:hover & {
-    opacity: 0;
-  }
-}
-
-.mapOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity $transition-fast;
-
-  .mapContainer:hover & {
-    opacity: 1;
-  }
-}
-
-.mapOverlayLabel {
+.ticketsPanel {
   background: var(--content-bg-color);
-  padding: 8px 16px;
-  border-radius: $radius-sm;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--primary-text-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-panel;
+  box-shadow: 0 1px 2px rgba(23, 23, 23, 0.05), 0 18px 48px rgba(23, 23, 23, 0.08);
+  padding: clamp(28px, 4vw, 48px);
+  margin-top: clamp(-72px, -6vw, -40px);
 
-  svg {
-    width: 0.85rem;
-    height: 0.85rem;
+  @include mixins.respond-below(md) {
+    padding: 24px 18px;
+    margin-top: -32px;
   }
 }
 
-// Tickets section - restyle .hi-product-widget-container
+.ticketsEyebrow {
+  font-family: $util;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8125rem;
+  color: var(--kamp-forest, #2f5147);
+  margin-bottom: 10px;
+}
+
+.ticketsTitle {
+  font-family: $serif;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 1rem + 2.6vw, 2.85rem);
+  line-height: 1.03;
+  letter-spacing: -0.03em;
+  color: var(--primary-text-color);
+  margin: 0 0 10px;
+}
+
+.ticketsIntro {
+  color: var(--secondary-color);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  max-width: 54ch;
+  margin: 0 0 24px;
+}
+
 .ticketsSection {
-  // Override widget styles
   :global(.hi-product-widget-container) {
     background: transparent;
     padding: 0;
-    font-family: $font-body;
+    font-family: $serif;
   }
 
   :global(.hi-product-category-rows) {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-  }
-
-  :global(.hi-product-category-row) {
-    margin-bottom: 0;
+    gap: 14px;
   }
 
   :global(.hi-product-category-title) {
-    font-family: $font-display;
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-family: $serif;
+    font-size: 1.375rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
     color: var(--primary-text-color);
-    margin: 0 0 18px;
+    margin: 0 0 14px;
   }
 
   :global(.hi-product-category-description) {
     color: var(--secondary-color);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     line-height: 1.6;
     margin-bottom: 16px;
   }
@@ -710,43 +591,33 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   :global(.hi-product-row) {
     background: var(--content-bg-color);
-    border-radius: $radius-lg;
-    border: 2px solid var(--border-color);
+    border-radius: $radius-card;
+    border: 1px solid var(--kamp-line-control, #8a8a8a);
     padding: 0;
-    transition: all $transition-fast;
-    cursor: pointer;
     position: relative;
     overflow: hidden;
+    transition: border-color $feedback;
 
-    &:hover {
-      border-color: color-mix(in srgb, var(--border-color) 150%, transparent);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    &:focus-within {
+      border-color: var(--kamp-ink, #171717);
+      box-shadow: 0 0 0 2px var(--content-bg-color), 0 0 0 4px var(--kamp-ink, #171717);
     }
   }
 
   :global(.hi-product-row.hi-product-highlighted) {
-    background: var(--accent-soft);
-    border-color: var(--primary-color);
-
-    &:hover {
-      background: color-mix(in srgb, var(--accent-soft) 80%, var(--content-bg-color));
-      border-color: var(--primary-color);
-    }
+    border-color: var(--kamp-orange, #ff7b00);
+    box-shadow: inset 5px 0 0 var(--kamp-orange, #ff7b00);
   }
 
   :global(.hi-product-highlight-message) {
-    background: var(--primary-color);
-    color: var(--accent-contrast);
+    background: var(--kamp-orange-tint, #fdeede);
+    color: var(--kamp-ink, #171717);
+    font-family: $util;
     font-size: 0.75rem;
-    font-weight: 600;
-    padding: 6px 16px;
+    font-weight: 700;
+    padding: 8px 16px;
     text-align: center;
     letter-spacing: 0.02em;
-  }
-
-  :global(.hi-product-row.selected) {
-    border-color: var(--primary-color);
-    background: var(--accent-soft);
   }
 
   :global(.hi-title-row) {
@@ -754,24 +625,29 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   :global(.hi-product-title) {
-    padding: 20px 24px;
+    padding: 22px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    min-height: 68px;
 
     h3 {
-      font-family: $font-display;
-      font-weight: 700;
-      font-size: 1.1rem;
+      font-family: $serif;
+      font-weight: 400;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
       color: var(--primary-text-color);
       margin: 0;
     }
   }
 
   :global(.hi-product-title-metadata) {
-    font-size: 0.8rem;
-    color: var(--secondary-text-color);
+    font-family: $util;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--secondary-color);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -781,14 +657,13 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--secondary-color);
 
     svg {
-      transition: transform $transition-fast;
+      transition: transform $feedback;
     }
   }
 
   :global(.hi-product-content) {
-    padding: 0 24px 20px;
+    padding: 0 24px 22px;
     border-top: 1px solid var(--border-color);
-    margin-top: 0;
   }
 
   :global(.hi-price-tiers-rows) {
@@ -812,16 +687,17 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   :global(.hi-price-tier-label) {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--primary-text-color);
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
 
   :global(.hi-price-tier-price) {
-    font-family: $font-display;
+    font-family: $serif;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     color: var(--primary-text-color);
+    font-variant-numeric: tabular-nums lining-nums;
   }
 
   :global(.hi-product-quantity-selector) {
@@ -830,51 +706,50 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       align-items: center;
       gap: 4px;
       background: var(--content-bg-color);
-      border-radius: $radius-sm;
+      border-radius: $radius-card;
       padding: 4px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--kamp-line-control, #8a8a8a);
 
       button {
-        width: 36px;
-        height: 36px;
-        border-radius: $radius-xs;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
         border: none;
         background: transparent;
-        color: var(--secondary-color);
+        color: var(--primary-text-color);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.9rem;
         cursor: pointer;
-        transition: all $transition-fast;
+        transition: background $feedback;
 
         &:hover:not(:disabled) {
           background: var(--accent-soft);
-          color: var(--primary-text-color);
         }
 
         &:disabled {
-          opacity: 0.3;
+          opacity: 0.35;
           cursor: not-allowed;
         }
       }
 
       input {
-        font-family: $font-display;
+        font-family: $serif;
         font-weight: 700;
         min-width: 32px;
         text-align: center;
-        font-size: 1rem;
+        font-size: 1.05rem;
         color: var(--primary-text-color);
         border: none;
         background: transparent;
+        font-variant-numeric: tabular-nums lining-nums;
       }
     }
   }
 
   :global(.hi-product-description-row) {
     color: var(--secondary-color);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     line-height: 1.6;
     margin-top: 12px;
     padding-top: 12px;
@@ -882,12 +757,12 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   :global(.hi-product-quantity-error) {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #dc2626;
-    border-radius: $radius-sm;
-    padding: 12px 16px;
-    font-size: 0.875rem;
+    background: var(--kamp-stop-tint, #f5e2dc);
+    border-left: 4px solid var(--kamp-stop, #9f3620);
+    color: var(--kamp-stop, #9f3620);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.9375rem;
     margin: 12px 0;
   }
 
@@ -908,59 +783,56 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-top: 1px solid var(--border-color);
 
     .hi-product-page-message {
-      background: var(--accent-soft);
-      border-radius: $radius-sm;
+      background: var(--kamp-wait-tint, #e9edf2);
+      border-left: 4px solid var(--kamp-wait, #40607d);
+      border-radius: 6px;
       padding: 12px 16px;
       margin-bottom: 16px;
-      font-size: 0.9rem;
+      font-size: 0.9375rem;
       color: var(--primary-text-color);
     }
   }
 
+  // The dominant action of the invitation.
   :global(.hi-continue-button) {
     width: 100%;
+    min-height: 60px;
     padding: 18px 24px !important;
     height: auto !important;
-    background: var(--primary-color) !important;
-    background-color: var(--primary-color) !important;
-    color: var(--accent-contrast) !important;
-    border: none !important;
-    border-radius: $radius-md !important;
-    font-family: $font-display;
+    background: var(--kamp-forest, #2f5147) !important;
+    background-color: var(--kamp-forest, #2f5147) !important;
+    color: var(--kamp-cream, #f9f4f0) !important;
+    border: 1px solid var(--kamp-forest, #2f5147) !important;
+    border-radius: $radius-pill !important;
+    font-family: $util;
     font-size: 1rem !important;
-    font-weight: 700 !important;
+    font-weight: 900 !important;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    transition: all $transition-fast;
+    transition: background $feedback, color $feedback;
 
-    // Override Mantine button internals
     :global(.mantine-Button-label) {
-      color: var(--accent-contrast) !important;
+      color: var(--kamp-cream, #f9f4f0) !important;
     }
 
     &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px var(--accent-soft);
-      filter: brightness(1.1);
-      background: var(--primary-color) !important;
-      background-color: var(--primary-color) !important;
+      background: var(--kamp-forest-deep, #223b34) !important;
+      background-color: var(--kamp-forest-deep, #223b34) !important;
     }
 
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
     }
   }
 
   :global(.hi-promo-code-row) {
-    margin-top: 14px;
+    margin-top: 16px;
     margin-bottom: 0;
   }
 
@@ -970,9 +842,11 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
     display: block;
     width: 100%;
+    text-decoration: underline;
+    text-underline-offset: 3px;
 
     &:hover {
-      color: var(--primary-color);
+      color: var(--kamp-forest, #2f5147);
     }
   }
 
@@ -980,38 +854,197 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     gap: 12px;
   }
 
-  :global(.hi-promo-code-input) {
+  :global(.hi-promo-code-input),
+  :global(.select-input input),
+  :global(.hi-donation-input) {
     background: var(--content-bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: $radius-sm;
+    border: 1px solid var(--kamp-line-control, #8a8a8a);
+    border-radius: $radius-card;
     color: var(--primary-text-color);
     padding: 10px 14px;
   }
 
-  :global(.hi-apply-promo-code-button) {
-    background: var(--primary-color);
-    color: var(--accent-contrast);
-    border: none;
-    border-radius: $radius-sm;
-    font-weight: 600;
+  :global(.hi-apply-promo-code-button),
+  :global(.hi-close-promo-code-input-button) {
+    background: var(--kamp-ink, #171717);
+    color: var(--kamp-cream, #f9f4f0);
+    border: 1px solid var(--kamp-ink, #171717);
+    border-radius: $radius-pill;
+    font-family: $util;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.75rem;
     padding: 10px 20px;
-
-    &:hover {
-      filter: brightness(1.1);
-    }
   }
 
   :global(.hi-promo-code-applied) {
     color: var(--primary-text-color);
     font-size: 0.9rem;
+    border-left: 4px solid var(--kamp-ok, #2f6b4f);
+    background: var(--kamp-ok-tint, #e7f0ea);
 
     b {
-      color: var(--primary-color);
+      color: var(--primary-text-color);
     }
   }
 }
 
-// Organizer section
+// Your Kamp: logistics expressed visually (real data + honest structure) ---
+.yourKampBand {
+  @include band(clamp(44px, 5vw, 72px));
+  background: var(--kamp-cream, #f9f4f0);
+}
+
+.logisticsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.logisticsCard {
+  background: var(--content-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-card;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.logisticsLabel {
+  font-family: $util;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  color: var(--kamp-forest, #2f5147);
+}
+
+.logisticsValue {
+  font-family: $serif;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--primary-text-color);
+}
+
+.logisticsBody {
+  color: var(--secondary-color);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.logisticsLink {
+  align-self: flex-start;
+  margin-top: 10px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--kamp-forest, #2f5147);
+  font-family: $util;
+  font-weight: 900;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.logisticsButton {
+  align-self: flex-start;
+  margin-top: 10px;
+  min-height: 44px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-pill;
+  color: var(--primary-text-color);
+  font-family: $util;
+  font-weight: 900;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: border-color $feedback, background $feedback;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover {
+    border-color: var(--kamp-ink, #171717);
+    background: var(--accent-soft);
+  }
+}
+
+// Honest future insertion point (structure only, no fabricated content).
+.logisticsCardPending {
+  border-style: dashed;
+  border-color: var(--kamp-line-control, #8a8a8a);
+  background: transparent;
+}
+
+.logisticsPending {
+  color: var(--secondary-color);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+// Merch: an editorial storefront insertion point (not connected) ----------
+.merchBand {
+  @include band(clamp(44px, 5vw, 72px));
+  background: var(--kamp-sand, #efe7db);
+}
+
+.merchSlot {
+  margin-top: 22px;
+  min-height: 120px;
+  border: 1px dashed var(--kamp-line-control, #8a8a8a);
+  border-radius: $radius-card;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-color);
+  font-family: $util;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 24px;
+  text-align: center;
+}
+
+// FAQ / questions: honest, uses the real organizer contact ----------------
+.faqBand {
+  @include band(clamp(44px, 5vw, 72px));
+  background: var(--kamp-cream, #f9f4f0);
+}
+
+.faqNote {
+  color: var(--secondary-color);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  max-width: 56ch;
+  margin: 0 0 20px;
+}
+
+// Organizer ---------------------------------------------------------------
 .organizerCard {
   display: flex;
   gap: 20px;
@@ -1025,24 +1058,25 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .organizerAvatar {
-  width: 72px;
-  height: 72px;
-  border-radius: $radius-md;
+  width: 76px;
+  height: 76px;
+  border-radius: $radius-card;
   object-fit: cover;
   flex-shrink: 0;
 }
 
 .organizerAvatarPlaceholder {
-  width: 72px;
-  height: 72px;
-  border-radius: $radius-md;
-  background: var(--primary-color);
+  width: 76px;
+  height: 76px;
+  border-radius: $radius-card;
+  background: var(--kamp-forest, #2f5147);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-contrast);
+  color: var(--kamp-cream, #f9f4f0);
+  font-family: $util;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 900;
   flex-shrink: 0;
 }
 
@@ -1065,9 +1099,10 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .organizerName {
-  font-family: $font-display;
-  font-weight: 700;
-  font-size: 1.15rem;
+  font-family: $serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
   color: var(--primary-text-color);
   margin: 0 0 4px;
 
@@ -1076,7 +1111,8 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
 
     &:hover {
-      color: var(--primary-color);
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
   }
 }
@@ -1085,29 +1121,26 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--secondary-color);
 
   svg {
-    color: var(--primary-color);
-    width: 0.75rem;
-    height: 0.75rem;
+    color: var(--kamp-muted, #585254);
+    width: 0.85rem;
+    height: 0.85rem;
   }
 
   a {
     color: inherit;
-    text-decoration: none;
-
-    &:hover {
-      color: var(--primary-color);
-    }
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 
 .organizerBio {
   color: var(--secondary-color);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.65;
   margin-bottom: 16px;
 
   p {
@@ -1119,19 +1152,16 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   a {
-    color: var(--primary-color);
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
+    color: var(--kamp-forest, #2f5147);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 
 .organizerActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 
   @include mixins.respond-below(sm) {
@@ -1145,65 +1175,106 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .socialLink {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--accent-soft);
+  background: transparent;
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--secondary-color);
+  color: var(--primary-text-color);
   text-decoration: none;
-  font-size: 1rem;
-  transition: all $transition-fast;
+  transition: border-color $feedback, background $feedback;
 
   &:hover {
-    background: var(--primary-color);
-    color: white;
-    transform: translateY(-2px);
+    border-color: var(--kamp-ink, #171717);
+    background: var(--accent-soft);
   }
 }
 
 .contactButton {
-  padding: 10px 20px;
-  border: 1px solid var(--border-color);
-  background: var(--content-bg-color);
-  color: var(--primary-text-color);
-  border-radius: $radius-sm;
-  font-weight: 600;
-  font-size: 0.9rem;
-  display: flex;
+  padding: 0 22px;
+  min-height: 48px;
+  border: 1px solid var(--kamp-forest, #2f5147);
+  background: var(--kamp-forest, #2f5147);
+  color: var(--kamp-cream, #f9f4f0);
+  border-radius: $radius-pill;
+  font-family: $util;
+  font-weight: 900;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: all $transition-fast;
+  transition: background $feedback, color $feedback;
 
   svg {
-    width: 0.9rem;
-    height: 0.9rem;
+    width: 0.95rem;
+    height: 0.95rem;
   }
 
   &:hover {
-    background: var(--primary-color);
-    color: var(--accent-contrast);
-    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--kamp-forest, #2f5147);
   }
 }
 
-// Footer section
-.footerSection {
-  text-align: center;
-  padding: 40px 20px;
-  padding-bottom: 100px;
-  color: var(--secondary-text-color);
-  font-size: 0.85rem;
+// Four-C signature (deep ink material field with an organic contour) ------
+.signatureBand {
+  @include band(clamp(40px, 5vw, 64px));
+  @include contour-top;
+  padding-top: clamp(56px, 6vw, 88px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 22px;
+  background: var(--kamp-ink, #171717);
+}
+
+.signatureItem {
+  font-family: $util;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: clamp(0.8125rem, 0.7rem + 0.5vw, 1rem);
+  color: var(--kamp-cream, #f9f4f0);
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
 
   @include mixins.respond-below(md) {
-    background-color: var(--content-bg-color);
-    border-top: 1px solid var(--border-color);
-    padding: 24px 20px;
+    gap: 14px;
+    letter-spacing: 0.1em;
+  }
+
+  &::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--kamp-orange, #ff7b00);
+  }
+
+  &:last-child::after {
+    display: none;
+  }
+}
+
+// Footer ------------------------------------------------------------------
+.footerSection {
+  @include band(clamp(32px, 4vw, 48px));
+  padding-bottom: 96px;
+  text-align: center;
+  color: var(--secondary-text-color);
+  font-size: 0.85rem;
+  background: var(--kamp-cream, #f9f4f0);
+
+  @include mixins.respond-below(md) {
     padding-bottom: 120px;
-    margin: 0;
   }
 }
 
@@ -1211,16 +1282,18 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   justify-content: center;
   gap: 24px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .footerLink {
   color: var(--secondary-color);
-  text-decoration: none;
-  transition: color $transition-fast;
+  font-family: $util;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 
   &:hover {
-    color: var(--primary-color);
+    color: var(--kamp-forest, #2f5147);
   }
 }
 
@@ -1228,26 +1301,28 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 6px;
+  font-family: $util;
+  font-size: 0.8125rem;
   color: var(--secondary-color);
 
   strong {
     color: var(--primary-text-color);
-    font-weight: 600;
+    font-weight: 700;
   }
 
   a {
     color: inherit;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
 
     &:hover {
-      color: var(--primary-color);
+      color: var(--kamp-forest, #2f5147);
     }
   }
 }
 
-// Floating scroll button
+// Floating "Register" pill ------------------------------------------------
 .scrollToTicketsButton {
   position: fixed;
   bottom: 24px;
@@ -1256,218 +1331,60 @@ $transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--primary-color);
-  color: var(--accent-contrast);
-  font-family: $font-display;
-  font-weight: 600;
-  font-size: 0.875rem;
-  padding: 12px 20px;
-  border-radius: 50px;
-  border: none;
+  background: var(--kamp-forest, #2f5147);
+  color: var(--kamp-cream, #f9f4f0);
+  font-family: $util;
+  font-weight: 900;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: $radius-pill;
+  border: 1px solid var(--kamp-forest, #2f5147);
   cursor: pointer;
-  box-shadow: 0 4px 20px var(--accent-soft);
-  animation: fadeInUp 0.4s ease-out;
-  transition: all $transition-fast;
+  box-shadow: 0 12px 32px rgba(23, 23, 23, 0.22);
+  transition: background $feedback;
 
   @include mixins.respond-below(sm) {
     bottom: 16px;
     right: 16px;
-    padding: 10px 16px;
-    font-size: 0.8125rem;
+    left: 16px;
+    justify-content: center;
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px var(--accent-soft);
-  }
-
-  &:active {
-    transform: translateY(0);
+    background: var(--kamp-forest-deep, #223b34);
   }
 }
 
-// Animations
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Animate sections
-.section {
-  animation: fadeInUp 0.4s ease-out backwards;
-
-  &:nth-child(2) { animation-delay: 0.1s; }
-  &:nth-child(3) { animation-delay: 0.15s; }
-  &:nth-child(4) { animation-delay: 0.2s; }
-  &:nth-child(5) { animation-delay: 0.25s; }
-}
-
-// No cover image adjustments
-.heroSection:not(:has(.coverWrapper)) {
-  .eventHeader {
-    padding-top: 32px;
-
-    @include mixins.respond-below(sm) {
-      padding-top: 24px;
-    }
-  }
-}
-
-// Online event badge
-.onlineEventBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--accent-soft);
-  color: var(--primary-color);
-  padding: 6px 12px;
-  border-radius: $radius-sm;
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  svg {
-    width: 0.9rem;
-    height: 0.9rem;
-  }
-}
-
-// Kamp Love buyer-surface foundation. These final overrides intentionally
-// preserve event content and native Hi.Events behavior while fixing the visual shell.
-.wrapper {
-  max-width: 980px;
-  padding: 32px 24px 18px;
-}
-
-.mainCard {
-  border-radius: 10px;
-  border: 1px solid #dadada;
-  box-shadow: 0 12px 36px rgba(23, 23, 23, 0.06);
-  animation: none;
-}
-
-.coverImage,
-.mainCard:hover .coverImage {
-  transform: none;
-}
-
+// Kept for compatibility (not used by the current markup).
 .eventHeader,
-.section {
-  padding: 28px 32px;
-}
-
-.eventTitle {
-  max-width: 16ch;
-  font-size: clamp(2rem, 6vw, 3.65rem);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
-}
-
-.sectionTitle,
-.ticketsSection :global(.hi-product-category-title) {
-  font-weight: 400;
-  letter-spacing: -0.025em;
-}
-
-.organizerPill,
+.eventMeta,
+.metaItem,
 .metaIconBox,
-.statusBadge,
+.metaContent,
+.metaPrimary,
+.metaSecondary,
+.metaLink,
+.headerTopRow,
+.locationContent,
+.venueDetails,
+.venueName,
+.venueAddress,
+.directionsLink,
+.addToCalendarButton,
 .onlineEventBadge {
-  border-radius: 999px;
-}
-
-.actionButton,
-.addToCalendarButton,
-.contactButton,
-.scrollToTicketsButton {
-  min-height: 44px;
-  font-family: var(--kamp-font-utility, sans-serif);
-  font-weight: 700;
-}
-
-.addToCalendarButton,
-.contactButton,
-.scrollToTicketsButton {
-  border-radius: 999px;
-}
-
-.actionButton:hover,
-.organizerPill:hover,
-.metaIconBox:hover,
-.scrollToTicketsButton:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.ticketsSection {
-  :global(.hi-product-row) {
-    border: 1px solid var(--kamp-line-control, #8a8a8a);
-    border-radius: 10px;
-    cursor: default;
-  }
-
-  :global(.hi-product-row.hi-product-highlighted) {
-    border-color: var(--kamp-orange, #ff7b00);
-    background: var(--kamp-paper, #ffffff);
-    box-shadow: inset 4px 0 0 var(--kamp-orange, #ff7b00);
-  }
-
-  :global(.hi-product-highlight-message) {
-    background: var(--kamp-orange-tint, #fdeede);
-    color: var(--kamp-ink, #171717);
-    font-family: var(--kamp-font-utility, sans-serif);
-    font-weight: 700;
-  }
-
-  :global(.hi-product-title h3),
-  :global(.hi-price-tier-label) {
-    font-weight: 400;
-  }
-
-  :global(.hi-continue-button),
-  :global(.hi-apply-promo-code-button),
-  :global(.hi-close-promo-code-input-button) {
-    background: var(--kamp-ink, #171717);
-    color: var(--kamp-cream, #f9f4f0);
-    border-radius: 999px;
-    font-family: var(--kamp-font-utility, sans-serif);
-    font-weight: 700;
-  }
-
-  :global(.hi-promo-code-input),
-  :global(.select-input input),
-  :global(.hi-donation-input) {
-    border-color: var(--kamp-line-control, #8a8a8a);
-    border-radius: 10px;
-  }
-}
-
-@media (max-width: 768px) {
-  .wrapper {
-    padding: 0;
-  }
-
-  .eventHeader,
-  .section {
-    padding: 24px 18px;
-  }
-
-  .eventTitle {
-    max-width: none;
-    font-size: clamp(2rem, 12vw, 3rem);
-  }
+  font-family: inherit;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mainCard,
-  .section,
-  .scrollToTicketsButton {
-    animation: none;
+  * {
+    transition-duration: 0.001ms !important;
+  }
+
+  .essentialsBand::before,
+  .signatureBand::before {
+    display: block;
   }
 }

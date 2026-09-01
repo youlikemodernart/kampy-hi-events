@@ -68,6 +68,16 @@
   --kamp-stop: #9f3620;
   --kamp-stop-tint: #f5e2dc;
 
+  // Outdoors-derived material palette (broad landscape bands, no gradients)
+  --kamp-forest: #2f5147;
+  --kamp-forest-deep: #223b34;
+  --kamp-moss: #5c6551;
+  --kamp-clay: #b3654a;
+  --kamp-clay-tint: #efe0d8;
+  --kamp-sky: #9db3ba;
+  --kamp-wood: #6f5f4e;
+  --kamp-sand: #efe7db;
+
   --hi-text: var(--kamp-ink);
   --hi-primary: var(--kamp-ink);
   --hi-secondary: var(--kamp-orange-tint);

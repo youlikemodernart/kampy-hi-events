@@ -64,8 +64,7 @@ export const PoweredByFooter = (
                 title={"Effortlessly manage events and sell tickets online with Hi.Events"}
             >
                 Hi.Events
-            </a>{" "}
-            🚀
+            </a>
         </>
     );
 

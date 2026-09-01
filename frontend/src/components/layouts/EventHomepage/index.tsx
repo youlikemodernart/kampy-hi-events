@@ -8,13 +8,9 @@ import {Event, OrganizerStatus} from "../../../types.ts";
 import {EventNotAvailable} from "./EventNotAvailable";
 import {
     IconArrowUpRight,
-    IconCalendar,
-    IconCalendarOff,
     IconCalendarPlus,
-    IconExternalLink,
     IconMail,
     IconMapPin,
-    IconMaximize,
     IconShare,
     IconTicket,
     IconWorld
@@ -32,7 +28,6 @@ import {
 } from "../../../utilites/addressUtilities.ts";
 import {StatusToggle} from "../../common/StatusToggle";
 import {getConfig} from "../../../utilites/config.ts";
-import {validateThemeSettings} from "../../../utilites/themeUtils.ts";
 import {useOrganizerTrackingPixels} from "../../../hooks/useOrganizerTrackingPixels";
 import {trackPixelEvent, hasActivePixels} from "../../../utilites/trackingPixels";
 import {CookieConsentBanner} from "../../common/CookieConsentBanner";
@@ -40,6 +35,15 @@ import {ShareComponent} from "../../common/ShareIcon";
 import {EventDateRange} from "../../common/EventDateRange";
 import {CalendarOptionsPopover} from "../../common/CalendarOptionsPopover";
 import {isDateInPast} from "../../../utilites/dates.ts";
+
+// Future Shopify merch lives on this same Kamper page: one coherent surface for tickets,
+// event information, and later merchandise. The section, its Kamp Love styling, and its mount
+// slot exist and stay off until Shopify is connected. Nothing here calls a storefront.
+const SHOW_MERCH_SECTION = false;
+
+// "Your Kamp" prep modules (what to bring, schedule). These render as honest, clearly-empty
+// future insertion points — no fabricated event content. Set false to hide them entirely.
+const SHOW_KAMP_PREP = true;
 
 interface EventHomepageProps {
     event?: Event;
@@ -110,10 +114,6 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         return <EventNotAvailable/>;
     }
 
-    const rawThemeSettings = event?.settings?.homepage_theme_settings;
-    const themeSettings = validateThemeSettings(rawThemeSettings);
-    const backgroundType = themeSettings.background_type;
-
     const themeStyles = {
         '--event-bg-color': '#f9f4f0',
         '--event-content-bg-color': '#ffffff',
@@ -171,6 +171,10 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
 
     const statusBadge = getStatusBadge();
 
+    const heroKicker = (hasLocation && locationDetails)
+        ? (getShortLocationDisplay(locationDetails) || locationDetails.venue_name || organizer?.name)
+        : (isOnlineEvent ? t`Online Event` : organizer?.name);
+
     const mapUrl = event.settings?.maps_url || (locationDetails ? getGoogleMapsUrl(locationDetails) : null);
 
     return (
@@ -203,24 +207,8 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
 
                 {event && <EventDocumentHead event={event}/>}
 
-                {/* Background */}
-                {(coverImage && backgroundType === 'MIRROR_COVER_IMAGE') ? (
-                    <div
-                        className={classes.background}
-                        style={{backgroundImage: `url(${coverImage})`}}
-                    />
-                ) : (
-                    <div
-                        className={classes.background}
-                        style={{backgroundColor: 'var(--event-bg-color)'}}
-                    />
-                )}
-                <div
-                    className={classes.backgroundOverlay}
-                    style={backgroundType === 'MIRROR_COVER_IMAGE' ? {
-                        '--overlay-color': themeSettings.background
-                    } as React.CSSProperties : undefined}
-                />
+                {/* Kamp Love ground: a calm cream field, never a blurred cover mirror */}
+                <div className={classes.background}/>
 
                 <div className={classes.container}>
                     <div className={classes.wrapper}>
@@ -249,153 +237,142 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                             className={classes.coverImage}
                                         />
                                         <div className={classes.heroGradient}/>
-                                        {statusBadge && (
-                                            <div className={classes.statusBadges}>
-                                                <span className={classes.statusBadge}>
-                                                    <IconTicket/>
-                                                    {statusBadge.text}
-                                                </span>
-                                            </div>
-                                        )}
+                                        <div className={classes.heroOverlay}>
+                                            {statusBadge && (
+                                                <div className={classes.statusBadges}>
+                                                    <span className={classes.statusBadge}>
+                                                        <IconTicket/>
+                                                        {statusBadge.text}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {heroKicker && (
+                                                <div className={classes.heroKicker}>
+                                                    {heroKicker}
+                                                </div>
+                                            )}
+                                            <h1 className={classes.eventTitle}>{event.title}</h1>
+                                        </div>
                                     </div>
                                 )}
 
-                                {/* Event Header */}
-                                <div className={classes.eventHeader}>
-                                    <div className={classes.headerTopRow}>
-                                        {organizer && organizer.status === OrganizerStatus.LIVE ? (
-                                            <a
-                                                href={organizerHomepageUrl(organizer)}
-                                                className={classes.organizerPill}
-                                            >
-                                                {organizerLogo ? (
-                                                    <img
-                                                        src={organizerLogo}
-                                                        alt={organizer.name}
-                                                        className={classes.organizerPillAvatar}
-                                                    />
-                                                ) : (
-                                                    <span className={classes.organizerPillAvatarPlaceholder}>
-                                                        {organizer.name.charAt(0).toUpperCase()}
-                                                    </span>
-                                                )}
-                                                <span className={classes.organizerPillName}>
-                                                    {organizer.name}
-                                                </span>
-                                            </a>
+                            </div>
+
+                            {/* Byline: who is inviting you to this Kamp */}
+                            <div className={classes.bylineStrip}>
+                                {organizer && organizer.status === OrganizerStatus.LIVE ? (
+                                    <a
+                                        href={organizerHomepageUrl(organizer)}
+                                        className={classes.organizerPill}
+                                    >
+                                        {organizerLogo ? (
+                                            <img
+                                                src={organizerLogo}
+                                                alt={organizer.name}
+                                                className={classes.organizerPillAvatar}
+                                            />
                                         ) : (
-                                            <div className={classes.organizerPill}>
-                                                {organizerLogo ? (
-                                                    <img
-                                                        src={organizerLogo}
-                                                        alt={organizer?.name || ''}
-                                                        className={classes.organizerPillAvatar}
-                                                    />
-                                                ) : (
-                                                    <span className={classes.organizerPillAvatarPlaceholder}>
-                                                        {organizer?.name?.charAt(0).toUpperCase() || '?'}
-                                                    </span>
-                                                )}
-                                                <span className={classes.organizerPillName}>
-                                                    {organizer?.name}
-                                                </span>
-                                            </div>
+                                            <span className={classes.organizerPillAvatarPlaceholder}>
+                                                {organizer.name.charAt(0).toUpperCase()}
+                                            </span>
                                         )}
-
-                                        <div className={classes.actionButtons}>
-                                            <ShareComponent
-                                                title={'Check out this event: ' + event.title}
-                                                text={'Check out this event: ' + event.title}
-                                                url={eventHomepageUrl(event)}
-                                                imageUrl={coverImage || undefined}
-                                            >
-                                                <button className={classes.actionButton} title={t`Share`}>
-                                                    <IconShare/>
-                                                </button>
-                                            </ShareComponent>
-                                            {/* Future enhancement: Favorite/Heart button */}
-                                            {/* <button className={`${classes.actionButton} ${classes.favoriteButton}`} title={t`Save`}>
-                                                <IconHeart />
-                                            </button> */}
-                                        </div>
+                                        <span className={classes.organizerPillName}>
+                                            {organizer.name}
+                                        </span>
+                                    </a>
+                                ) : (
+                                    <div className={classes.organizerPill}>
+                                        {organizerLogo ? (
+                                            <img
+                                                src={organizerLogo}
+                                                alt={organizer?.name || ''}
+                                                className={classes.organizerPillAvatar}
+                                            />
+                                        ) : (
+                                            <span className={classes.organizerPillAvatarPlaceholder}>
+                                                {organizer?.name?.charAt(0).toUpperCase() || '?'}
+                                            </span>
+                                        )}
+                                        <span className={classes.organizerPillName}>
+                                            {organizer?.name}
+                                        </span>
                                     </div>
+                                )}
 
+                                <div className={classes.actionButtons}>
+                                    <ShareComponent
+                                        title={'Check out this event: ' + event.title}
+                                        text={'Check out this event: ' + event.title}
+                                        url={eventHomepageUrl(event)}
+                                        imageUrl={coverImage || undefined}
+                                    >
+                                        <button className={classes.actionButton} title={t`Share`}>
+                                            <IconShare/>
+                                        </button>
+                                    </ShareComponent>
+                                </div>
+                            </div>
+
+                            {!coverImage && (
+                                <div className={classes.section}>
+                                    {heroKicker && (
+                                        <div className={classes.eyebrow}>{heroKicker}</div>
+                                    )}
                                     <h1 className={classes.eventTitle}>{event.title}</h1>
+                                </div>
+                            )}
 
-                                    <div className={classes.eventMeta}>
-                                        {/* Date/Time */}
-                                        <div className={classes.metaItem}>
-                                            <div className={classes.metaIconBox}>
-                                                <IconCalendar/>
-                                            </div>
-                                            <div className={classes.metaContent}>
-                                                <div className={classes.metaPrimary}>
-                                                    <EventDateRange event={event}/>
-                                                </div>
-                                            </div>
-                                            <CalendarOptionsPopover event={event}>
-                                                <button className={classes.addToCalendarButton}>
-                                                    <IconCalendarPlus/>
-                                                    {t`Add to Calendar`}
-                                                </button>
-                                            </CalendarOptionsPopover>
+                            {/* Essentials: logistics made delightfully simple */}
+                            <div className={classes.essentialsBand}>
+                                <div className={classes.essentialsGrid}>
+                                    <div className={classes.essentialBlock}>
+                                        <div className={classes.essentialLabel}>{t`When`}</div>
+                                        <div className={classes.essentialValue}>
+                                            <EventDateRange event={event}/>
                                         </div>
-
-                                        {/* Event Ended */}
                                         {event.end_date && isDateInPast(event.end_date) && (
-                                            <div className={classes.metaItem}>
-                                                <div className={classes.metaIconBox}>
-                                                    <IconCalendarOff/>
-                                                </div>
-                                                <div className={classes.metaContent}>
-                                                    <div className={classes.metaPrimary}>{t`This event has ended`}</div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Online Event */}
-                                        {isOnlineEvent && (
-                                            <div className={classes.metaItem}>
-                                                <div className={classes.metaIconBox}>
-                                                    <IconWorld/>
-                                                </div>
-                                                <div className={classes.metaContent}>
-                                                    <div className={classes.metaPrimary}>{t`Online Event`}</div>
-                                                    <div className={classes.metaSecondary}>
-                                                        {t`Join from anywhere`}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Location */}
-                                        {hasLocation && locationDetails && (
-                                            <div className={classes.metaItem}>
-                                                <div className={classes.metaIconBox}>
-                                                    <IconMapPin/>
-                                                </div>
-                                                <div className={classes.metaContent}>
-                                                    <div className={classes.metaPrimary}>
-                                                        {locationDetails.venue_name}
-                                                    </div>
-                                                    <div className={classes.metaSecondary}>
-                                                        {formatAddress(locationDetails)}
-                                                    </div>
-                                                    {mapUrl && (
-                                                        <a
-                                                            href={mapUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className={classes.metaLink}
-                                                        >
-                                                            {t`View on Google Maps`}
-                                                            <IconExternalLink/>
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            <div className={classes.essentialSub}>{t`This event has ended`}</div>
                                         )}
                                     </div>
+
+                                    {isOnlineEvent && (
+                                        <div className={classes.essentialBlock}>
+                                            <div className={classes.essentialLabel}>{t`Where`}</div>
+                                            <div className={classes.essentialValue}>{t`Online Event`}</div>
+                                            <div className={classes.essentialSub}>{t`Join from anywhere`}</div>
+                                        </div>
+                                    )}
+
+                                    {hasLocation && locationDetails && (
+                                        <div className={classes.essentialBlock}>
+                                            <div className={classes.essentialLabel}>{t`Where`}</div>
+                                            <div className={classes.essentialValue}>{locationDetails.venue_name}</div>
+                                            <div className={classes.essentialSub}>
+                                                <IconMapPin/>
+                                                {getShortLocationDisplay(locationDetails) || formatAddress(locationDetails)}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className={classes.essentialActions}>
+                                    <CalendarOptionsPopover event={event}>
+                                        <button className={classes.lightPill}>
+                                            <IconCalendarPlus/>
+                                            {t`Add to Calendar`}
+                                        </button>
+                                    </CalendarOptionsPopover>
+                                    {mapUrl && (
+                                        <a
+                                            href={mapUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`${classes.lightPill} ${classes.ghostPill}`}
+                                        >
+                                            <IconArrowUpRight/>
+                                            {t`Get Directions`}
+                                        </a>
+                                    )}
                                 </div>
                             </div>
 
@@ -412,98 +389,121 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                 </div>
                             )}
 
-                            {/* Location Section (with map) */}
-                            {hasLocation && locationDetails && (
-                                <div className={classes.section}>
-                                    <div className={classes.sectionHeader}>
-                                        <h2 className={classes.sectionTitle}>{t`Location`}</h2>
+                            {/* Tickets: one substantial cream panel, part of the Kamp invitation */}
+                            <div className={classes.ticketsBand} id="tickets" ref={ticketsSectionRef}>
+                                <div className={classes.ticketsPanel}>
+                                    <div className={classes.ticketsEyebrow}>{t`Registration`}</div>
+                                    <h2 className={classes.ticketsTitle}>{t`Join us at Kamp`}</h2>
+                                    <p className={classes.ticketsIntro}>
+                                        {t`Choose your registration below.`}
+                                    </p>
+                                    <div className={classes.ticketsSection}>
+                                        <SelectProducts
+                                            colors={{
+                                                background: "transparent",
+                                                primary: "var(--event-primary-color)",
+                                                primaryText: "var(--event-primary-text-color)",
+                                                secondary: "var(--event-primary-color)",
+                                                secondaryText: "var(--event-accent-contrast)",
+                                                bodyBackground: "var(--event-bg-color)",
+                                            }}
+                                            continueButtonText={event.settings?.continue_button_text}
+                                            padding={"0px"}
+                                            event={event}
+                                            promoCodeValid={promoCodeValid}
+                                            promoCode={promoCode}
+                                            showPoweredBy={false}
+                                        />
                                     </div>
-                                    <div className={classes.locationContent}>
-                                        <div className={classes.venueDetails}>
-                                            <div className={classes.venueName}>
-                                                {locationDetails.venue_name}
+                                </div>
+                            </div>
+
+                            {/* Your Kamp: logistics expressed visually. Real data populates cards;
+                                modules without a data source are honest, clearly-empty insertion points. */}
+                            {(hasLocation || SHOW_KAMP_PREP) && (
+                                <div className={classes.yourKampBand} id="your-kamp">
+                                    <div className={classes.sectionHeader}>
+                                        <div className={classes.eyebrow}>{t`Your Kamp`}</div>
+                                        <h2 className={classes.sectionTitle}>{t`Getting ready`}</h2>
+                                    </div>
+                                    <div className={classes.logisticsGrid}>
+                                        {hasLocation && locationDetails && (
+                                            <div className={classes.logisticsCard}>
+                                                <div className={classes.logisticsLabel}>{t`Getting there`}</div>
+                                                <div className={classes.logisticsValue}>{locationDetails.venue_name}</div>
+                                                <div className={classes.logisticsBody}>{formatAddress(locationDetails)}</div>
+                                                {mapUrl && (
+                                                    <a
+                                                        href={mapUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className={classes.logisticsLink}
+                                                    >
+                                                        <IconMapPin/>
+                                                        {t`Get Directions`}
+                                                    </a>
+                                                )}
                                             </div>
-                                            <div className={classes.venueAddress}>
-                                                {formatAddress(locationDetails)}
+                                        )}
+
+                                        {SHOW_KAMP_PREP && (
+                                            <div className={`${classes.logisticsCard} ${classes.logisticsCardPending}`}>
+                                                <div className={classes.logisticsLabel}>{t`What to bring`}</div>
+                                                <div className={classes.logisticsPending}>{t`A packing list will appear here when it's posted.`}</div>
                                             </div>
-                                            {mapUrl && (
-                                                <a
-                                                    href={mapUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className={classes.directionsLink}
-                                                >
-                                                    <IconArrowUpRight/>
-                                                    {t`Get Directions`}
-                                                </a>
-                                            )}
-                                        </div>
-                                        {mapUrl && (
-                                            <a
-                                                href={mapUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className={classes.mapContainer}
-                                            >
-                                                <svg
-                                                    viewBox="0 0 200 120"
-                                                    preserveAspectRatio="xMidYMid slice"
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        position: 'absolute',
-                                                        inset: 0,
-                                                    }}
-                                                >
-                                                    <rect width="200" height="120" fill="var(--accent-soft)"/>
-                                                    {/* River */}
-                                                    <path d="M-5 95 Q30 85, 50 90 Q80 100, 110 88 Q140 75, 170 82 Q190 86, 205 80" stroke="var(--border-color)" strokeWidth="2" fill="none" opacity="0.3"/>
-                                                    {/* Main roads */}
-                                                    <line x1="0" y1="50" x2="200" y2="50" stroke="var(--border-color)" strokeWidth="2" opacity="0.2"/>
-                                                    <line x1="100" y1="0" x2="100" y2="120" stroke="var(--border-color)" strokeWidth="2" opacity="0.2"/>
-                                                    {/* Secondary roads */}
-                                                    <line x1="0" y1="25" x2="200" y2="25" stroke="var(--border-color)" strokeWidth="1.5" opacity="0.2"/>
-                                                    <line x1="0" y1="70" x2="85" y2="70" stroke="var(--border-color)" strokeWidth="1.5" opacity="0.2"/>
-                                                    <line x1="115" y1="70" x2="200" y2="70" stroke="var(--border-color)" strokeWidth="1.5" opacity="0.2"/>
-                                                    <line x1="50" y1="0" x2="50" y2="120" stroke="var(--border-color)" strokeWidth="1.5" opacity="0.2"/>
-                                                    <line x1="150" y1="0" x2="150" y2="75" stroke="var(--border-color)" strokeWidth="1.5" opacity="0.2"/>
-                                                    {/* Blocks/buildings */}
-                                                    <rect x="110" y="28" width="14" height="10" fill="var(--border-color)" opacity="0.25" rx="1"/>
-                                                    <rect x="20" y="55" width="12" height="10" fill="var(--border-color)" opacity="0.25" rx="1"/>
-                                                </svg>
-                                                <IconMapPin size={32} className={classes.mapPin}/>
-                                                <div className={classes.mapOverlay}>
-                                                    <span className={classes.mapOverlayLabel}>
-                                                        <IconMaximize/>
-                                                        {t`View Map`}
-                                                    </span>
-                                                </div>
-                                            </a>
+                                        )}
+
+                                        {SHOW_KAMP_PREP && (
+                                            <div className={`${classes.logisticsCard} ${classes.logisticsCardPending}`}>
+                                                <div className={classes.logisticsLabel}>{t`Schedule`}</div>
+                                                <div className={classes.logisticsPending}>{t`The schedule will appear here when it's posted.`}</div>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
                             )}
 
-                            {/* Tickets Section */}
-                            <div className={`${classes.section} ${classes.ticketsSection}`} ref={ticketsSectionRef}
-                                 id="tickets">
-                                <SelectProducts
-                                    colors={{
-                                        background: "transparent",
-                                        primary: "var(--event-primary-color)",
-                                        primaryText: "var(--event-primary-text-color)",
-                                        secondary: "var(--event-primary-color)",
-                                        secondaryText: "var(--event-accent-contrast)",
-                                        bodyBackground: "var(--event-bg-color)",
-                                    }}
-                                    continueButtonText={event.settings?.continue_button_text}
-                                    padding={"0px"}
-                                    event={event}
-                                    promoCodeValid={promoCodeValid}
-                                    promoCode={promoCode}
-                                    showPoweredBy={false}
-                                />
-                            </div>
+                            {/* Merch: an integrated editorial storefront insertion point (not connected) */}
+                            {SHOW_MERCH_SECTION && (
+                                <section className={classes.merchBand} id="merch" aria-label={t`Merch`}>
+                                    <div className={classes.sectionHeader}>
+                                        <div className={classes.eyebrow}>{t`Kamp Store`}</div>
+                                        <h2 className={classes.sectionTitle}>{t`Take Kamp home`}</h2>
+                                    </div>
+                                    <p className={classes.faqNote}>
+                                        {t`Kamp Love merch will live here, on the same page as your ticket.`}
+                                    </p>
+                                    {/*
+                                      Shopify Buy Button mount point. To connect later: load Shopify's
+                                      buy-button.js storefront SDK once, initialize a ShopifyBuy.UI client with
+                                      the shop domain and Storefront access token, then render the collection into
+                                      the slot below. No storefront request is made until that wiring exists.
+                                    */}
+                                    <div className={classes.merchSlot} data-shopify-merch-slot>
+                                        {t`Merch storefront mounts here once connected.`}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Questions: an honest FAQ-ready module backed by the real organizer contact */}
+                            {organizer && (
+                                <section className={classes.faqBand} id="questions" aria-label={t`Questions`}>
+                                    <div className={classes.sectionHeader}>
+                                        <div className={classes.eyebrow}>{t`Questions`}</div>
+                                        <h2 className={classes.sectionTitle}>{t`Questions about this Kamp?`}</h2>
+                                    </div>
+                                    <p className={classes.faqNote}>
+                                        {t`Reach out and we'll help you get ready.`}
+                                    </p>
+                                    <button
+                                        onClick={() => setContactModalOpen(true)}
+                                        className={classes.contactButton}
+                                    >
+                                        <IconMail/>
+                                        {t`Contact`}
+                                    </button>
+                                </section>
+                            )}
 
                             {/* Organizer Section */}
                             {organizer && organizer.status === OrganizerStatus.LIVE && (
@@ -604,6 +604,14 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Kamp Love signature: Camping, Connection, Community, Christ */}
+                            <div className={classes.signatureBand} aria-label={t`Kamp Love`}>
+                                <span className={classes.signatureItem}>{t`Camping`}</span>
+                                <span className={classes.signatureItem}>{t`Connection`}</span>
+                                <span className={classes.signatureItem}>{t`Community`}</span>
+                                <span className={classes.signatureItem}>{t`Christ`}</span>
+                            </div>
                         </div>
 
                         {/* Footer */}
@@ -633,7 +641,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                             onClick={scrollToTickets}
                         >
                             <IconTicket size={18}/>
-                            {t`Get Tickets`}
+                            {t`Register`}
                         </button>
                     )}
 

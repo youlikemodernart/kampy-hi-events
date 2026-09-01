@@ -63,9 +63,9 @@ $font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
 
   .title {
     font-family: $font-display;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     font-weight: 400;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     color: var(--checkout-text-primary);
   }
 
@@ -77,9 +77,9 @@ $font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
     overflow: hidden;
     color: var(--checkout-text-primary);
     font-family: $font-display;
-    font-size: 1.3rem;
+    font-size: 1.55rem;
     font-weight: 400;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     text-overflow: ellipsis;
     white-space: nowrap;
 

@@ -188,6 +188,14 @@
     font-weight: 700;
   }
 
+  .hi-continue-button,
+  .hi-apply-promo-code-button,
+  .hi-waitlist-button {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
   .button-input button:disabled {
     opacity: 0.5;
   }
