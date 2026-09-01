@@ -173,6 +173,27 @@ class KampStripeMetadataServiceTest extends TestCase
         $this->assertStringNotContainsString('address', implode('|', $result->metadata));
     }
 
+    public function test_event_configuration_can_override_the_default_source_namespace(): void
+    {
+        $config = $this->config([
+            'services' => ['kamp_stripe_metadata' => ['event_map' => [
+                '3' => [
+                    'university_id' => 'gvsu',
+                    'cycle_id' => '2026-fall',
+                    'event_id' => 'gvsu-kamp-fall-2026',
+                    'pricing_policy' => 'gvsu-ticket-v1',
+                    'service_fee_id' => 81,
+                    'source_namespace' => 'gvsu-2026',
+                ],
+            ]]],
+        ]);
+
+        $result = (new KampStripeMetadataService($config))->build($this->request());
+
+        $this->assertSame('gvsu-2026', $result?->metadata['kamp_source_namespace']);
+        $this->assertSame('gvsu', $result?->metadata['kamp_university_id']);
+    }
+
     public function test_disabled_feature_preserves_generic_hi_events_behavior(): void
     {
         $config = $this->config([

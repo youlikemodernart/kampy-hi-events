@@ -38,6 +38,7 @@ class KampStripeMetadataService
         'event_id',
         'pricing_policy',
         'service_fee_id',
+        'source_namespace',
         'campaign_id',
         'allocation_id',
     ];
@@ -94,7 +95,8 @@ class KampStripeMetadataService
         $this->assertPaymentContract($request);
 
         $eventConfiguration = $this->eventConfiguration($request->order->getEventId());
-        $sourceNamespace = $this->requiredConfigValue('services.kamp_stripe_metadata.source_namespace');
+        $sourceNamespace = $eventConfiguration['source_namespace']
+            ?? $this->requiredConfigValue('services.kamp_stripe_metadata.source_namespace');
         $environment = $request->stripeEnvironment;
         if (! in_array($environment, ['test', 'live'], true)) {
             $this->fail('stripe_environment_required');
@@ -251,6 +253,9 @@ class KampStripeMetadataService
         }
         $this->assertSafeValue('pricing_policy', $eventConfiguration['pricing_policy'] ?? null, self::SAFE_POLICY_PATTERN);
         $this->assertPositiveInteger('service_fee_id', $eventConfiguration['service_fee_id'] ?? null);
+        if (array_key_exists('source_namespace', $eventConfiguration)) {
+            $this->assertSafeValue('source_namespace', $eventConfiguration['source_namespace'], self::SAFE_ID_PATTERN);
+        }
 
         foreach (['campaign_id', 'allocation_id'] as $field) {
             if (array_key_exists($field, $eventConfiguration)) {
