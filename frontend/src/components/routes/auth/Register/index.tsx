@@ -140,10 +140,10 @@ export const Register = () => {
                 <footer>
                     <Trans>
                         By registering you agree to our <NavLink target={'_blank'}
-                                                                 to={getConfig("VITE_TOS_URL", "https://hi.events/terms-of-service?utm_source=app-register-footer") as string}>Terms
+                                                                 to={getConfig("VITE_TOS_URL", "https://kamplove.org/terms-conditions") as string}>Terms
                         of Service</NavLink> and <NavLink
                         target={'_blank'}
-                        to={getConfig("VITE_PRIVACY_URL", 'https://hi.events/privacy-policy?utm_source=app-register-footer') as string}>Privacy Policy</NavLink>.
+                        to={getConfig("VITE_PRIVACY_URL", 'https://kamplove.org/privacy-policy') as string}>Privacy Policy</NavLink>.
                     </Trans>
                 </footer>
             </div>

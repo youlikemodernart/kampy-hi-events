@@ -335,14 +335,14 @@ export const OrganizerHomepage = ({
                         <div className={classes.footerSection}>
                             <div className={classes.footerLinks}>
                                 <Anchor
-                                    href={getConfig('VITE_PRIVACY_URL', 'https://hi.events/privacy-policy?utm_source=app-organizer-footer')}
+                                    href={getConfig('VITE_PRIVACY_URL', 'https://kamplove.org/privacy-policy')}
                                     className={classes.footerLink}
                                 >
                                     {t`Privacy Policy`}
                                 </Anchor>
                                 <span className={classes.footerSeparator}>•</span>
                                 <Anchor
-                                    href={getConfig('VITE_TOS_URL', 'https://hi.events/terms-of-service?utm_source=app-organizer-footer')}
+                                    href={getConfig('VITE_TOS_URL', 'https://kamplove.org/terms-conditions')}
                                     className={classes.footerLink}
                                 >
                                     {t`Terms of Service`}

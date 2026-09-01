@@ -1383,7 +1383,12 @@ msgstr ""
 
 #: src/components/routes/product-widget/CollectInformation/index.tsx:716
 #: src/components/routes/product-widget/Payment/index.tsx:152
-msgid "By continuing, you agree to the <0>{0} Terms of Service</0>"
+#~ msgid "By continuing, you agree to the <0>{0} Terms of Service</0>"
+#~ msgstr ""
+
+#: src/components/routes/product-widget/CollectInformation/index.tsx:715
+#: src/components/routes/product-widget/Payment/index.tsx:151
+msgid "By continuing, you agree to the <0>Kamp Love Terms of Service</0>"
 msgstr ""
 
 #: src/components/routes/auth/Register/index.tsx:141
@@ -8367,7 +8372,6 @@ msgstr ""
 msgid "Sorry, this promo code is not recognized"
 msgstr ""
 
-#: src/components/common/PoweredByFooter/index.tsx:81
 #: src/components/routes/admin/Attribution/index.tsx:106
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:430
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:460
