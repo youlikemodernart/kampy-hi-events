@@ -20,6 +20,7 @@ import {isSsr} from "./utilites/helpers.ts";
 import {StartupChecks} from "./StartupChecks.tsx";
 import {ThirdPartyScripts} from "./components/common/ThirdPartyScripts";
 import {getConfig} from "./utilites/config.ts";
+import {appName, faviconMimeType} from "./utilites/branding.ts";
 import {CookieConsentBanner} from "./components/common/CookieConsentBanner";
 import {isConsentPending, setConsentState, updateGoogleConsentMode} from "./utilites/trackingPixels/consent";
 
@@ -40,6 +41,9 @@ export const App: FC<
     const [isLoadedOnBrowser, setIsLoadedOnBrowser] = React.useState(false);
     const showGlobalConsentBanner = getConfig('VITE_COOKIE_CONSENT_ENABLED') === 'true'
         && !isSsr() && isConsentPending();
+    // public/favicon.ico exists; public/favicon.svg does not. The declared type has
+    // to follow the href, or a user agent that honours it discards the icon.
+    const faviconHref = getConfig("VITE_APP_FAVICON", "/favicon.ico") as string;
 
     const handleGlobalConsent = useCallback((granted: boolean) => {
         setConsentState(granted ? 'granted' : 'denied');
@@ -93,10 +97,10 @@ export const App: FC<
                                 <ThirdPartyScripts/>
                                 <ModalsProvider>
                                     <Helmet>
-                                        <title>{getConfig("VITE_APP_NAME", "Hi.Events")}</title>
+                                        <title>{appName()}</title>
                                         <link rel="icon"
-                                              type="image/svg+xml"
-                                              href={getConfig("VITE_APP_FAVICON", "/favicon.svg")}
+                                              type={faviconMimeType(faviconHref)}
+                                              href={faviconHref}
                                         />
                                     </Helmet>
                                     {props.children}

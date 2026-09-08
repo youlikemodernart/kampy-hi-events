@@ -33,6 +33,15 @@
     }
   }
 
+  // The sidebar sits on a dark ground, so the wordmark fallback needs the light
+  // ink. Only applies when no logo asset is configured; a configured <img> is
+  // unaffected.
+  .brandMark {
+    max-width: 160px;
+    margin: 10px auto;
+    color: var(--kamp-cream, #f9f4f0);
+  }
+
   .nav {
     flex: 1 1 auto;
     overflow: auto;

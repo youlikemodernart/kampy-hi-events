@@ -20,3 +20,11 @@ prompts/
 
 /plans/**
 /plans
+
+# Agent task prompts, transcripts and artifacts. These are local working state,
+# not project source. Without these entries a `git add -A` on this branch stages
+# ~219 files of prompts and transcripts into a client production branch.
+# The directories themselves are deliberately left on disk.
+/.pi/
+/.pi-subagents/
+/.pi-subagent-artifacts/

@@ -1,7 +1,7 @@
 @use "../../../styles/mixins";
 
-$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
-$font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
+$font-display: var(--checkout-font-serif, var(--kamp-font-serif));
+$font-body: var(--checkout-font-serif, var(--kamp-font-serif));
 
 .container {
   display: flex;
@@ -12,13 +12,13 @@ $font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
   color: var(--checkout-text-primary, #171717);
 
   .countdown {
-    color: #2f6b4f;
+    color: var(--checkout-ok, var(--kamp-ok, #2f6b4f));
     font-family: var(--checkout-font-utility, sans-serif);
     font-weight: 700;
   }
 
   .countdownCloseToExpiry {
-    color: #9f3620;
+    color: var(--checkout-stop, var(--kamp-stop, #9f3620));
   }
 
   .timerGroup {
@@ -48,7 +48,7 @@ $font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
   .header {
     min-height: 72px;
     background: var(--checkout-surface);
-    border-bottom: 1px solid #dadada;
+    border-bottom: 1px solid var(--checkout-border, var(--kamp-line, #dadada));
     display: flex;
     justify-content: center;
     align-items: center;
@@ -67,6 +67,15 @@ $font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
     font-weight: 400;
     letter-spacing: -0.03em;
     color: var(--checkout-text-primary);
+    max-width: 42ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @include mixins.respond-below(md) {
+      font-size: 1rem;
+      max-width: 24ch;
+    }
   }
 
   h1 {
@@ -113,7 +122,7 @@ $font-body: 'PT Serif', Georgia, 'Times New Roman', serif;
 
   :global(.mantine-Paper-root) {
     border-radius: 10px;
-    border-color: #dadada;
+    border-color: var(--checkout-border, var(--kamp-line, #dadada));
     box-shadow: none;
   }
 }

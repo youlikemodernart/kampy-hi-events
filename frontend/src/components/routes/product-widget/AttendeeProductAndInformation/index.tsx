@@ -9,6 +9,9 @@ import {PoweredByFooter} from "../../../common/PoweredByFooter";
 import {OnlineEventDetails} from "../../../common/OnlineEventDetails";
 import {HomepageInfoMessage} from "../../../common/HomepageInfoMessage";
 import classes from './AttendeeProductAndInformation.module.scss';
+import {CheckoutDocumentHead} from "../../../common/CheckoutDocumentHead";
+import {eventSupportEmail} from "../../../../utilites/branding.ts";
+import {eventHomepagePath} from "../../../../utilites/urlHelper.ts";
 
 export const AttendeeProductAndInformation = () => {
     const {eventId, attendeeShortId} = useParams();
@@ -21,6 +24,9 @@ export const AttendeeProductAndInformation = () => {
                 status="not_found"
                 message={t`Ticket Not Found`}
                 subtitle={t`We couldn't find the ticket you're looking for. The link may have expired or the ticket details may have changed.`}
+                link={event ? eventHomepagePath(event) : undefined}
+                linkText={event ? t`Back to Event` : undefined}
+                supportEmail={eventSupportEmail(event)}
             />
         );
     }
@@ -44,6 +50,7 @@ export const AttendeeProductAndInformation = () => {
      */
     return (
         <Container>
+            <CheckoutDocumentHead title={t`Your ticket`} eventTitle={event.title}/>
             <h2 className={classes.title}>{t`Your ticket for`} {event.title}</h2>
 
             <AttendeeTicket

@@ -9,6 +9,8 @@ import {eventCheckoutPath} from "../../../../utilites/urlHelper.ts";
 import {HomepageInfoMessage} from "../../../common/HomepageInfoMessage";
 import {isSsr} from "../../../../utilites/helpers.ts";
 import {trackEvent, AnalyticsEvents} from "../../../../utilites/analytics.ts";
+import {CheckoutDocumentHead} from "../../../common/CheckoutDocumentHead";
+import {eventSupportEmail} from "../../../../utilites/branding.ts";
 
 /**
  * This component is responsible for handling the return from the payment provider.
@@ -78,15 +80,18 @@ export const PaymentReturn = () => {
         }
     }, [order]);
 
+    const supportEmail = eventSupportEmail(order?.event);
+
     return (
         <CheckoutContent>
+            <CheckoutDocumentHead title={t`Confirming payment`} eventTitle={order?.event?.title}/>
             <div className={classes.container}>
                 {!cannotConfirmPayment && (
                     <HomepageInfoMessage
                         status="processing"
                         message={(
                             <>
-                                {(!shouldPoll && paymentIntentQuery.isFetched) && t`We could not process your payment. Please try again or contact support.`}
+                                {(!shouldPoll && paymentIntentQuery.isFetched) && t`We could not process your payment. Please try again.`}
                                 {(!shouldPoll && !paymentIntentQuery.isFetched) && t`Almost there! We're just waiting for your payment to be processed. This should only take a few seconds.`}
                                 {shouldPoll && t`We're processing your order. Please wait...`}
                             </>
@@ -97,7 +102,10 @@ export const PaymentReturn = () => {
                 {cannotConfirmPayment && (
                     <HomepageInfoMessage
                         status="error"
-                        message={t`We were unable to confirm your payment. Please try again or contact support.`}
+                        message={t`We were unable to confirm your payment. Please try again.`}
+                        link={eventCheckoutPath(eventId, orderShortId, 'payment')}
+                        linkText={t`Back to Payment`}
+                        supportEmail={supportEmail}
                     />
                 )}
             </div>

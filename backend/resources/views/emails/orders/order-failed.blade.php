@@ -15,8 +15,9 @@
 {{ __('View Event Homepage') }}
 </x-mail::button>
 
-{{ __('If you have any questions or need assistance, feel free to reach out to our support team') }}
-{{ __('at') }} {{ $supportEmail ?? 'hello@hi.events' }}.
+@if(!empty($supportEmail))
+{{ __('If you have any questions or need assistance, please contact us at :supportEmail.', ['supportEmail' => $supportEmail]) }}
+@endif
 
 {{ __('Best regards') }},<br>
 {{ $organizer->getName() ?: config('app.name') }}

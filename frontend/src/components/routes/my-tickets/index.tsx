@@ -1,4 +1,4 @@
-import {t} from "@lingui/macro";
+import {t, Trans} from "@lingui/macro";
 import {NavLink, useParams} from "react-router";
 import {Badge, Button, Group, SimpleGrid, Text, TextInput} from "@mantine/core";
 import {
@@ -28,6 +28,9 @@ import {CheckoutContent} from "../../layouts/Checkout/CheckoutContent";
 
 import {Event, Order} from "../../../types.ts";
 import classes from './MyTickets.module.scss';
+import {CheckoutDocumentHead} from "../../common/CheckoutDocumentHead";
+import {BrandMark} from "../../common/BrandMark";
+import {appName, platformSupportEmail} from "../../../utilites/branding.ts";
 
 const OrderStatusBadge = () => (
     <Badge variant="light" color="green" size="sm">
@@ -102,9 +105,8 @@ const OrderCard = ({order}: { order: Order }) => {
                 <Button
                     component={NavLink}
                     to={orderUrl}
-                    variant="gradient"
-                    gradient={{ from: 'grape', to: 'pink', deg: 90 }}
                     size="sm"
+                    className={classes.primaryAction}
                     leftSection={<IconExternalLink size={16}/>}
                 >
                     {t`View Order`}
@@ -154,8 +156,10 @@ export const MyTickets = () => {
     if (isError) {
         return (
             <CheckoutContent>
+                <CheckoutDocumentHead title={t`My tickets`}/>
                 <div className={classes.container}>
                     <div className={classes.header}>
+                        <BrandMark className={classes.brandMark}/>
                         <IconAlertCircle size={48} className={classes.headerIconError}/>
                         <h1>{t`Link Expired or Invalid`}</h1>
                         <p className={classes.subtitle}>
@@ -195,7 +199,7 @@ export const MyTickets = () => {
                                     />
                                     <Button
                                         type="submit"
-                                        color="secondary.5"
+                                        className={classes.primaryAction}
                                         loading={ticketLookupMutation.isPending}
                                         disabled={ticketLookupMutation.isPending}
                                     >
@@ -205,6 +209,16 @@ export const MyTickets = () => {
                             </form>
                         )}
                     </Card>
+
+                    {platformSupportEmail() && (
+                        <p className={classes.supportNote}>
+                            <Trans>
+                                Still stuck?{' '}
+                                <a href={`mailto:${platformSupportEmail()}`}>Email {appName()}</a>{' '}
+                                and we'll find your tickets.
+                            </Trans>
+                        </p>
+                    )}
                 </div>
                 <PoweredByFooter/>
             </CheckoutContent>
@@ -214,8 +228,10 @@ export const MyTickets = () => {
     if (!orders || orders.length === 0) {
         return (
             <CheckoutContent>
+                <CheckoutDocumentHead title={t`My tickets`}/>
                 <div className={classes.container}>
                     <div className={classes.header}>
+                        <BrandMark className={classes.brandMark}/>
                         <IconTicket size={48} className={classes.headerIcon}/>
                         <h1>{t`No Tickets Found`}</h1>
                         <p className={classes.subtitle}>
@@ -230,8 +246,10 @@ export const MyTickets = () => {
 
     return (
         <CheckoutContent>
+            <CheckoutDocumentHead title={t`My tickets`}/>
             <div className={classes.container}>
                 <div className={classes.header}>
+                    <BrandMark className={classes.brandMark}/>
                     <IconTicket size={48} className={classes.headerIcon}/>
                     <h1>{t`My Tickets`}</h1>
                     <p className={classes.subtitle}>

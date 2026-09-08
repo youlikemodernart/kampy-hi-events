@@ -17,12 +17,11 @@ use Illuminate\Mail\Mailables\Envelope;
 class OrderFailed extends BaseMail
 {
     public function __construct(
-        private readonly OrderDomainObject        $order,
-        private readonly EventDomainObject        $event,
-        private readonly OrganizerDomainObject    $organizer,
+        private readonly OrderDomainObject $order,
+        private readonly EventDomainObject $event,
+        private readonly OrganizerDomainObject $organizer,
         private readonly EventSettingDomainObject $eventSettings,
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -43,11 +42,20 @@ class OrderFailed extends BaseMail
                 'order' => $this->order,
                 'organizer' => $this->organizer,
                 'eventSettings' => $this->eventSettings,
+                /**
+                 * The view rendered `$supportEmail ?? 'hello@hi.events'`, but this key
+                 * was never passed, so the upstream address always rendered: a buyer
+                 * whose payment failed was told in writing to contact another company.
+                 * Resolved most-specific-first, and null when neither is configured so
+                 * the view can omit the sentence entirely.
+                 */
+                'supportEmail' => $this->eventSettings->getSupportEmail()
+                    ?: $this->organizer->getEmail(),
                 'eventUrl' => sprintf(
                     Url::getFrontEndUrlFromConfig(Url::EVENT_HOMEPAGE),
                     $this->event->getId(),
                     $this->event->getSlug(),
-                )
+                ),
             ]
         );
     }

@@ -1,4 +1,4 @@
-import {t} from "@lingui/macro";
+import {t, Trans} from "@lingui/macro";
 import {NavLink, useNavigate, useParams, useLocation} from "react-router";
 import {ActionIcon, Alert, Button, Group, SimpleGrid, Text, Tooltip} from "@mantine/core";
 import {
@@ -23,7 +23,7 @@ import {useEffect, useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
 
 import {useGetOrderPublic, GET_ORDER_PUBLIC_QUERY_KEY} from "../../../../queries/useGetOrderPublic.ts";
-import {eventCheckoutPath} from "../../../../utilites/urlHelper.ts";
+import {eventCheckoutPath, eventHomepagePath} from "../../../../utilites/urlHelper.ts";
 import {dateToBrowserTz} from "../../../../utilites/dates.ts";
 import {formatAddress} from "../../../../utilites/addressUtilities.ts";
 import {getAttendeeProductTitle} from "../../../../utilites/products.ts";
@@ -48,6 +48,9 @@ import {useResendOrderConfirmationPublic} from "../../../../mutations/useResendO
 
 import {Attendee, Event, Order, Product} from "../../../../types.ts";
 import classes from './OrderSummaryAndProducts.module.scss';
+import {getConfirmationHeadline} from "../../../../utilites/confirmationCopy.ts";
+import {CheckoutDocumentHead} from "../../../common/CheckoutDocumentHead";
+import {eventSupportEmail, privacyUrl, termsUrl} from "../../../../utilites/branding.ts";
 import {clearWaitlistJoinedForEvent} from "../../../../hooks/useWaitlistJoined.ts";
 // Purchase tracking is handled by the parent Checkout layout
 
@@ -106,6 +109,7 @@ const GuestListItem = ({
                 <Tooltip label={t`View Ticket`}>
                     <ActionIcon
                         variant="subtle"
+                        aria-label={t`View Ticket`}
                         onClick={() => window?.open(`/product/${event.id}/${attendee.short_id}`, '_blank')}
                     >
                         <IconExternalLink size={18}/>
@@ -114,6 +118,7 @@ const GuestListItem = ({
                 <Tooltip label={t`Print Ticket`}>
                     <ActionIcon
                         variant="subtle"
+                        aria-label={t`Print Ticket`}
                         onClick={() => window?.open(`/product/${event.id}/${attendee.short_id}/print`, '_blank')}
                     >
                         <IconPrinter size={18}/>
@@ -124,6 +129,7 @@ const GuestListItem = ({
                         <Tooltip label={t`Edit Attendee`}>
                             <ActionIcon
                                 variant="subtle"
+                                aria-label={t`Edit Attendee`}
                                 onClick={onEditClick}
                             >
                                 <IconEdit size={18}/>
@@ -132,6 +138,7 @@ const GuestListItem = ({
                         <Tooltip label={t`Resend Ticket`}>
                             <ActionIcon
                                 variant="subtle"
+                                aria-label={t`Resend Ticket`}
                                 onClick={onResendClick}
                             >
                                 <IconSend size={18}/>
@@ -156,42 +163,62 @@ const DetailItem = ({icon: Icon, label, value}: { icon: any, label: string, valu
     </div>
 );
 
+/**
+ * Confirmation headline, Rule C-1.
+ *
+ * Each state is ONE complete translatable message with named placeholders, not a
+ * fragment with the event title concatenated on. Translators need to reorder the
+ * event name and the venue relative to the surrounding words, and a concatenation
+ * makes that impossible.
+ */
 const WelcomeHeader = ({order, event, allowSelfEdit}: { order: Order; event: Event; allowSelfEdit: boolean }) => {
+    const headline = getConfirmationHeadline(order, event);
+
+    if (headline.kind === 'none') return null;
+
     const isCompleted = order.status === 'COMPLETED';
     const isAwaitingPayment = order.status === 'AWAITING_OFFLINE_PAYMENT';
     const isCancelled = order.status === 'CANCELLED';
 
-    const message = {
-        'COMPLETED': t`You're going to ${event.title}!`,
-        'CANCELLED': t`Your order has been cancelled`,
-        'RESERVED': null,
-        'AWAITING_OFFLINE_PAYMENT': t`Your order is awaiting payment`,
-        'ABANDONED': null,
-    }[order.status];
+    const eventTitle = headline.eventTitle;
+    const venueName = headline.venueName ?? '';
 
-    if (!message) return null;
+    const emoji = isCompleted ? '🎉' : isAwaitingPayment ? '⏳' : '😔';
 
     return (
         <div className={classes.welcomeHeader}>
-            {isCompleted && (
-                <div className={classes.confettiIcon}>
-                    {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-                    <span>🎉</span>
-                </div>
-            )}
-            {isAwaitingPayment && (
-                <div className={classes.confettiIcon}>
-                    {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-                    <span>⏳</span>
-                </div>
-            )}
-            {isCancelled && (
-                <div className={classes.confettiIcon}>
-                    {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
-                    <span>😔</span>
-                </div>
-            )}
-            <div className={classes.welcomeMessage}>{message}</div>
+            {/*
+              Decorative: the headline below says the same thing in words. Without
+              aria-hidden, screen readers announce the Unicode name ("party popper")
+              as though it were content.
+            */}
+            <div className={classes.confettiIcon} aria-hidden="true">
+                {/* eslint-disable-next-line lingui/no-unlocalized-strings */}
+                <span>{emoji}</span>
+            </div>
+
+            {/*
+              This sentence is what happened to the buyer, so it is the page's h1.
+              It was previously a div while four subsection labels were h1s.
+            */}
+            <h1 className={classes.welcomeMessage}>
+                {headline.kind === 'going_to_venue' && (
+                    <Trans>You're going to {eventTitle} at {venueName}</Trans>
+                )}
+                {headline.kind === 'going_to' && (
+                    <Trans>You're going to {eventTitle}</Trans>
+                )}
+                {headline.kind === 'online' && (
+                    <Trans>You're all set for {eventTitle}</Trans>
+                )}
+                {headline.kind === 'awaiting_payment' && (
+                    <Trans>Your spot at {eventTitle} is being held</Trans>
+                )}
+                {headline.kind === 'cancelled' && (
+                    <Trans>Your order for {eventTitle} has been cancelled</Trans>
+                )}
+            </h1>
+
             {isCompleted && (
                 <div className={classes.confirmationText}>
                     {t`Confirmation sent to`} <strong>{order.email}</strong>
@@ -234,7 +261,7 @@ const OrderDetails = ({
                         <span>{order.first_name} {order.last_name}</span>
                         {allowSelfEdit && order.status !== 'CANCELLED' && (
                             <Tooltip label={t`Edit`}>
-                                <ActionIcon size="xs" variant="subtle" onClick={onEditClick}>
+                                <ActionIcon size="xs" variant="subtle" aria-label={t`Edit`} onClick={onEditClick}>
                                     <IconEdit size={14}/>
                                 </ActionIcon>
                             </Tooltip>
@@ -255,7 +282,7 @@ const OrderDetails = ({
                         <span style={{wordBreak: 'break-all'}}>{order.email}</span>
                         {allowSelfEdit && order.status !== 'CANCELLED' && (
                             <Tooltip label={t`Resend Confirmation`}>
-                                <ActionIcon size="xs" variant="subtle" onClick={onResendClick}>
+                                <ActionIcon size="xs" variant="subtle" aria-label={t`Resend Confirmation`} onClick={onResendClick}>
                                     <IconSend size={14}/>
                                 </ActionIcon>
                             </Tooltip>
@@ -378,7 +405,7 @@ const OrderStatus = ({order}: { order: Order }) => {
 
 const PostCheckoutMessage = ({ message }: { message: string }) => (
     <div style={{ marginTop: '20px', marginBottom: '40px' }}>
-        <h1 className={classes.heading}>{t`Additional Information`}</h1>
+        <h2 className={classes.heading}>{t`Additional Information`}</h2>
         <Card>
             <div dangerouslySetInnerHTML={{ __html: message }} />
         </Card>
@@ -541,6 +568,9 @@ export const OrderSummaryAndProducts = () => {
                 status="not_found"
                 message={t`Order Not Found`}
                 subtitle={t`We couldn't find the order you're looking for. The link may have expired or the order details may have changed.`}
+                link={order?.event ? eventHomepagePath(order.event) : undefined}
+                linkText={order?.event ? t`Back to Event` : undefined}
+                supportEmail={eventSupportEmail(order?.event)}
             />
         );
     }
@@ -561,6 +591,7 @@ export const OrderSummaryAndProducts = () => {
     return (
         <>
             <CheckoutContent>
+                <CheckoutDocumentHead title={t`Your order`} eventTitle={event.title}/>
                 <WelcomeHeader order={order} event={event} allowSelfEdit={allowSelfEdit}/>
 
                 {emailUpdated && (
@@ -570,11 +601,11 @@ export const OrderSummaryAndProducts = () => {
                         mb="lg"
                         radius="lg"
                         style={{
-                            backgroundColor: 'var(--checkout-surface, #ECFDF5)',
-                            borderColor: 'var(--checkout-border, #D1FAE5)',
+                            backgroundColor: 'var(--checkout-ok-soft, var(--kamp-ok-tint, #e7f0ea))',
+                            borderColor: 'var(--checkout-ok, var(--kamp-ok, #2f6b4f))',
                         }}
                     >
-                        <Text size="sm" style={{color: 'var(--checkout-text-primary, #065F46)'}}>
+                        <Text size="sm" style={{color: 'var(--checkout-text-primary, var(--kamp-ink, #171717))'}}>
                             {t`Your order details have been updated. A confirmation email has been sent to the new email address.`}
                         </Text>
                     </Alert>
@@ -589,7 +620,7 @@ export const OrderSummaryAndProducts = () => {
 
                 {order?.status === 'AWAITING_OFFLINE_PAYMENT' && <OfflinePaymentInstructions event={event}/>}
 
-                <h1 className={classes.heading}>{t`Order Details`}</h1>
+                <h2 className={classes.heading}>{t`Order Details`}</h2>
 
                 <OrderDetails
                     order={order}
@@ -603,7 +634,7 @@ export const OrderSummaryAndProducts = () => {
 
                 {!!event?.settings?.post_checkout_message && <PostCheckoutMessage message={event.settings.post_checkout_message}/>}
 
-                <h1 className={classes.heading}>{t`Event Details`}</h1>
+                <h2 className={classes.heading}>{t`Event Details`}</h2>
                 <EventDetails event={event}/>
 
                 {order.status === 'COMPLETED' && <AddToCalendarCTA event={event}/>}
@@ -611,12 +642,12 @@ export const OrderSummaryAndProducts = () => {
                 {(order?.attendees && order.attendees.length > 0) && (
                     <>
                         <Group justify="space-between" align="center">
-                            <h1 className={classes.heading}>
+                            <h2 className={classes.heading}>
                                 <Group gap="xs">
                                     <IconTicket size={20}/>
                                     {t`Guests`}
                                 </Group>
-                            </h1>
+                            </h2>
                             <Button
                                 size="sm"
                                 variant="subtle"
@@ -643,6 +674,11 @@ export const OrderSummaryAndProducts = () => {
                         </Card>
                     </>
                 )}
+
+                <div className={classes.legalLinks}>
+                    <a href={privacyUrl()} target="_blank" rel="noopener noreferrer">{t`Privacy Policy`}</a>
+                    <a href={termsUrl()} target="_blank" rel="noopener noreferrer">{t`Terms of Service`}</a>
+                </div>
 
                 <PoweredByFooter/>
             </CheckoutContent>

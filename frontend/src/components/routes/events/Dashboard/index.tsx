@@ -26,9 +26,9 @@ import {getEventQueryFilters} from "../../../../utilites/eventsPageFiltersHelper
 import {EventsDashboardStatusButtons} from "../../../common/EventsDashboardStatusButtons";
 import {NoEventsBlankSlate} from "../../../common/NoEventsBlankSlate";
 import {useState} from "react";
-import {getConfig} from "../../../../utilites/config.ts";
 import {useGetMe} from "../../../../queries/useGetMe.ts";
 import {currentUserCan} from "../../../../hooks/useIsCurrentUserAdmin.ts";
+import {appName} from "../../../../utilites/branding.ts";
 
 const EVENT_SCOPED_ROLES = ['UNIVERSITY_DIRECTOR', 'ORGANIZER', 'REPORTING', 'CHECK_IN'];
 
@@ -94,7 +94,7 @@ export function Dashboard() {
                 <div className={classes.headerContent}>
                     <h1 className={classes.pageTitle}>{getHeading()}</h1>
                     <p className={classes.welcomeMessage}>
-                        <Trans>Welcome to {getConfig('VITE_APP_NAME', 'Hi.Events')}, here's a listing of all your events</Trans>
+                        <Trans>Welcome to {appName()}, here's a listing of all your events</Trans>
                     </p>
                 </div>
 

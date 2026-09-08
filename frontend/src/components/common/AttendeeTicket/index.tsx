@@ -10,6 +10,8 @@ import classes from './AttendeeTicket.module.scss';
 import {imageUrl} from "../../../utilites/urlHelper.ts";
 import {formatAddress} from "../../../utilites/addressUtilities.ts";
 import {PoweredByFooter} from "../PoweredByFooter";
+import {kamp} from "../../../styles/kampPrimitives";
+import {eventSupportEmail} from "../../../utilites/branding";
 
 interface AttendeeTicketProps {
     event: Event;
@@ -30,7 +32,7 @@ export const AttendeeTicket = ({
     const hasVenue = event?.settings?.location_details?.venue_name || event?.settings?.location_details?.address_line_1;
 
     const ticketDesignSettings = event?.settings?.ticket_design_settings;
-    const accentColor = ticketDesignSettings?.accent_color || '#6B46C1';
+    const accentColor = ticketDesignSettings?.accent_color || kamp.forest;
     const footerText = ticketDesignSettings?.footer_text;
     const logoUrl = imageUrl('TICKET_LOGO', event?.images);
 
@@ -38,6 +40,7 @@ export const AttendeeTicket = ({
         '--accent': accentColor,
     } as React.CSSProperties;
 
+    const supportEmail = eventSupportEmail(event);
     const isCancelled = attendee.status === 'CANCELLED';
     const isAwaitingPayment = attendee.status === 'AWAITING_PAYMENT';
 
@@ -119,7 +122,11 @@ export const AttendeeTicket = ({
                     <div className={classes.qrSection}>
                         {logoUrl && (
                             <div className={classes.logoContainer}>
-                                <img src={logoUrl} alt="Event Logo" className={classes.logo}/>
+                                <img
+                                    src={logoUrl}
+                                    alt={event?.organizer?.name ?? ''}
+                                    className={classes.logo}
+                                />
                             </div>
                         )}
 
@@ -176,12 +183,19 @@ export const AttendeeTicket = ({
             </div>
 
             {/* Footer - Only show if there's footer text or buttons */}
-            {(footerText || !hideButtons) && (
+            {(footerText || supportEmail || !hideButtons) && (
                 <div className={classes.footer}>
                     <div className={classes.footerContent}>
                         {footerText && (
                             <div className={classes.footerText}>
                                 {footerText}
+                            </div>
+                        )}
+
+                        {supportEmail && (
+                            <div className={classes.supportLine}>
+                                {t`Questions?`}{' '}
+                                <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
                             </div>
                         )}
 

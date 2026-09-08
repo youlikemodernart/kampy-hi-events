@@ -1,6 +1,6 @@
 @use "../../../../styles/mixins";
 
-$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
+$font-display: var(--checkout-font-serif, var(--kamp-font-serif));
 
 .welcomeHeader {
   margin-bottom: 28px;
@@ -55,25 +55,25 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
   line-height: 1.05;
   letter-spacing: -0.03em;
   font-weight: 400;
-  color: var(--checkout-text-primary, #171717);
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
   margin-bottom: 6px;
-  max-width: 20ch;
+  max-width: var(--measure-lead, 54ch);
   text-wrap: balance;
 }
 
 .confirmationText {
   font-size: 15px;
-  color: var(--checkout-text-secondary, #6B7280);
+  color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
 
   strong {
     font-weight: 700;
-    color: var(--checkout-accent, #2f5147);
+    color: var(--checkout-accent, var(--kamp-forest, #2f5147));
   }
 }
 
 .selfServiceHint {
   font-size: 13px;
-  color: var(--checkout-text-tertiary, #9CA3AF);
+  color: var(--checkout-text-tertiary, var(--kamp-muted, #585254));
   margin-top: 4px;
 }
 
@@ -83,7 +83,7 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
   font-weight: 600;
   margin-top: 24px;
   margin-bottom: 5px;
-  color: var(--checkout-text-primary, #111827);
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
 }
 
 .detailItem {
@@ -97,14 +97,14 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
 
   .label {
     margin-bottom: 0.25rem;
-    color: var(--checkout-text-secondary, #6B7280);
+    color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
   }
 
   .value {
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
-    color: var(--checkout-text-primary, #111827);
+    color: var(--checkout-text-primary, var(--kamp-ink, #171717));
   }
 }
 
@@ -118,7 +118,7 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
   align-items: center;
   justify-content: space-between;
   padding: 16px 0;
-  border-bottom: 1px solid var(--checkout-border, #e5e7eb);
+  border-bottom: 1px solid var(--checkout-border, var(--kamp-line, #dadada));
   gap: 12px;
 
   &:last-child {
@@ -146,7 +146,7 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
 
 .guestName {
   font-weight: 500;
-  color: var(--checkout-text-primary, #111827);
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
   margin-bottom: 4px;
   display: flex;
   align-items: center;
@@ -157,8 +157,8 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
 .cancelledBadge {
   font-size: 11px;
   font-weight: 500;
-  color: #dc2626;
-  background: rgba(220, 38, 38, 0.1);
+  color: var(--checkout-stop, var(--kamp-stop, #9f3620));
+  background: var(--checkout-stop-soft, var(--kamp-stop-tint, #f5e2dc));
   padding: 2px 8px;
   border-radius: 4px;
   text-decoration: none;
@@ -169,7 +169,7 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
   flex-wrap: wrap;
   gap: 8px;
   font-size: 13px;
-  color: var(--checkout-text-secondary, #6B7280);
+  color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
 }
 
 .guestEmail {
@@ -180,7 +180,7 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
   &::before {
     content: '•';
     margin-right: 8px;
-    color: var(--checkout-text-tertiary, #9CA3AF);
+    color: var(--checkout-text-tertiary, var(--kamp-muted, #585254));
   }
 
   @include mixins.respond-below(sm) {
@@ -196,4 +196,19 @@ $font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
   display: flex;
   gap: 4px;
   flex-shrink: 0;
+}
+
+.legalLinks {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-5, 1.5rem);
+  margin-top: var(--space-6, 2rem);
+  font-family: var(--checkout-font-utility, var(--kamp-font-utility));
+  font-size: 0.8125rem;
+
+  a {
+    color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }

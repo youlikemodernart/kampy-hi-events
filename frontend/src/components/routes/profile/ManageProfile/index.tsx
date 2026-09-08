@@ -16,7 +16,7 @@ import {useResendEmailConfirmation} from "../../../../mutations/useResendEmailCo
 import {localeToFlagEmojiMap, localeToNameMap, SupportedLocales} from "../../../../locales.ts";
 import {Fieldset} from "../../../common/Fieldset";
 import {InputGroup} from "../../../common/InputGroup";
-import {getConfig} from "../../../../utilites/config.ts";
+import {appName} from "../../../../utilites/branding.ts";
 
 const localeSelectData = Object.keys(localeToNameMap).map(locale => ({
     value: locale,
@@ -206,7 +206,7 @@ export const ManageProfile = () => {
                                     }>
                                         <Checkbox
                                             {...profileForm.getInputProps('marketing_opt_in', {type: 'checkbox'})}
-                                            label={<Trans>Receive product updates from {getConfig("VITE_APP_NAME", "Hi.Events")}.</Trans>}
+                                            label={<Trans>Receive product updates from {appName()}.</Trans>}
                                         />
                                     </Fieldset>
 

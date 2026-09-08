@@ -1,9 +1,10 @@
 import {AttendeeTicket} from "../../../common/AttendeeTicket";
 import {Product} from "../../../../types.ts";
-import {PoweredByFooter} from "../../../common/PoweredByFooter";
 import {useParams} from "react-router";
 import {useGetOrderPublic} from "../../../../queries/useGetOrderPublic.ts";
 import {t} from "@lingui/macro";
+import {CheckoutDocumentHead} from "../../../common/CheckoutDocumentHead";
+import {PoweredByFooter} from "../../../common/PoweredByFooter";
 import {useEffect} from "react";
 import classes from './PrintOrder.module.scss';
 
@@ -37,6 +38,7 @@ export const PrintOrder = () => {
      */
     return (
         <div className={classes.container}>
+            <CheckoutDocumentHead title={t`Tickets`} eventTitle={event.title}/>
             <h2 className={classes.title}>{t`Tickets for`} {event.title}</h2>
             {order.attendees?.map((attendee) => {
                 return (
@@ -51,8 +53,15 @@ export const PrintOrder = () => {
                     </div>
                 );
             })}
-            
-            {/* PoweredBy footer for web view only */}
+
+            {/*
+              Screen-only attribution. The per-ticket instances above are print-only
+              (.poweredByInTicket is display:none on screen, display:block in print),
+              and this block is the inverse (.webOnlyFooter is display:none in print).
+              The two are complementary media, not duplicates: removing this one left
+              the public /order/:eventId/:orderShortId/print route with no rendered
+              notice at all in a browser. Exactly one instance is visible per medium.
+            */}
             <div className={classes.webOnlyFooter}>
                 <PoweredByFooter/>
             </div>

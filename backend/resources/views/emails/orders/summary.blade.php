@@ -8,7 +8,20 @@
 @php /** @see \HiEvents\Mail\Order\OrderSummary */ @endphp
 
 <x-mail::message>
-# {{ __('Your Order is Confirmed! ') }} 🎉
+@php
+    $venueName = $eventSettings->getConfirmationVenueName();
+    $isOnline = $eventSettings->getIsOnlineEvent();
+@endphp
+
+@if($order->isOrderAwaitingOfflinePayment())
+# {{ __('Your spot at :eventTitle is being held', ['eventTitle' => $event->getTitle()]) }}
+@elseif($isOnline)
+# {{ __('You\'re all set for :eventTitle', ['eventTitle' => $event->getTitle()]) }} 🎉
+@elseif($venueName)
+# {{ __('You\'re going to :eventTitle at :venueName', ['eventTitle' => $event->getTitle(), 'venueName' => $venueName]) }} 🎉
+@else
+# {{ __('You\'re going to :eventTitle', ['eventTitle' => $event->getTitle()]) }} 🎉
+@endif
 
 @if($order->isOrderAwaitingOfflinePayment() === false)
 
@@ -23,7 +36,7 @@
 {{ __('Your order is pending payment. Tickets have been issued but will not be valid until payment is received.') }}
 </p>
 
-<div style="border-radius: 4px; background-color: #d7e8f8; color: #204e84; margin-bottom: 1.5rem; padding: 1rem;">
+<div style="border-radius: 10px; background-color: #e9edf2; color: #171717; border-left: 4px solid #40607d; margin-bottom: 1.5rem; padding: 1rem;">
 <h2>{{ __('Payment Instructions') }}</h2>
 {{ __('Please follow the instructions below to complete your payment.') }}
 {!! $eventSettings->getOfflinePaymentInstructions() !!}
@@ -59,8 +72,13 @@
     {{ __('View Order Summary & Tickets') }}
 </x-mail::button>
 
-{{ __('If you have any questions or need assistance, please contact') }} <a href="mailto:{{ $organizer->getEmail() }}">{{ $organizer->getEmail() }}</a>.
+@php $supportEmail = $eventSettings->getSupportEmail() ?: $organizer->getEmail(); @endphp
+@if(!empty($supportEmail))
+{{ __('Questions? Contact us at :supportEmail.', ['supportEmail' => $supportEmail]) }}
+@endif
 
 {{ __('Best regards,') }}<br>
 {{ $organizer->getName() ?: config('app.name') }}
+
+{!! $eventSettings->getGetEmailFooterHtml() !!}
 </x-mail::message>

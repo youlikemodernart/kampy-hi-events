@@ -2,7 +2,7 @@ import {t} from "@lingui/macro";
 import classes from "./FloatingPoweredBy.module.scss";
 import classNames from "classnames";
 import React, {useMemo} from "react";
-import {iHavePurchasedALicence, isHiEvents} from "../../../utilites/helpers.ts";
+import {iHavePurchasedALicence} from "../../../utilites/helpers.ts";
 import {getConfig} from "../../../utilites/config.ts";
 
 /**
@@ -21,10 +21,12 @@ import {getConfig} from "../../../utilites/config.ts";
 export const PoweredByFooter = (
     props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
 ) => {
-    if (iHavePurchasedALicence()) {
-        return <></>;
-    }
-
+    // The hook must run before any conditional return. It previously sat after the
+    // licence early-return, so the licensed and unlicensed paths rendered a
+    // different number of hooks. getConfig reads process.env during SSR and
+    // window.hievents on the client, so a disagreement between those two sources
+    // would throw "Rendered fewer hooks than expected" during hydration on every
+    // surface that mounts this footer.
     const link = useMemo(() => {
         let host = getConfig("VITE_FRONTEND_URL") ?? "unknown";
         let medium = "app";
@@ -36,26 +38,23 @@ export const PoweredByFooter = (
 
         const url = new URL("https://hi.events");
         url.searchParams.set("utm_source", "app-powered-by-footer");
-        url.searchParams.set("utm_medium", isHiEvents() ? medium : 'self-hosted-' + medium);
+        url.searchParams.set("utm_medium", 'self-hosted-' + medium);
         url.searchParams.set("utm_campaign", "powered-by");
-        url.searchParams.set("utm_content", isHiEvents() ? "hi.events" : host);
+        url.searchParams.set("utm_content", host);
 
         return url.toString();
     }, []);
 
-    const footerContent = isHiEvents() ? (
-        <>
-            {t`Planning an event?`}{" "}
-            <a
-                href={`${link}`}
-                target="_blank"
-                className={classes.ctaLink}
-                title={"Effortlessly manage events and sell tickets online with Hi.Events"}
-            >
-                {t`Try Hi.Events Free`}
-            </a>
-        </>
-    ) : (
+    if (iHavePurchasedALicence()) {
+        return <></>;
+    }
+
+    // Always the attribution. Upstream swapped this for a "Try Hi.Events Free"
+    // marketing CTA whenever the host contained ".hi.events"; on a Kamp Love
+    // deployment that would both drop the licence notice and advertise another
+    // ticketing product to a buyer. Rendering the notice unconditionally is the
+    // conservative behaviour on both counts.
+    const footerContent = (
         <>
             {t`Powered by`}{" "}
             <a

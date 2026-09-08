@@ -16,9 +16,10 @@ import {
 import {Card} from "../../../common/Card";
 import {InlineOrderSummary} from "../../../common/InlineOrderSummary";
 import {showError} from "../../../../utilites/notifications.tsx";
-import {getConfig} from "../../../../utilites/config.ts";
 import classes from "./Payment.module.scss";
 import {trackEvent, AnalyticsEvents} from "../../../../utilites/analytics.ts";
+import {CheckoutDocumentHead} from "../../../common/CheckoutDocumentHead";
+import {eventSupportEmail, termsUrl} from "../../../../utilites/branding.ts";
 
 const Payment = () => {
     const navigate = useNavigate();
@@ -74,7 +75,10 @@ const Payment = () => {
                 },
                 onError: (error: any) => {
                     setIsPaymentLoading(false);
-                    showError(error.response?.data?.message || t`Offline payment failed. Please try again or contact the event organizer.`);
+                    const support = eventSupportEmail(event);
+                    showError(error.response?.data?.message || (support
+                        ? t`Offline payment failed. Please try again, or email ${support} for help.`
+                        : t`Offline payment failed. Please try again or contact the event organizer.`));
                 }
             });
         }
@@ -83,6 +87,7 @@ const Payment = () => {
     if (!isStripeEnabled && !isOfflineEnabled && isOrderFetched && isEventFetched) {
         return (
             <CheckoutContent>
+                <CheckoutDocumentHead title={t`Payment`} eventTitle={event?.title}/>
                 <Card>
                     {t`No payment methods are currently available. Please contact the event organizer for assistance.`}
                 </Card>
@@ -93,6 +98,7 @@ const Payment = () => {
     return (
         <>
             <CheckoutContent>
+                <CheckoutDocumentHead title={t`Payment`} eventTitle={event?.title}/>
                 {(event && order) && (
                     <InlineOrderSummary event={event} order={order} defaultExpanded={false}/>
                 )}
@@ -151,7 +157,7 @@ const Payment = () => {
                         <Trans>
                             By continuing, you agree to the{' '}
                             <a
-                                href={getConfig('VITE_TOS_URL', 'https://kamplove.org/terms-conditions') as string}
+                                href={termsUrl()}
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >

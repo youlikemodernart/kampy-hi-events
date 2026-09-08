@@ -18,10 +18,7 @@
     margin: 20px 0 12px;
     font-size: 2rem;
     font-weight: 700;
-    background: linear-gradient(90deg, var(--mantine-color-secondary-5) 0%, var(--mantine-color-primary-6) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
 
     @include mixins.respond-below(md) {
       font-size: 1.5rem;
@@ -31,9 +28,9 @@
 }
 
 .headerIcon {
-  color: var(--mantine-color-secondary-5);
+  color: var(--checkout-accent, var(--kamp-forest, #2f5147));
   padding: 16px;
-  background: var(--mantine-color-primary-0);
+  background: var(--checkout-accent-soft, var(--kamp-orange-tint, #fdeede));
   border-radius: 50%;
 
   @include mixins.respond-below(md) {
@@ -44,7 +41,7 @@
 }
 
 .subtitle {
-  color: var(--mantine-color-dimmed);
+  color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
   font-size: 1rem;
   margin: 0;
   line-height: 1.6;
@@ -67,19 +64,13 @@
 .orderCard {
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: 1px solid var(--mantine-color-gray-2);
+  border: 1px solid var(--checkout-border, var(--kamp-line, #dadada));
 
-  @media (prefers-color-scheme: dark) {
-    border-color: var(--mantine-color-dark-4);
-  }
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 
-    @media (prefers-color-scheme: dark) {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
   }
 
   &::before {
@@ -89,8 +80,10 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--mantine-color-secondary-5) 0%, var(--mantine-color-primary-6) 100%);
-    border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
+    // Flat forest rule, not a gradient: the Kamp palette is declared as broad
+    // material bands with no gradients.
+    background: var(--checkout-accent, var(--kamp-forest, #2f5147));
+    border-radius: var(--radius, 10px) var(--radius, 10px) 0 0;
   }
 }
 
@@ -118,7 +111,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--mantine-color-text);
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
 
   @include mixins.respond-below(md) {
     font-size: 1.125rem;
@@ -127,11 +120,8 @@
 
 .orderDetails {
   padding-top: 16px;
-  border-top: 1px solid var(--mantine-color-gray-2);
+  border-top: 1px solid var(--checkout-border, var(--kamp-line, #dadada));
 
-  @media (prefers-color-scheme: dark) {
-    border-color: var(--mantine-color-dark-4);
-  }
 }
 
 .detailItem {
@@ -143,9 +133,9 @@
 }
 
 .headerIconError {
-  color: var(--mantine-color-red-6);
+  color: var(--checkout-stop, var(--kamp-stop, #9f3620));
   padding: 16px;
-  background: rgba(239, 68, 68, 0.08);
+  background: var(--checkout-stop-soft, var(--kamp-stop-tint, #f5e2dc));
   border-radius: 50%;
 
   @include mixins.respond-below(md) {
@@ -164,10 +154,10 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
-  color: var(--mantine-color-text);
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
 
   svg {
-    color: var(--mantine-color-secondary-5);
+    color: var(--checkout-accent, var(--kamp-forest, #2f5147));
   }
 }
 
@@ -189,19 +179,40 @@
 .successMessage {
   text-align: center;
   padding: 16px;
-  background: var(--mantine-color-primary-0);
+  background: var(--checkout-accent-soft, var(--kamp-orange-tint, #fdeede));
   border-radius: var(--mantine-radius-md);
-  border: 1px solid var(--mantine-color-primary-1);
+  border: 1px solid var(--checkout-border, var(--kamp-line, #dadada));
 
-  @media (prefers-color-scheme: dark) {
-    background: var(--mantine-color-primary-1);
-    border-color: var(--mantine-color-primary-2);
-  }
 
   p {
     margin: 0 0 8px;
     font-size: 0.875rem;
     line-height: 1.5;
-    color: var(--mantine-color-text);
+    color: var(--checkout-text-primary, var(--kamp-ink, #171717));
+  }
+}
+
+.brandMark {
+  margin-bottom: var(--space-3, 0.75rem);
+}
+
+.primaryAction {
+  background: var(--checkout-accent, var(--kamp-forest, #2f5147));
+  color: var(--checkout-accent-contrast, var(--kamp-paper, #ffffff));
+  font-family: var(--checkout-font-utility, var(--kamp-font-utility));
+  font-weight: 700;
+}
+
+.supportNote {
+  margin-top: var(--space-5, 1.5rem);
+  text-align: center;
+  font-family: var(--checkout-font-utility, var(--kamp-font-utility));
+  font-size: 0.875rem;
+  color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }

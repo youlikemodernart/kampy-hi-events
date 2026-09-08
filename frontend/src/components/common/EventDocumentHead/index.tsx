@@ -39,6 +39,12 @@ export const EventDocumentHead = ({event}: EventDocumentHeadProps) => {
         address
     } : {};
 
+    // Honours the per-event SEO setting. This was previously hardcoded to
+    // "index, follow", so an organiser who switched indexing off for a private
+    // Kamp was not obeyed. OrganizerDocumentHead already honours its equivalent.
+    const allowIndexing = eventSettings?.allow_search_engine_indexing !== false
+        && event.status !== 'DRAFT';
+
     const schemaOrgJSONLD = {
         "@context": "http://schema.org",
         "@type": "http://schema.org/Event",
@@ -85,7 +91,7 @@ export const EventDocumentHead = ({event}: EventDocumentHeadProps) => {
             {image && <meta name="twitter:image" content={image}/>}
             <meta name="twitter:card" content="summary_large_image"/>
 
-            <meta name="robots" content="index, follow"/>
+            <meta name="robots" content={allowIndexing ? "index, follow" : "noindex, nofollow"}/>
 
             <link rel="canonical" href={url}/>
 

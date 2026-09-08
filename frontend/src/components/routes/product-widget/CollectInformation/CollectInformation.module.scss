@@ -12,8 +12,8 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 16px 20px;
   margin-bottom: 24px;
   border-radius: $radius-sm;
-  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-  border: 1px solid #a7f3d0;
+  background: var(--checkout-ok-soft, var(--kamp-ok-tint, #e7f0ea));
+  border: 1px solid var(--checkout-ok, var(--kamp-ok, #2f6b4f));
 }
 
 .waitlistBannerIcon {
@@ -21,8 +21,8 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #059669;
-  color: white;
+  background: var(--checkout-ok, var(--kamp-ok, #2f6b4f));
+  color: var(--kamp-paper, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;

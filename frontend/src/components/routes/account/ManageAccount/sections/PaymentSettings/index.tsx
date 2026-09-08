@@ -13,13 +13,13 @@ import {IconAlertCircle, IconBrandStripe, IconCheck, IconExternalLink, IconInfoC
 import {Card} from "../../../../../common/Card";
 import {formatCurrency} from "../../../../../../utilites/currency.ts";
 import {showSuccess} from "../../../../../../utilites/notifications.tsx";
-import {getConfig} from "../../../../../../utilites/config.ts";
 import {isHiEvents} from "../../../../../../utilites/helpers.ts";
 import {VatSettings} from './VatSettings';
 import {VatSettingsModal} from './VatSettings/VatSettingsModal.tsx';
 import {VatNotice, getVatInfo} from './VatNotice';
 import {useGetAccountVatSetting} from '../../../../../../queries/useGetAccountVatSetting.ts';
 import {trackEvent, AnalyticsEvents} from "../../../../../../utilites/analytics.ts";
+import {appName} from "../../../../../../utilites/branding.ts";
 
 interface FeePlanDisplayProps {
     configuration?: {
@@ -248,7 +248,7 @@ const FeePlanDisplay = ({configuration, stripeCountry}: FeePlanDisplayProps) => 
             <Title mb={10} order={3}>{t`Platform Fees`}</Title>
 
             <Text size="sm" c="dimmed" mb="lg">
-                {getConfig("VITE_APP_NAME", "Hi.Events")} charges platform fees to maintain and improve our services.
+                {appName()} charges platform fees to maintain and improve our services.
                 These fees are automatically deducted from each transaction.
             </Text>
 

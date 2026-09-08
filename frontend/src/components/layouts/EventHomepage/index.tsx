@@ -217,7 +217,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                 <style>
                     {`
                         body, .ssr-loader {
-                            background-color: #f9f4f0 !important;
+                            background-color: var(--kamp-cream, #f9f4f0) !important;
                         }
                     `}
                 </style>
@@ -333,8 +333,8 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
 
                                 <div className={classes.actionButtons}>
                                     <ShareComponent
-                                        title={'Check out this event: ' + event.title}
-                                        text={'Check out this event: ' + event.title}
+                                        title={t`Join me at ${event.title}`}
+                                        text={t`Join me at ${event.title}`}
                                         url={eventHomepageUrl(event)}
                                         imageUrl={coverImage || undefined}
                                     >

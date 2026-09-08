@@ -27,7 +27,7 @@
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 12px;
             line-height: 1.5;
-            color: #1a1a1a;
+            color: #171717;
             padding: 20px 30px;
         }
 
@@ -44,7 +44,7 @@
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 28px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #171717;
             margin: 0 0 2px 0;
             letter-spacing: -0.5px;
         }
@@ -52,19 +52,19 @@
         .header-event-name {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 12px;
-            color: #666;
+            color: #585254;
             margin: 0;
         }
 
         .company-details {
             text-align: right;
             line-height: 1.6;
-            color: #555;
+            color: #585254;
         }
 
         .company-name {
             font-weight: bold;
-            color: #1a1a1a;
+            color: #171717;
         }
 
         .status-badge {
@@ -80,27 +80,27 @@
         }
 
         .status-paid {
-            background-color: #e6f9ee;
-            color: #1a7d42;
-            border: 1px solid #b8e6cc;
+            background-color: #e7f0ea;
+            color: #2f6b4f;
+            border: 1px solid #2f6b4f;
         }
 
         .status-unpaid {
-            background-color: #fff3e0;
-            color: #b36b00;
-            border: 1px solid #ffe0b2;
+            background-color: #f5e2dc;
+            color: #9f3620;
+            border: 1px solid #9f3620;
         }
 
         .status-void {
-            background-color: #f5f5f5;
-            color: #888;
-            border: 1px solid #ddd;
+            background-color: #efe7db;
+            color: #585254;
+            border: 1px solid #dadada;
         }
 
         .invoice-info-grid {
             width: 100%;
             margin-bottom: 20px;
-            border: 1px solid #e6e6e6;
+            border: 1px solid #dadada;
             border-radius: 4px;
         }
 
@@ -111,7 +111,7 @@
 
         .info-label {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            color: #888;
+            color: #585254;
             font-size: 10px;
             font-weight: bold;
             display: block;
@@ -128,7 +128,7 @@
 
         .billing-section {
             margin-bottom: 20px;
-            background: #f9f9fb;
+            background: #f9f4f0;
             padding: 15px;
             border-radius: 4px;
             width: 48%;
@@ -136,7 +136,7 @@
         }
 
         .billing-title {
-            color: #888;
+            color: #585254;
             font-size: 10px;
             font-weight: bold;
             margin-bottom: 8px;
@@ -157,31 +157,31 @@
         }
 
         .items th {
-            background: #f9f9fb;
-            color: #555;
+            background: #f9f4f0;
+            color: #585254;
             text-align: left;
             padding: 10px 15px;
             font-weight: bold;
             font-size: 10px;
             letter-spacing: 0.3px;
             text-transform: uppercase;
-            border-bottom: 2px solid #e6e6e6;
+            border-bottom: 2px solid #dadada;
         }
 
         .items td {
             padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #efe7db;
             vertical-align: middle;
         }
 
         .item-description {
-            color: #888;
+            color: #585254;
             font-size: 11px;
             margin-top: 4px;
         }
 
         .item-price-original {
-            color: #999;
+            color: #585254;
             text-decoration: line-through;
             font-size: 11px;
             margin-bottom: 2px;
@@ -203,20 +203,20 @@
         }
 
         .total-line td {
-            border-top: 2px solid #1a1a1a;
+            border-top: 2px solid #171717;
             font-weight: bold;
             font-size: 14px;
             padding-top: 12px;
         }
 
         .amount-paid-line td {
-            color: #1a7d42;
+            color: #2f6b4f;
             font-size: 12px;
             padding-top: 8px;
         }
 
         .balance-due-line td {
-            border-top: 1px solid #e6e6e6;
+            border-top: 1px solid #dadada;
             font-weight: bold;
             font-size: 14px;
             padding-top: 10px;
@@ -228,37 +228,37 @@
         }
 
         .breakdown td {
-            color: #888;
+            color: #585254;
             font-size: 11px;
         }
 
         .invoice-notes {
             margin: 30px 0;
             padding: 15px;
-            background-color: #f9f9fb;
+            background-color: #f9f4f0;
             border-radius: 4px;
             line-height: 1.6;
             clear: both;
-            color: #555;
+            color: #585254;
         }
 
         .invoice-footer {
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #e6e6e6;
+            border-top: 1px solid #dadada;
             text-align: center;
             line-height: 1.6;
             clear: both;
-            color: #888;
+            color: #585254;
             font-size: 11px;
         }
 
         .tax-info {
             margin-top: 15px;
             padding-top: 12px;
-            border-top: 1px dashed #e6e6e6;
+            border-top: 1px dashed #dadada;
             font-size: 11px;
-            color: #888;
+            color: #585254;
         }
 
         .col-description {
@@ -283,7 +283,7 @@
             }
 
             .status-paid {
-                background-color: #e6f9ee !important;
+                background-color: #e7f0ea !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }

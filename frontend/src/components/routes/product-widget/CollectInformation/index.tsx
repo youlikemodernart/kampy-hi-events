@@ -24,7 +24,6 @@ import {useEffect, useState} from "react";
 import {InputGroup} from "../../../common/InputGroup";
 import {Card} from "../../../common/Card";
 import {CheckoutContent} from "../../../layouts/Checkout/CheckoutContent";
-import {getConfig} from "../../../../utilites/config.ts";
 import {HomepageInfoMessage} from "../../../common/HomepageInfoMessage";
 import {InlineOrderSummary} from "../../../common/InlineOrderSummary";
 import {eventCheckoutPath, eventHomepagePath} from "../../../../utilites/urlHelper.ts";
@@ -33,6 +32,8 @@ import countries from "../../../../../data/countries.json";
 import classes from "./CollectInformation.module.scss";
 import {trackEvent, AnalyticsEvents} from "../../../../utilites/analytics.ts";
 import {clearWaitlistJoinedForEvent} from "../../../../hooks/useWaitlistJoined.ts";
+import {CheckoutDocumentHead} from "../../../common/CheckoutDocumentHead";
+import {eventSupportEmail, termsUrl} from "../../../../utilites/branding.ts";
 
 const LoadingSkeleton = () =>
     (
@@ -375,6 +376,7 @@ export const CollectInformation = () => {
                     : t`We couldn't find this order. It may have been removed.`}
                 link={eventHomepagePath(event as Event)}
                 linkText={t`Go to Event Page`}
+                supportEmail={eventSupportEmail(event)}
             />
         );
     }
@@ -387,6 +389,7 @@ export const CollectInformation = () => {
                 subtitle={t`We hit a snag loading this page. Please try again.`}
                 link={eventHomepagePath(event as Event)}
                 linkText={t`Back to Event`}
+                supportEmail={eventSupportEmail(event)}
             />
         );
     }
@@ -399,6 +402,7 @@ export const CollectInformation = () => {
     return (
         <form onSubmit={form.onSubmit(handleSubmit)}>
 
+            <CheckoutDocumentHead title={t`Your details`} eventTitle={event?.title}/>
             <CheckoutContent>
                 {isFromWaitlist && (
                     <div className={classes.waitlistBanner}>
@@ -715,7 +719,7 @@ export const CollectInformation = () => {
                         <Trans>
                             By continuing, you agree to the{' '}
                             <a
-                                href={getConfig('VITE_TOS_URL', 'https://kamplove.org/terms-conditions') as string}
+                                href={termsUrl()}
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >

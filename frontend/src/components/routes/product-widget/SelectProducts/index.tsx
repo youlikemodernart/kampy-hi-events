@@ -668,7 +668,7 @@ const SelectProducts = (props: SelectProductsProps) => {
             }
             {(props.showPoweredBy ?? true) && (
                 <PoweredByFooter style={{
-                    'color': props.colors?.primaryText || '#000',
+                    'color': props.colors?.primaryText || 'var(--kamp-ink, #171717)',
                 }}/>
             )}
         </div>

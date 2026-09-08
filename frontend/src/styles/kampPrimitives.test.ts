@@ -1,0 +1,107 @@
+import {describe, expect, it} from 'vitest';
+import {readFileSync, readdirSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {dirname, join} from 'node:path';
+import {KAMP_PRIMITIVES, kamp} from './kampPrimitives';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const globalScss = readFileSync(join(here, 'global.scss'), 'utf8');
+
+/** Parse the `--kamp-*` declarations out of the `:root` block in global.scss. */
+const parseKampDeclarations = (scss: string): Record<string, string> => {
+    const rootStart = scss.indexOf(':root {');
+    expect(rootStart, 'global.scss must contain a :root block').toBeGreaterThan(-1);
+
+    const block = scss.slice(rootStart, scss.indexOf('\n}', rootStart));
+    const out: Record<string, string> = {};
+
+    for (const line of block.split('\n')) {
+        const match = line.match(/^\s*(--kamp-[a-z0-9-]+)\s*:\s*(.+?);\s*$/);
+        if (match) {
+            out[match[1]] = match[2].trim();
+        }
+    }
+
+    return out;
+};
+
+describe('Kamp primitive source of truth', () => {
+    const declared = parseKampDeclarations(globalScss);
+
+    it('finds the --kamp-* declarations in global.scss', () => {
+        expect(Object.keys(declared).length).toBeGreaterThan(20);
+    });
+
+    it('declares every primitive in exactly the same way in SCSS and TypeScript', () => {
+        // This is the guard that replaces a codegen step. If it fails, the two
+        // representations have drifted and the checkout theme no longer matches
+        // the event page.
+        expect(declared).toEqual({...KAMP_PRIMITIVES});
+    });
+
+    it('declares --kamp-* in global.scss and nowhere else', () => {
+        // Reserved-namespace rule: authored styles must not redefine a primitive.
+        const srcRoot = join(here, '..');
+        const files = readdirSync(srcRoot, {recursive: true, encoding: 'utf8'})
+            .filter((f) => f.endsWith('.scss') || f.endsWith('.css'))
+            .map((f) => join(srcRoot, f))
+            .filter((f) => !f.endsWith('global.scss'));
+
+        expect(files.length, 'expected to find stylesheets to scan').toBeGreaterThan(10);
+
+        const offenders = files.filter((file) =>
+            /^\s*--kamp-[a-z0-9-]+\s*:/m.test(readFileSync(file, 'utf8'))
+        );
+
+        expect(offenders).toEqual([]);
+    });
+});
+
+describe('checkout theme derives from the primitive source', () => {
+    it('exposes named accessors that resolve to the declared values', () => {
+        expect(kamp.forest).toBe(declaredValue('--kamp-forest'));
+        expect(kamp.cream).toBe(declaredValue('--kamp-cream'));
+        expect(kamp.ink).toBe(declaredValue('--kamp-ink'));
+        expect(kamp.muted).toBe(declaredValue('--kamp-muted'));
+        expect(kamp.sand).toBe(declaredValue('--kamp-sand'));
+        expect(kamp.fontSerif).toBe(declaredValue('--kamp-font-serif'));
+        expect(kamp.fontUtility).toBe(declaredValue('--kamp-font-utility'));
+    });
+
+    function declaredValue(name: string): string {
+        return parseKampDeclarations(globalScss)[name];
+    }
+});
+
+describe('mutation proof', () => {
+    it('propagates a primitive change into the checkout theme values', async () => {
+        // The acceptance test from the specification: a change to --kamp-forest must
+        // reach checkout. Before Phase 1, CheckoutThemeProvider held its own copy of
+        // the palette, so this stopped at the checkout boundary.
+        const providerSource = readFileSync(
+            join(here, '../components/layouts/Checkout/CheckoutThemeProvider.tsx'),
+            'utf8'
+        );
+        const checkoutSource = readFileSync(
+            join(here, '../components/layouts/Checkout/index.tsx'),
+            'utf8'
+        );
+
+        // The light palette must be expressed in terms of the primitive accessors,
+        // not as hex literals.
+        const lightPalette = providerSource.slice(
+            providerSource.indexOf('const LIGHT_PALETTE'),
+            providerSource.indexOf('};', providerSource.indexOf('const LIGHT_PALETTE'))
+        );
+        expect(lightPalette).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+        expect(lightPalette).toMatch(/kamp\./);
+
+        // The accent must be the primitive, not a repeated literal.
+        expect(checkoutSource).toMatch(/accentColor=\{kamp\.forest\}/);
+        expect(checkoutSource).not.toMatch(/accentColor="#/);
+
+        // No font stack literals left in the provider.
+        expect(providerSource).not.toMatch(/'PT Serif'/);
+        expect(providerSource).not.toMatch(/'Lato'/);
+    });
+});

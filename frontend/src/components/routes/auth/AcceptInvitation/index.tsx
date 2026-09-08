@@ -11,6 +11,7 @@ import {showError, showSuccess} from "../../../../utilites/notifications.tsx";
 import {AcceptInvitationRequest} from "../../../../types.ts";
 import {getConfig} from "../../../../utilites/config.ts";
 import classes from "./AcceptInvitation.module.scss";
+import {appName} from "../../../../utilites/branding.ts";
 
 const AcceptInvitation = () => {
     const navigate = useNavigate();
@@ -154,7 +155,7 @@ const AcceptInvitation = () => {
                         <Checkbox
                             mb="md"
                             {...form.getInputProps('marketing_opt_in', {type: 'checkbox'})}
-                            label={<Trans>Receive product updates from {getConfig("VITE_APP_NAME", "Hi.Events")}.</Trans>}
+                            label={<Trans>Receive product updates from {appName()}.</Trans>}
                         />
 
                         <Button

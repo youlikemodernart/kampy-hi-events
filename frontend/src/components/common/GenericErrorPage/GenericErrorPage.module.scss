@@ -7,70 +7,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) no-repeat center;
-  padding: var(--mantine-spacing-md);
+  background: var(--checkout-background, var(--kamp-cream, #f9f4f0));
+  padding: var(--space-4, 1rem);
 
   @include mixins.respond-below(md) {
-    padding: var(--mantine-spacing-sm);
+    padding: var(--space-3, 0.75rem);
     min-height: 100dvh;
-  }
-}
-
-.backgroundOrb1 {
-  position: absolute;
-  top: 15%;
-  left: -15%;
-  width: 50%;
-  height: 50%;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--mantine-color-primary-6) 0%, var(--mantine-color-secondary-6) 70%);
-  filter: blur(80px);
-  animation: drift 20s ease-in-out infinite;
-  z-index: -1;
-
-  @include mixins.respond-below(md) {
-    width: 70%;
-    height: 70%;
-    top: 10%;
-    left: -25%;
-    filter: blur(60px);
-  }
-
-  @include mixins.respond-below(sm) {
-    width: 90%;
-    height: 90%;
-    top: 5%;
-    left: -35%;
-    filter: blur(40px);
-  }
-}
-
-.backgroundOrb2 {
-  position: absolute;
-  bottom: 10%;
-  right: -15%;
-  width: 45%;
-  height: 45%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0.03) 70%);
-  filter: blur(100px);
-  animation: drift-slow 25s ease-in-out infinite;
-  z-index: -1;
-
-  @include mixins.respond-below(md) {
-    width: 65%;
-    height: 65%;
-    bottom: 5%;
-    right: -25%;
-    filter: blur(70px);
-  }
-
-  @include mixins.respond-below(sm) {
-    width: 80%;
-    height: 80%;
-    bottom: 0%;
-    right: -30%;
-    filter: blur(50px);
   }
 }
 
@@ -79,156 +21,74 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: var(--mantine-spacing-xl) 0;
+  padding: var(--space-6, 2rem) 0;
   position: relative;
   z-index: 1;
   width: 100%;
 
   @include mixins.respond-below(md) {
-    padding: var(--mantine-spacing-lg) 0;
-  }
-
-  @include mixins.respond-below(sm) {
-    padding: var(--mantine-spacing-md) 0;
+    padding: var(--space-5, 1.5rem) 0;
   }
 }
 
 .logo {
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: scale(1.05);
-  }
-
-  @include mixins.respond-below(md) {
-    width: 120px !important;
-  }
-
-  @include mixins.respond-below(sm) {
-    width: 100px !important;
-  }
+  display: flex;
+  justify-content: center;
 }
 
 .content {
   max-width: 520px;
   width: 100%;
   text-align: center;
-  background: rgba(255, 255, 255, 0.8);
-  padding: var(--mantine-spacing-xl);
-  border-radius: var(--mantine-radius-xl);
-  box-shadow: 
-    0 10px 40px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--checkout-surface, var(--kamp-paper, #ffffff));
+  padding: var(--panel-pad, 2rem);
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--checkout-border, var(--kamp-line, #dadada));
+  box-shadow: var(--elev-1, 0 1px 2px rgba(23, 23, 23, 0.05));
   position: relative;
-
-  @include mixins.respond-below(md) {
-    max-width: 480px;
-    padding: var(--mantine-spacing-lg);
-    margin: 0 var(--mantine-spacing-md);
-  }
 
   @include mixins.respond-below(sm) {
     max-width: 100%;
-    padding: var(--mantine-spacing-md);
+    padding: var(--space-4, 1rem);
     margin: 0;
-    border-radius: var(--mantine-radius-lg);
   }
 }
 
 .title {
-  font-weight: 800;
-  margin-bottom: var(--mantine-spacing-md);
-  font-size: clamp(24px, 5vw, 36px);
+  // Was a gradient-clipped transparent text fill at weight 800. Transparent fill
+  // can leave the heading invisible under forced-colors, and PT Serif ships
+  // 400/700 only, so 800 synthesised.
+  font-family: var(--checkout-font-serif, var(--kamp-font-serif));
+  font-weight: 700;
+  margin-bottom: var(--space-4, 1rem);
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
   line-height: 1.2;
-  background: linear-gradient(135deg, 
-    var(--mantine-color-primary-9) 0%,
-    var(--mantine-color-secondary-7) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-
-  @include mixins.respond-below(md) {
-    font-size: clamp(22px, 4.5vw, 32px);
-    margin-bottom: var(--mantine-spacing-sm);
-  }
-
-  @include mixins.respond-below(sm) {
-    font-size: clamp(20px, 4vw, 28px);
-  }
+  letter-spacing: -0.03em;
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
 }
 
 .description {
   line-height: 1.6;
-  margin-bottom: var(--mantine-spacing-lg);
-  font-size: clamp(16px, 2.5vw, 18px);
-  color: var(--mantine-color-gray-7);
+  margin-bottom: var(--space-5, 1.5rem);
+  font-size: 1rem;
+  color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
   max-width: 400px;
   margin-left: auto;
   margin-right: auto;
-
-  @include mixins.respond-below(md) {
-    font-size: clamp(15px, 2.2vw, 17px);
-    margin-bottom: var(--mantine-spacing-md);
-  }
-
-  @include mixins.respond-below(sm) {
-    font-size: clamp(14px, 2vw, 16px);
-    line-height: 1.5;
-  }
 }
 
 .button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 600;
-  min-height: 44px; // Better touch target on mobile
-  font-size: clamp(14px, 2vw, 16px);
+  transition: box-shadow var(--motion-transition, 200ms) ease;
+  font-family: var(--checkout-font-utility, var(--kamp-font-utility));
+  font-weight: 700;
+  min-height: 44px;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 25px rgba(147, 51, 234, 0.25),
-      0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active {
-    transform: translateY(0);
+    box-shadow: var(--elev-1, 0 1px 2px rgba(23, 23, 23, 0.05));
   }
 
   @include mixins.respond-below(sm) {
     width: 100%;
     max-width: 280px;
-  }
-}
-
-// Animation keyframes
-@keyframes drift {
-  0%, 100% {
-    transform: translateX(0) translateY(0) scale(1);
-  }
-  25% {
-    transform: translateX(20px) translateY(-30px) scale(1.1);
-  }
-  50% {
-    transform: translateX(-15px) translateY(20px) scale(0.9);
-  }
-  75% {
-    transform: translateX(25px) translateY(15px) scale(1.05);
-  }
-}
-
-@keyframes drift-slow {
-  0%, 100% {
-    transform: translateX(0) translateY(0) scale(1);
-  }
-  33% {
-    transform: translateX(-25px) translateY(20px) scale(1.08);
-  }
-  66% {
-    transform: translateX(20px) translateY(-25px) scale(0.92);
   }
 }

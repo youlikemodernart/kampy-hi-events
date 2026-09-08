@@ -7,7 +7,7 @@ import {NavItem} from "../types";
 import {NavLink} from "react-router";
 import classNames from "classnames";
 import {useMediaQuery} from "@mantine/hooks";
-import {getConfig} from "../../../../utilites/config.ts";
+import {BrandMark} from "../../../common/BrandMark";
 
 interface SidebarProps {
     sidebarOpen: boolean;
@@ -75,10 +75,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className={classNames(`${classes.sidebar} ${sidebarOpen ? classes.open : classes.closed}`)}>
             <div className={classes.logo}>
                 <NavLink to={`/manage/events`}>
-                    <img
-                        style={{maxWidth: '160px', margin: "10px auto"}}
-                        src={getConfig("VITE_APP_LOGO_LIGHT", "/logos/hi-events-text-dark.svg")}
-                        alt={t`${getConfig("VITE_APP_NAME", "Hi.Events")} logo`}
+                    <BrandMark
+                        variant="light"
+                        className={classes.brandMark}
                     />
                 </NavLink>
             </div>

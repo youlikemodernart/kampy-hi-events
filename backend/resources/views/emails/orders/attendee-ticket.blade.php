@@ -10,11 +10,28 @@
 @php /** @see \HiEvents\Mail\Attendee\AttendeeTicketMail */ @endphp
 
 <x-mail::message>
-# {{ __('You\'re going to') }} {{ $event->getTitle() }}! 🎉
+@php
+    /**
+     * Rule C-1/C-2. One complete translatable message per state with named
+     * placeholders. The previous form translated only the fragment "You're going
+     * to" and concatenated the event title outside it, which no translator can
+     * reorder. Venue name only: a formatted street address reads like a label.
+     */
+    $venueName = $eventSettings->getConfirmationVenueName();
+    $isOnline = $eventSettings->getIsOnlineEvent();
+@endphp
+
+@if($isOnline)
+# {{ __('You\'re all set for :eventTitle', ['eventTitle' => $event->getTitle()]) }} 🎉
+@elseif($venueName)
+# {{ __('You\'re going to :eventTitle at :venueName', ['eventTitle' => $event->getTitle(), 'venueName' => $venueName]) }} 🎉
+@else
+# {{ __('You\'re going to :eventTitle', ['eventTitle' => $event->getTitle()]) }} 🎉
+@endif
 <br>
 <br>
 @if($order->isOrderAwaitingOfflinePayment())
-<div style="border-radius: 4px; background-color: #f8d7da; color: #842029; margin-bottom: 1.5rem; padding: 1rem;">
+<div style="border-radius: 10px; background-color: #e9edf2; color: #171717; border-left: 4px solid #40607d; margin-bottom: 1.5rem; padding: 1rem;">
 <p>
 {{ __('ℹ️ Your order is pending payment. Tickets have been issued but will not be valid until payment is received.') }}
 </p>
@@ -27,10 +44,13 @@
 {{ __('View Ticket') }}
 </x-mail::button>
 
-{{ __('If you have any questions or need assistance, please reply to this email or contact the event organizer') }}
-{{ __('at') }} <a href="mailto:{{$eventSettings->getSupportEmail()}}">{{$eventSettings->getSupportEmail()}}</a>.
+@php $supportEmail = $eventSettings->getSupportEmail() ?: $organizer->getEmail(); @endphp
+@if(!empty($supportEmail))
+{{ __('Questions? Reply to this email or contact us at :supportEmail.', ['supportEmail' => $supportEmail]) }}
+@endif
 
 {{ __('Best regards,') }}<br>
 {{ $organizer->getName() ?: config('app.name') }}
 
+{!! $eventSettings->getGetEmailFooterHtml() !!}
 </x-mail::message>

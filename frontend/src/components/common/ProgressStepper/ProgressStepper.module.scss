@@ -1,8 +1,10 @@
 @use "../../../styles/mixins";
 
-// Design tokens
-$font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-$transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+// 'Outfit' was previously specified here but is never loaded: only PT Serif and
+// Lato have @font-face declarations and woff2 files. Step numbers therefore fell
+// back to a system sans while the rest of checkout set in PT Serif.
+$font-display: var(--checkout-font-utility, var(--kamp-font-utility));
+$transition-fast: var(--motion-feedback, 120ms) cubic-bezier(0.4, 0, 0.2, 1);
 
 .stepper {
   display: flex;
@@ -32,20 +34,23 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: $font-display;
   font-size: 13px;
   font-weight: 600;
-  background-color: var(--checkout-border, #E5E7EB);
-  color: var(--checkout-text-secondary, #6B7280);
+  // Uses the dedicated muted-surface role, not the hairline border role. The
+  // previous pairing (--checkout-border #8a8a8a behind --checkout-text-secondary
+  // #585254) computed to 2.21:1 against a 4.5:1 requirement.
+  background-color: var(--checkout-surface-muted, var(--kamp-sand, #efe7db));
+  color: var(--checkout-text-primary, var(--kamp-ink, #171717));
   transition: all $transition-fast;
 
   &.active {
     background-color: var(--checkout-accent, var(--mantine-primary-color-filled));
-    color: var(--checkout-accent-contrast, #ffffff);
+    color: var(--checkout-accent-contrast, var(--kamp-paper, #ffffff));
   }
 }
 
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--checkout-text-secondary, #6B7280);
+  color: var(--checkout-text-secondary, var(--kamp-muted, #585254));
   transition: color $transition-fast;
 
   @include mixins.respond-below(sm) {
@@ -53,14 +58,14 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &.activeLabel {
-    color: var(--checkout-text-primary, #111827);
+    color: var(--checkout-text-primary, var(--kamp-ink, #171717));
   }
 }
 
 .connector {
   width: 40px;
   height: 2px;
-  background-color: var(--checkout-border, #D1D5DB);
+  background-color: var(--checkout-border, var(--kamp-line, #dadada));
   margin: 0 8px;
   border-radius: 1px;
   transition: background-color $transition-fast;
