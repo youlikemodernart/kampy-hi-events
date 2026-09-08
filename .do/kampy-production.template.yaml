@@ -26,6 +26,9 @@ envs:
   - key: APP_NAME
     scope: RUN_AND_BUILD_TIME
     value: Kamp Love
+  - key: VITE_APP_NAME
+    scope: RUN_AND_BUILD_TIME
+    value: Kamp Love
   - key: APP_ENV
     scope: RUN_AND_BUILD_TIME
     value: production
