@@ -40,7 +40,7 @@ export const KAMP_PRIMITIVES = {
     '--kamp-clay-tint': '#efe0d8',
     '--kamp-sky': '#9db3ba',
     '--kamp-wood': '#6f5f4e',
-    '--kamp-sand': '#efe7db',
+    '--kamp-sand': '#ffffff',
 } as const;
 
 export type KampPrimitiveName = keyof typeof KAMP_PRIMITIVES;
