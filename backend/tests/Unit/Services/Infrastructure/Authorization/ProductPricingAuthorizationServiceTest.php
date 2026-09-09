@@ -37,6 +37,27 @@ class ProductPricingAuthorizationServiceTest extends TestCase
             ]));
     }
 
+    public function test_university_director_can_create_product_without_fee_associations(): void
+    {
+        $this->service->validateCreate(Role::UNIVERSITY_DIRECTOR, []);
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function test_university_director_cannot_create_product_with_fee_associations(): void
+    {
+        $this->expectException(UnauthorizedException::class);
+
+        $this->service->validateCreate(Role::UNIVERSITY_DIRECTOR, [6]);
+    }
+
+    public function test_event_manager_can_create_product_with_fee_associations(): void
+    {
+        $this->service->validateCreate(Role::ORGANIZER, [6]);
+
+        $this->addToAssertionCount(1);
+    }
+
     public function test_university_director_can_submit_unchanged_pricing_and_fees(): void
     {
         $this->service->validateUpdate(
@@ -50,31 +71,42 @@ class ProductPricingAuthorizationServiceTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    #[DataProvider('forbiddenPricingChanges')]
-    public function test_university_director_cannot_change_pricing_or_fees(
+    #[DataProvider('allowedPricingChanges')]
+    public function test_university_director_can_change_ticket_pricing(
         string $priceType,
         array $prices,
-        array $taxAndFeeIds,
     ): void {
-        $this->expectException(UnauthorizedException::class);
-
         $this->service->validateUpdate(
             Role::UNIVERSITY_DIRECTOR,
             $this->product,
             $priceType,
             $prices,
-            $taxAndFeeIds,
+            [6],
         );
+
+        $this->addToAssertionCount(1);
     }
 
-    public static function forbiddenPricingChanges(): array
+    public static function allowedPricingChanges(): array
     {
         return [
-            'price amount' => ['PAID', [['id' => 20, 'price' => 31]], [6]],
-            'new price tier' => ['PAID', [['id' => 20, 'price' => 30], ['price' => 30]], [6]],
-            'price type' => ['FREE', [['id' => 20, 'price' => 30]], [6]],
-            'fee association' => ['PAID', [['id' => 20, 'price' => 30]], []],
+            'price amount' => ['PAID', [['id' => 20, 'price' => 31]]],
+            'new price tier' => ['PAID', [['id' => 20, 'price' => 30], ['price' => 30]]],
+            'price type' => ['FREE', [['id' => 20, 'price' => 30]]],
         ];
+    }
+
+    public function test_university_director_cannot_change_fee_associations(): void
+    {
+        $this->expectException(UnauthorizedException::class);
+
+        $this->service->validateUpdate(
+            Role::UNIVERSITY_DIRECTOR,
+            $this->product,
+            'PAID',
+            [['id' => 20, 'price' => 30]],
+            [],
+        );
     }
 
     public function test_event_manager_can_change_pricing_and_fees(): void

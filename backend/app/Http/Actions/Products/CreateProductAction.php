@@ -12,17 +12,17 @@ use HiEvents\Http\ResponseCodes;
 use HiEvents\Resources\Product\ProductResource;
 use HiEvents\Services\Application\Handlers\Product\CreateProductHandler;
 use HiEvents\Services\Application\Handlers\Product\DTO\UpsertProductDTO;
+use HiEvents\Services\Infrastructure\Authorization\ProductPricingAuthorizationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class CreateProductAction extends BaseAction
 {
-    private CreateProductHandler $createProductHandler;
-
-    public function __construct(CreateProductHandler $handler)
-    {
-        $this->createProductHandler = $handler;
+    public function __construct(
+        private readonly CreateProductHandler $createProductHandler,
+        private readonly ProductPricingAuthorizationService $productPricingAuthorizationService,
+    ) {
     }
 
     /**
@@ -31,6 +31,10 @@ class CreateProductAction extends BaseAction
     public function __invoke(int $eventId, UpsertProductRequest $request): JsonResponse
     {
         $this->isActionAuthorized($eventId, EventDomainObject::class);
+        $this->productPricingAuthorizationService->validateCreate(
+            $this->getAuthenticatedUserRole(),
+            $request->input('tax_and_fee_ids', []),
+        );
 
         $request->merge([
             'event_id' => $eventId,

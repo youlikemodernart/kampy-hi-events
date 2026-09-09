@@ -185,10 +185,11 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
     const [taxFeeModalOpen, {open: openTaxFeeModal, close: closeTaxFeeModal}] = useDisclosure(false);
     const {data: me} = useGetMe();
     const canManagePricing = currentUserCan(me?.permissions, 'event.pricing.manage');
+    const canManageBilling = currentUserCan(me?.permissions, 'billing.manage');
     const isFreeProduct = form.values.type === 'FREE';
     const isDonationProduct = form.values.type === 'DONATION';
     const {data: event} = useGetEvent(eventId);
-    const {data: taxesAndFees} = useGetTaxesAndFees(canManagePricing);
+    const {data: taxesAndFees} = useGetTaxesAndFees(canManageBilling);
 
     const handleTaxOrFeeCreated = (taxOrFee: TaxAndFee) => {
         const currentIds = form.values.tax_and_fee_ids || [];
@@ -401,7 +402,7 @@ export const ProductForm = ({form, product}: ProductFormProps) => {
 
             <Collapse in={opened}>
                 <div className={classes.additionalOptionsContent}>
-                    {canManagePricing && (
+                    {canManageBilling && (
                         <Fieldset legend={
                             <span className={classes.fieldsetLegend}>
                                 <IconReceipt size={16}/>

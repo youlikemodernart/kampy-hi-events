@@ -32,7 +32,7 @@ class UniversityDirectorResourceTest extends TestCase
         $this->assertSame('USD', $data['currency_code']);
     }
 
-    public function test_event_settings_projection_excludes_payment_invoicing_and_platform_fee_fields(): void
+    public function test_event_settings_projection_includes_payment_configuration_but_excludes_platform_fees(): void
     {
         $settings = new EventSettingDomainObject;
         $data = (new UniversityDirectorEventSettingsResource($settings))->toArray(Request::create('/'));
@@ -51,11 +51,11 @@ class UniversityDirectorResourceTest extends TestCase
             'invoice_tax_details',
             'invoice_notes',
             'invoice_payment_terms_days',
-            'pass_platform_fee_to_buyer',
         ] as $key) {
-            $this->assertArrayNotHasKey($key, $data);
+            $this->assertArrayHasKey($key, $data);
         }
 
+        $this->assertArrayNotHasKey('pass_platform_fee_to_buyer', $data);
         $this->assertArrayHasKey('support_email', $data);
         $this->assertArrayHasKey('location_details', $data);
     }

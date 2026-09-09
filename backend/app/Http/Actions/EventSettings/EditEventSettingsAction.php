@@ -2,7 +2,9 @@
 
 namespace HiEvents\Http\Actions\EventSettings;
 
+use HiEvents\DomainObjects\Enums\Role;
 use HiEvents\DomainObjects\EventDomainObject;
+use HiEvents\Exceptions\UnauthorizedException;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Http\Request\EventSettings\UpdateEventSettingsRequest;
 use HiEvents\Resources\Event\EventSettingsResource;
@@ -21,6 +23,10 @@ class EditEventSettingsAction extends BaseAction
     public function __invoke(UpdateEventSettingsRequest $request, int $eventId): JsonResponse
     {
         $this->isActionAuthorized($eventId, EventDomainObject::class);
+
+        if ($this->getAuthenticatedUserRole() === Role::UNIVERSITY_DIRECTOR) {
+            throw new UnauthorizedException(__('University directors must use partial event settings updates.'));
+        }
 
         $settings = array_merge(
             $request->validated(),

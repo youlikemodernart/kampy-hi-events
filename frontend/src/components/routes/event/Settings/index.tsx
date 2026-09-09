@@ -38,6 +38,7 @@ export const Settings = () => {
     const canUpdateEvent = currentUserCan(me?.permissions, 'event.update');
     const canManageEvent = currentUserCan(me?.permissions, 'event.manage');
     const canManageEventSettings = currentUserCan(me?.permissions, 'event.settings.manage');
+    const canManagePlatformFees = me?.role !== 'UNIVERSITY_DIRECTOR';
 
     const SECTIONS = useMemo(() => {
         const baseSections = [
@@ -98,7 +99,7 @@ export const Settings = () => {
             }
         ];
 
-        if (isSaasMode) {
+        if (isSaasMode && canManagePlatformFees) {
             baseSections.splice(baseSections.length - 1, 0, {
                 id: 'platform-fees',
                 label: t`Platform Fees`,
@@ -112,7 +113,7 @@ export const Settings = () => {
             if (component === DangerZoneSettings) return canManageEvent;
             return canManageEventSettings;
         });
-    }, [canManageEvent, canManageEventSettings, canUpdateEvent, isSaasMode]);
+    }, [canManageEvent, canManageEventSettings, canManagePlatformFees, canUpdateEvent, isSaasMode]);
 
     const isLargeScreen = useMediaQuery('(min-width: 1200px)', true);
     const [activeSection, setActiveSection] = useState(() => {

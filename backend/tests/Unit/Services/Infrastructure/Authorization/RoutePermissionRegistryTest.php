@@ -63,19 +63,25 @@ class RoutePermissionRegistryTest extends TestCase
         $this->assertSame(Permission::REPORTS_EXPORT, RoutePermissionRegistry::permissionForAction(ExportFinancialReportAction::class));
     }
 
-    public function test_university_director_can_update_but_not_create_delete_publish_or_change_financial_settings(): void
+    public function test_university_director_can_manage_assigned_event_operations_but_not_event_lifecycle(): void
     {
-        $allowedPermission = RoutePermissionRegistry::permissionForAction(UpdateEventAction::class);
-        $this->assertSame(Permission::EVENT_UPDATE, $allowedPermission);
-        $this->assertTrue(Role::UNIVERSITY_DIRECTOR->hasPermission($allowedPermission));
+        foreach ([
+            UpdateEventAction::class,
+            CreateProductAction::class,
+            GetPlatformFeePreviewAction::class,
+            EditEventSettingsAction::class,
+            RefundOrderAction::class,
+        ] as $actionClass) {
+            $permission = RoutePermissionRegistry::permissionForAction($actionClass);
+
+            $this->assertNotNull($permission);
+            $this->assertTrue(Role::UNIVERSITY_DIRECTOR->hasPermission($permission), $actionClass);
+        }
 
         foreach ([
             CreateEventAction::class,
             DeleteEventAction::class,
             UpdateEventStatusAction::class,
-            CreateProductAction::class,
-            GetPlatformFeePreviewAction::class,
-            EditEventSettingsAction::class,
         ] as $actionClass) {
             $permission = RoutePermissionRegistry::permissionForAction($actionClass);
 

@@ -10,6 +10,13 @@ use HiEvents\Exceptions\UnauthorizedException;
 
 readonly class ProductPricingAuthorizationService
 {
+    public function validateCreate(Role $role, array $submittedTaxAndFeeIds): void
+    {
+        if ($role === Role::UNIVERSITY_DIRECTOR && $submittedTaxAndFeeIds !== []) {
+            throw new UnauthorizedException(__('You are not authorized to add ticket taxes or fees.'));
+        }
+    }
+
     public function validateUpdate(
         Role $role,
         ProductDomainObject $product,
@@ -18,6 +25,12 @@ readonly class ProductPricingAuthorizationService
         array $submittedTaxAndFeeIds,
     ): void {
         if ($role->hasPermission(Permission::EVENT_PRICING_MANAGE)) {
+            if ($role === Role::UNIVERSITY_DIRECTOR
+                && $this->taxesAndFeesChanged($product, $submittedTaxAndFeeIds)
+            ) {
+                throw new UnauthorizedException(__('You are not authorized to change ticket taxes or fees.'));
+            }
+
             return;
         }
 

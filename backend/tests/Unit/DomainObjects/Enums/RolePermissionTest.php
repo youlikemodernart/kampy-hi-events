@@ -22,7 +22,7 @@ class RolePermissionTest extends TestCase
         ], Role::getAssignableRoles());
     }
 
-    public function test_university_director_can_operate_assigned_events_without_financial_or_administrative_power(): void
+    public function test_university_director_can_operate_assigned_events_without_fee_or_administrative_power(): void
     {
         $role = Role::UNIVERSITY_DIRECTOR;
 
@@ -33,9 +33,13 @@ class RolePermissionTest extends TestCase
             Permission::EVENT_CONTENT_VIEW,
             Permission::EVENT_UPDATE,
             Permission::EVENT_CONTENT_MANAGE,
+            Permission::EVENT_PRICING_MANAGE,
+            Permission::EVENT_SETTINGS_MANAGE,
             Permission::ATTENDEES_VIEW,
             Permission::ATTENDEES_MANAGE,
             Permission::ORDERS_VIEW,
+            Permission::ORDERS_MANAGE,
+            Permission::ORDERS_REFUND,
             Permission::REPORTS_VIEW,
             Permission::REPORTS_EXPORT,
             Permission::CHECK_IN_MANAGE,
@@ -51,10 +55,6 @@ class RolePermissionTest extends TestCase
             Permission::ORGANIZER_MANAGE,
             Permission::EVENT_MANAGE,
             Permission::EVENT_PUBLISH,
-            Permission::EVENT_PRICING_MANAGE,
-            Permission::EVENT_SETTINGS_MANAGE,
-            Permission::ORDERS_MANAGE,
-            Permission::ORDERS_REFUND,
             Permission::FINANCIAL_RECONCILIATION_VIEW,
             Permission::MESSAGES_MANAGE,
             Permission::INTEGRATIONS_MANAGE,
