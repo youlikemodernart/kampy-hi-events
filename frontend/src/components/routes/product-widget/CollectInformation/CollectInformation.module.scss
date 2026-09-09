@@ -1,7 +1,7 @@
 @use "../../../../styles/mixins";
 
-$font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
-$font-utility: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-display: var(--kamp-font-utility);
+$font-utility: var(--kamp-font-utility);
 $radius-sm: 10px;
 $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 

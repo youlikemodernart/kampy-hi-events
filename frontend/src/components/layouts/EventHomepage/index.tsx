@@ -44,6 +44,10 @@ const SHOW_MERCH_SECTION = false;
 // future insertion points — no fabricated event content. Set false to hide them entirely.
 const SHOW_KAMP_PREP = true;
 
+const UNIVERSITY_ACCENTS: Record<string, string> = {
+    'grand-valley-state-university': 'var(--kamp-university-gvsu)',
+};
+
 interface EventHomepageProps {
     event?: Event;
     promoCodeValid?: boolean;
@@ -113,7 +117,10 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         return <EventNotAvailable/>;
     }
 
+    const universityAccent = UNIVERSITY_ACCENTS[event.slug] ?? 'var(--kamp-forest)';
+
     const themeStyles = {
+        '--university-accent': universityAccent,
         '--event-bg-color': 'var(--kamp-cream)',
         '--event-content-bg-color': 'var(--kamp-paper)',
         '--event-primary-color': 'var(--kamp-ink)',
@@ -124,8 +131,8 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         '--event-accent-soft': 'var(--kamp-orange-tint)',
         '--event-accent-muted': 'var(--kamp-orange)',
         '--event-border-color': 'var(--kamp-line)',
-        '--theme-font-family': 'var(--kamp-font-serif)',
-        fontFamily: 'var(--kamp-font-serif)',
+        '--theme-font-family': 'var(--kamp-font-utility)',
+        fontFamily: 'var(--kamp-font-utility)',
     } as React.CSSProperties;
 
     const coverImageData = eventCoverImage(event);
@@ -217,14 +224,14 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                 <style>
                     {`
                         body, .ssr-loader {
-                            background-color: var(--kamp-cream, #f9f4f0) !important;
+                            background-color: var(--kamp-cream, #ffffff) !important;
                         }
                     `}
                 </style>
 
                 {event && <EventDocumentHead event={event}/>}
 
-                {/* Kamp Love ground: a calm cream field, never a blurred cover mirror */}
+                {/* Kamp Love ground: a clean white field, never a blurred cover mirror */}
                 <div className={classes.background}/>
 
                 <div className={classes.container}>

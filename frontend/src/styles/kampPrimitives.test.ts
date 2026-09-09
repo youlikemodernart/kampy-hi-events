@@ -103,5 +103,19 @@ describe('mutation proof', () => {
         // No font stack literals left in the provider.
         expect(providerSource).not.toMatch(/'PT Serif'/);
         expect(providerSource).not.toMatch(/'Lato'/);
+
+        const eventStyles = readFileSync(
+            join(here, '../components/layouts/EventHomepage/EventHomepage.module.scss'),
+            'utf8'
+        );
+        const eventSource = readFileSync(
+            join(here, '../components/layouts/EventHomepage/index.tsx'),
+            'utf8'
+        );
+        expect(eventStyles).toMatch(/\$serif: var\(--kamp-font-serif\)/);
+        expect(eventStyles).toMatch(/\$util: var\(--kamp-font-utility\)/);
+        expect(eventStyles).not.toMatch(/'DM Sans'/);
+        expect(eventSource).toMatch(/'grand-valley-state-university': 'var\(--kamp-university-gvsu\)'/);
+        expect(eventSource).not.toMatch(/event\.id === 7/);
     });
 });

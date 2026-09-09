@@ -1,14 +1,12 @@
 @use "../../../styles/mixins.scss";
 
-// Kamp Love Kamper page. Method transferred from the accepted Special Olympics reference
-// (Blink UX): oversized plainspoken type, full-width material bands with organic contours,
-// cream panels overlapping band edges, logistics expressed visually, one dominant action per
-// band, large touch targets, mobile-first. Substituted into Kamp Love's outdoors palette:
-// cream ground, deep ink + forest green material fields, restrained burnt orange (non-text
-// accent), PT Serif for editorial, Lato for logistics. No gradients.
+// Kamp Love customer page: oversized plainspoken type, clean rectangular color bands,
+// one dominant action per band, large touch targets, and mobile-first composition. White and
+// Kamp green provide the consistent foundation; official university colors appear as bounded
+// event accents. No ornamental contours or decorative gradients.
 
-$serif: 'PT Serif', Georgia, 'Times New Roman', serif;
-$util: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$serif: var(--kamp-font-serif);
+$util: var(--kamp-font-utility);
 $radius-panel: var(--radius);
 $radius-card: var(--radius);
 $radius-pill: var(--radius-pill);
@@ -22,22 +20,8 @@ $feedback: var(--motion-feedback) ease-out;
   }
 }
 
-// A broad, gentle cream landscape ridge flowing into a dark material band.
-@mixin contour-top {
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    left: 0;
-    right: 0;
-    height: 46px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 72' preserveAspectRatio='none'%3E%3Cpath fill='%23f9f4f0' d='M0,0 H1440 V28 C1180,66 940,6 700,30 C470,53 240,66 0,38 Z'/%3E%3C/svg%3E") no-repeat;
-    background-size: 100% 100%;
-    pointer-events: none;
-  }
-}
+// Bands meet on straight edges. Kept as a no-op to make the rectangular rule explicit.
+@mixin contour-top {}
 
 // Page ground -------------------------------------------------------------
 .skipLink {
@@ -185,7 +169,7 @@ $feedback: var(--motion-feedback) ease-out;
   padding: 9px 16px;
   font-family: $util;
   font-size: 0.8125rem;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--kamp-ink, #171717);
@@ -198,7 +182,7 @@ $feedback: var(--motion-feedback) ease-out;
 
 .heroKicker {
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: clamp(0.8125rem, 0.7rem + 0.4vw, 0.95rem);
@@ -207,8 +191,8 @@ $feedback: var(--motion-feedback) ease-out;
 
 .eventTitle {
   font-family: $serif;
-  font-style: italic;
-  font-weight: 400;
+  font-style: normal;
+  font-weight: 700;
   font-size: clamp(2.75rem, 1rem + 7vw, 5rem);
   line-height: 0.98;
   letter-spacing: -0.035em;
@@ -232,7 +216,7 @@ $feedback: var(--motion-feedback) ease-out;
   flex-direction: column;
   justify-content: flex-end;
   gap: var(--space-4);
-  background: var(--kamp-forest);
+  background: var(--university-accent, var(--kamp-forest));
   color: var(--kamp-cream);
 
   .eventTitle {
@@ -285,7 +269,7 @@ a.organizerPill:hover {
   color: var(--kamp-cream, #f9f4f0);
   font-family: $util;
   font-size: 0.85rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .organizerPillName {
@@ -326,13 +310,11 @@ a.organizerPill:hover {
   }
 }
 
-// Essentials: logistics made delightfully simple (forest material field) --
+// Essentials: Kamp-owned logistics in a solid rectangular field.
 .essentialsBand {
   @include band(var(--band-py-material));
-  @include contour-top;
   background: var(--kamp-forest);
   color: var(--kamp-cream);
-  padding-top: calc(var(--band-py-material) + var(--band-contour-clear));
 }
 
 .essentialsGrid {
@@ -348,11 +330,11 @@ a.organizerPill:hover {
 
 .essentialLabel {
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.8125rem;
-  color: rgba(249, 244, 240, 0.72);
+  color: var(--kamp-cream);
   margin-bottom: 10px;
 }
 
@@ -400,7 +382,7 @@ a.organizerPill:hover {
   border: 1px solid var(--kamp-cream, #f9f4f0);
   border-radius: $radius-pill;
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 0.8125rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -454,7 +436,7 @@ a.organizerPill:hover {
 
 .eyebrow {
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.8125rem;
@@ -509,7 +491,7 @@ a.organizerPill:hover {
     padding-left: 1em;
     margin: 1em 0;
     color: var(--secondary-color);
-    font-style: italic;
+    font-style: normal;
   }
 
   img {
@@ -562,7 +544,7 @@ a.organizerPill:hover {
 
 .ticketsEyebrow {
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.8125rem;
@@ -842,7 +824,7 @@ a.organizerPill:hover {
     border-radius: $radius-pill !important;
     font-family: $util;
     font-size: 1rem !important;
-    font-weight: 900 !important;
+    font-weight: 700 !important;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     cursor: pointer;
@@ -907,7 +889,7 @@ a.organizerPill:hover {
     border: 1px solid var(--kamp-ink, #171717);
     border-radius: $radius-pill;
     font-family: $util;
-    font-weight: 900;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-size: 0.75rem;
@@ -951,7 +933,7 @@ a.organizerPill:hover {
 
 .logisticsLabel {
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.75rem;
@@ -983,7 +965,7 @@ a.organizerPill:hover {
   gap: 7px;
   color: var(--kamp-forest, #2f5147);
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1013,7 +995,7 @@ a.organizerPill:hover {
   border-radius: $radius-pill;
   color: var(--primary-text-color);
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1113,7 +1095,7 @@ a.organizerPill:hover {
   color: var(--kamp-cream, #f9f4f0);
   font-family: $util;
   font-size: 1.5rem;
-  font-weight: 900;
+  font-weight: 700;
   flex-shrink: 0;
 }
 
@@ -1238,7 +1220,7 @@ a.organizerPill:hover {
   color: var(--kamp-cream, #f9f4f0);
   border-radius: $radius-pill;
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1259,11 +1241,9 @@ a.organizerPill:hover {
   }
 }
 
-// Four-C signature (deep ink material field with an organic contour) ------
+// Four-C signature: a solid Kamp identity block.
 .signatureBand {
   @include band(var(--band-py-material));
-  @include contour-top;
-  padding-top: clamp(56px, 6vw, 88px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1274,7 +1254,7 @@ a.organizerPill:hover {
 
 .signatureItem {
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: clamp(0.8125rem, 0.7rem + 0.5vw, 1rem);
@@ -1371,7 +1351,7 @@ a.organizerPill:hover {
   background: var(--kamp-forest, #2f5147);
   color: var(--kamp-cream, #f9f4f0);
   font-family: $util;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 0.8125rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;

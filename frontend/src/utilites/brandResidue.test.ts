@@ -93,12 +93,12 @@ describe('customer-facing surfaces carry no default Hi.Events identity', () => {
     });
 
     it('specifies no typeface that the application does not load', () => {
-        // Only PT Serif and Lato have @font-face declarations and woff2 files.
-        // 'Outfit' was previously specified in two checkout components and silently
-        // fell back to a system sans.
+        // DM Sans is the single loaded customer-facing family. 'Outfit' was previously
+        // specified in two checkout components and silently fell back to a system sans.
         const loaded = read(join(srcRoot, 'styles/global.scss'));
-        expect(loaded).toMatch(/font-family: 'PT Serif'/);
-        expect(loaded).toMatch(/font-family: 'Lato'/);
+        expect(loaded).toMatch(/font-family: 'DM Sans'/);
+        expect(loaded).not.toMatch(/font-family: 'PT Serif'/);
+        expect(loaded).not.toMatch(/font-family: 'Lato'/);
 
         const offenders = files
             .filter((f) => uncommentedLines(read(f)).some((l) => /['"]Outfit['"]/.test(l)))

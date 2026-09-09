@@ -22,6 +22,7 @@ import {ThirdPartyScripts} from "./components/common/ThirdPartyScripts";
 import {getConfig} from "./utilites/config.ts";
 import {appName, faviconMimeType} from "./utilites/branding.ts";
 import {CookieConsentBanner} from "./components/common/CookieConsentBanner";
+import {kamp} from "./styles/kampPrimitives";
 import {isConsentPending, setConsentState, updateGoogleConsentMode} from "./utilites/trackingPixels/consent";
 
 declare global {
@@ -78,13 +79,13 @@ export const App: FC<
                 theme={{
                     colors: {
                         primary: generateColors(getConfig("VITE_APP_PRIMARY_COLOR", "#ff7b00") as string),
-                        secondary: generateColors(getConfig("VITE_APP_SECONDARY_COLOR", "#171717") as string),
+                        secondary: generateColors(getConfig("VITE_APP_SECONDARY_COLOR", kamp.ink) as string),
                     },
                     primaryColor: "primary",
-                    fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
+                    fontFamily: kamp.fontUtility,
                     headings: {
-                        fontFamily: "'PT Serif', Georgia, 'Times New Roman', serif",
-                        fontWeight: "400",
+                        fontFamily: kamp.fontUtility,
+                        fontWeight: "700",
                     },
                     primaryShade: 7,
                 }}
