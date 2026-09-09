@@ -77,7 +77,8 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         const checkTicketsPosition = () => {
             if (ticketsSectionRef.current) {
                 const rect = ticketsSectionRef.current.getBoundingClientRect();
-                const isBelowFold = rect.top > window.innerHeight;
+                const scrollButtonRevealDistance = 96;
+                const isBelowFold = rect.top > window.innerHeight + scrollButtonRevealDistance;
                 const isAboveView = rect.bottom < 0;
                 const shouldShowButton = isBelowFold || isAboveView;
                 setShowScrollButton(shouldShowButton);
