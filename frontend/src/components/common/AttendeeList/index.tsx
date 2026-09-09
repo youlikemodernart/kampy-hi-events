@@ -13,9 +13,10 @@ interface AttendeeListProps {
     products: Product[];
     questionAnswers?: QuestionAnswer[];
     refetchOrder?: () => void;
+    canEditAnswers?: boolean;
 }
 
-export const AttendeeList = ({order, products, refetchOrder, questionAnswers = []}: AttendeeListProps) => {
+export const AttendeeList = ({order, products, refetchOrder, questionAnswers = [], canEditAnswers = true}: AttendeeListProps) => {
     if (!order.attendees?.length) {
         return (
             <div className={classes.container}>
@@ -125,6 +126,7 @@ export const AttendeeList = ({order, products, refetchOrder, questionAnswers = [
                                         compact
                                         questions={getAttendeeQuestions(attendee.id)}
                                         onEditAnswer={refetchOrder}
+                                        canEditAnswers={canEditAnswers}
                                     />
                                 </div>
                             </Collapse>

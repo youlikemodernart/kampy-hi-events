@@ -18,6 +18,7 @@ import {orderClient} from "../../../api/order.client";
 import {downloadBinary} from "../../../utilites/download";
 import {FilterModal, FilterOption} from "../../common/FilterModal";
 import {withLoadingNotification} from "../../../utilites/withLoadingNotification.tsx";
+import {useCurrentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 const orderStatuses = [
     {label: t`Completed`, value: 'COMPLETED'},
@@ -38,6 +39,7 @@ export const Orders: React.FC = () => {
     const orders = ordersQuery?.data?.data;
     const pagination = ordersQuery?.data?.meta;
     const [downloadPending, setDownloadPending] = useState(false);
+    const canExportOrders = useCurrentUserCan('reports.export');
 
     const filterOptions: FilterOption[] = [
         {
@@ -110,9 +112,7 @@ export const Orders: React.FC = () => {
 
     return (
         <PageBody>
-            <PageTitle
-                subheading={t`View order details, issue refunds, and resend confirmations.`}
-            >{t`Orders`}</PageTitle>
+            <PageTitle>{t`Orders`}</PageTitle>
             <ToolBar
                 filterComponent={
                     <FilterModal
@@ -132,15 +132,17 @@ export const Orders: React.FC = () => {
                     />
                 )}
             >
-                <Button
-                    onClick={() => handleExport(eventId)}
-                    rightSection={<IconDownload size={14}/>}
-                    color="green"
-                    loading={downloadPending}
-                    size="sm"
-                >
-                    {t`Export`}
-                </Button>
+                {canExportOrders && (
+                    <Button
+                        onClick={() => handleExport(eventId)}
+                        rightSection={<IconDownload size={14}/>}
+                        color="green"
+                        loading={downloadPending}
+                        size="sm"
+                    >
+                        {t`Export`}
+                    </Button>
+                )}
             </ToolBar>
 
             <TableSkeleton isVisible={!orders || ordersQuery.isFetching}/>

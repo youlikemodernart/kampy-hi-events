@@ -22,6 +22,7 @@ import {InputLabelWithHelp} from "../../common/InputLabelWithHelp";
 import classes from './ManageOrderModal.module.scss';
 import {EditOrderPayload} from "../../../api/order.client.ts";
 import {SideDrawer} from "../../common/SideDrawer";
+import {useCurrentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 interface ManageOrderModalProps {
     orderId: IdParam;
@@ -37,6 +38,8 @@ export const ManageOrderModal = ({onClose, orderId}: GenericModalProps & ManageO
     const [activeTab, setActiveTab] = useState("view");
     const errorHandler = useFormErrorResponseHandler();
     const mutation = useEditOrder();
+    const canManageOrders = useCurrentUserCan('orders.manage');
+    const canManageEventContent = useCurrentUserCan('event.content.manage');
 
     const form = useForm({
         initialValues: {
@@ -113,6 +116,7 @@ export const ManageOrderModal = ({onClose, orderId}: GenericModalProps & ManageO
             content: orderHasQuestions ? (
                 <QuestionAndAnswerList
                     onEditAnswer={refetchOrder}
+                    canEditAnswers={canManageEventContent}
                     questionAnswers={order.question_answers as QuestionAnswer[]}/>
             ) : (
                 <Text c="dimmed" ta="center" py="xl">
@@ -126,7 +130,13 @@ export const ManageOrderModal = ({onClose, orderId}: GenericModalProps & ManageO
             title: t`Attendees`,
             count: orderHasAttendees ? order.attendees.length : undefined,
             content: orderHasAttendees ? (
-                <AttendeeList refetchOrder={refetchOrder} order={order} products={products as Product[]} questionAnswers={order.question_answers}/>
+                <AttendeeList
+                    refetchOrder={refetchOrder}
+                    order={order}
+                    products={products as Product[]}
+                    questionAnswers={order.question_answers}
+                    canEditAnswers={canManageEventContent}
+                />
             ) : (
                 <Text c="dimmed" ta="center" py="xl">
                     {t`No attendees have been added to this order.`}
@@ -199,9 +209,11 @@ export const ManageOrderModal = ({onClose, orderId}: GenericModalProps & ManageO
                         <Tabs.Tab value="view" leftSection={<IconInfoCircle size={16}/>}>
                             {t`View`}
                         </Tabs.Tab>
-                        <Tabs.Tab value="edit" leftSection={<IconEdit size={16}/>}>
-                            {t`Edit`}
-                        </Tabs.Tab>
+                        {canManageOrders && (
+                            <Tabs.Tab value="edit" leftSection={<IconEdit size={16}/>}>
+                                {t`Edit`}
+                            </Tabs.Tab>
+                        )}
                     </Tabs.List>
 
                     <Box mt="md">
@@ -211,9 +223,11 @@ export const ManageOrderModal = ({onClose, orderId}: GenericModalProps & ManageO
                                 defaultValue="details"
                             />
                         </Tabs.Panel>
-                        <Tabs.Panel value="edit">
-                            {editContent}
-                        </Tabs.Panel>
+                        {canManageOrders && (
+                            <Tabs.Panel value="edit">
+                                {editContent}
+                            </Tabs.Panel>
+                        )}
                     </Box>
                 </Tabs>
             </Stack>

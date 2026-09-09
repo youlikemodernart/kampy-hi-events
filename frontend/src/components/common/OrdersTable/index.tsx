@@ -45,6 +45,7 @@ import {ColumnVisibilityToggle} from "../ColumnVisibilityToggle";
 import {CellContext} from "@tanstack/react-table";
 import {formatCurrency} from "../../../utilites/currency.ts";
 import {eventCheckoutUrl} from "../../../utilites/urlHelper.ts";
+import {useCurrentUserCan} from "../../../hooks/useIsCurrentUserAdmin.ts";
 
 interface OrdersTableProps {
     event: Event,
@@ -61,6 +62,9 @@ export const OrdersTable = ({orders, event}: OrdersTableProps) => {
     const resendConfirmationMutation = useResendOrderConfirmation();
     const markAsPaidMutation = useMarkOrderAsPaid();
     const clipboard = useClipboard({timeout: 2000});
+    const canManageOrders = useCurrentUserCan('orders.manage');
+    const canRefundOrders = useCurrentUserCan('orders.refund');
+    const canManageMessages = useCurrentUserCan('messages.manage');
 
     useUrlHash(/^#order-(\d+)$/, (matches => {
         const orderId = matches![1];
@@ -148,34 +152,39 @@ export const OrdersTable = ({orders, event}: OrdersTableProps) => {
                     </Menu.Target>
 
                     <Menu.Dropdown>
-                        <Menu.Label>{t`Manage`}</Menu.Label>
+                        <Menu.Label>{t`Order`}</Menu.Label>
                         <Menu.Item onClick={() => handleModalClick(order.id, viewModal)}
-                                   leftSection={<IconBasketCog size={14}/>}>{t`Manage order`}</Menu.Item>
-                        <Menu.Item onClick={() => handleModalClick(order.id, messageModal)}
-                                   leftSection={<IconSend size={14}/>}>{t`Message buyer`}</Menu.Item>
-                        <Menu.Item onClick={() => {
-                                       const url = eventCheckoutUrl(order.event_id, order.short_id, 'summary');
-                                       clipboard.copy(url);
-                                       showSuccess(t`Customer link copied to clipboard`);
-                                   }}
-                                   leftSection={<IconCopy size={14}/>}>{t`Copy customer link`}</Menu.Item>
+                                   leftSection={<IconBasketCog size={14}/>}>{canManageOrders ? t`Manage order` : t`View`}</Menu.Item>
+
+                        {canManageMessages && (
+                            <Menu.Item onClick={() => handleModalClick(order.id, messageModal)}
+                                       leftSection={<IconSend size={14}/>}>{t`Message buyer`}</Menu.Item>
+                        )}
+                        {canManageOrders && (
+                            <Menu.Item onClick={() => {
+                                               const url = eventCheckoutUrl(order.event_id, order.short_id, 'summary');
+                                               clipboard.copy(url);
+                                               showSuccess(t`Customer link copied to clipboard`);
+                                           }}
+                                           leftSection={<IconCopy size={14}/>}>{t`Copy customer link`}</Menu.Item>
+                        )}
 
                         {order.latest_invoice && (
                             <Menu.Item onClick={() => handleInvoiceDownload(order.latest_invoice as Invoice)}
                                        leftSection={<IconReceipt2 size={14}/>}>{t`Download invoice`}</Menu.Item>
                         )}
 
-                        {order.status === 'AWAITING_OFFLINE_PAYMENT' && (
+                        {canManageOrders && order.status === 'AWAITING_OFFLINE_PAYMENT' && (
                             <Menu.Item onClick={() => handleMarkAsPaid(event.id, order.id)}
                                        leftSection={<IconReceiptDollar size={14}/>}>{t`Mark as paid`}</Menu.Item>
                         )}
 
-                        {isRefundable && (
+                        {canRefundOrders && isRefundable && (
                             <Menu.Item onClick={() => handleModalClick(order.id, refundModal)}
                                        leftSection={<IconReceiptRefund size={14}/>}>{t`Refund order`}</Menu.Item>
                         )}
 
-                        {order.status === 'COMPLETED' && (
+                        {canManageOrders && order.status === 'COMPLETED' && (
                             <Menu.Item
                                 onClick={() => handleResendConfirmation(event.id, order.id)}
                                 leftSection={<IconRepeat size={14}/>}>
@@ -183,7 +192,7 @@ export const OrdersTable = ({orders, event}: OrdersTableProps) => {
                             </Menu.Item>
                         )}
 
-                        {order.status !== 'CANCELLED' && (
+                        {canManageOrders && order.status !== 'CANCELLED' && (
                             <>
                                 <Menu.Divider/>
                                 <Menu.Label>{t`Danger zone`}</Menu.Label>
@@ -245,14 +254,16 @@ export const OrdersTable = ({orders, event}: OrdersTableProps) => {
                                 </Popover.Target>
                                 <Popover.Dropdown>
                                     <Group gap="xs" style={{flexDirection: 'column', width: '100%'}}>
-                                        <Button
-                                            fullWidth
-                                            variant="light"
-                                            leftSection={<IconSend size={16}/>}
-                                            onClick={() => handleMessageFromEmail(order)}
-                                        >
-                                            {t`Message`}
-                                        </Button>
+                                        {canManageMessages && (
+                                            <Button
+                                                fullWidth
+                                                variant="light"
+                                                leftSection={<IconSend size={16}/>}
+                                                onClick={() => handleMessageFromEmail(order)}
+                                            >
+                                                {t`Message`}
+                                            </Button>
+                                        )}
                                         <Button
                                             fullWidth
                                             variant="light"
@@ -457,7 +468,7 @@ export const OrdersTable = ({orders, event}: OrdersTableProps) => {
                 },
             },
         ],
-        [event.id, emailPopoverId]
+        [event.id, emailPopoverId, canManageOrders, canRefundOrders, canManageMessages]
     );
 
     if (orders.length === 0) {

@@ -22,18 +22,21 @@ interface QuestionAndAnswerListProps {
     questionAnswers: QuestionAnswer[];
     belongsToFilter?: string[];
     onEditAnswer?: () => void;
+    canEditAnswers?: boolean;
 }
 
 interface QuestionListProps {
     questions: QuestionAnswer[];
     onEditAnswer?: () => void;
     compact?: boolean;
+    canEditAnswers?: boolean;
 }
 
 interface AttendeeQuestionsListProps {
     attendeeQuestions: QuestionAnswer[];
     onEditAnswer?: () => void;
     compact?: boolean;
+    canEditAnswers?: boolean;
 }
 
 interface QuestionItemProps {
@@ -44,10 +47,11 @@ interface QuestionItemProps {
     compact?: boolean;
     eventId?: string;
     hideAttendeeInfo?: boolean;
+    canEditAnswer?: boolean;
 }
 
 // Separated QuestionItem component to isolate form initialization
-const QuestionItem = ({ qa, isEditing, toggleEditMode, onEditAnswer, compact = false, eventId, hideAttendeeInfo = false }: QuestionItemProps) => {
+const QuestionItem = ({ qa, isEditing, toggleEditMode, onEditAnswer, compact = false, eventId, hideAttendeeInfo = false, canEditAnswer = true }: QuestionItemProps) => {
     const errorHandler = useFormErrorResponseHandler();
     const updateAnswerMutation = useEditQuestionAnswer();
 
@@ -156,16 +160,18 @@ const QuestionItem = ({ qa, isEditing, toggleEditMode, onEditAnswer, compact = f
                     <Text size="sm" className={classes.answer} style={{whiteSpace: 'pre-line'}}>
                         {formatAnswer(qa.answer)}
                     </Text>
-                    <Tooltip label={t`Edit Answer`} position="bottom" withArrow>
-                        <ActionIcon
-                            variant="subtle"
-                            radius="xl"
-                            size="sm"
-                            onClick={() => toggleEditMode(qa.question_id)}
-                        >
-                            <IconEdit size={16}/>
-                        </ActionIcon>
-                    </Tooltip>
+                    {canEditAnswer && (
+                        <Tooltip label={t`Edit Answer`} position="bottom" withArrow>
+                            <ActionIcon
+                                variant="subtle"
+                                radius="xl"
+                                size="sm"
+                                onClick={() => toggleEditMode(qa.question_id)}
+                            >
+                                <IconEdit size={16}/>
+                            </ActionIcon>
+                        </Tooltip>
+                    )}
                 </div>
             )}
 
@@ -198,7 +204,7 @@ const QuestionItem = ({ qa, isEditing, toggleEditMode, onEditAnswer, compact = f
     );
 };
 
-export const QuestionList = ({questions, onEditAnswer, compact = false}: QuestionListProps) => {
+export const QuestionList = ({questions, onEditAnswer, compact = false, canEditAnswers = true}: QuestionListProps) => {
     const {eventId} = useParams();
     const [editingQuestionIds, setEditingQuestionIds] = useState<IdParam[]>([]);
 
@@ -229,6 +235,7 @@ export const QuestionList = ({questions, onEditAnswer, compact = false}: Questio
                     onEditAnswer={onEditAnswer}
                     compact={compact}
                     eventId={eventId}
+                    canEditAnswer={canEditAnswers}
                 />
             ))}
         </div>
@@ -236,7 +243,7 @@ export const QuestionList = ({questions, onEditAnswer, compact = false}: Questio
 };
 
 // New component to group questions by attendee
-export const AttendeeQuestionsList = ({attendeeQuestions, onEditAnswer, compact = false}: AttendeeQuestionsListProps) => {
+export const AttendeeQuestionsList = ({attendeeQuestions, onEditAnswer, compact = false, canEditAnswers = true}: AttendeeQuestionsListProps) => {
     const {eventId} = useParams();
     const [editingQuestionIds, setEditingQuestionIds] = useState<IdParam[]>([]);
 
@@ -315,6 +322,7 @@ export const AttendeeQuestionsList = ({attendeeQuestions, onEditAnswer, compact 
                                     compact={compact}
                                     eventId={eventId}
                                     hideAttendeeInfo={true} // Hide attendee info since we're showing it in the header
+                                    canEditAnswer={canEditAnswers}
                                 />
                             ))}
                         </div>
@@ -325,7 +333,7 @@ export const AttendeeQuestionsList = ({attendeeQuestions, onEditAnswer, compact 
     );
 };
 
-export const QuestionAndAnswerList = ({questionAnswers, belongsToFilter, onEditAnswer}: QuestionAndAnswerListProps) => {
+export const QuestionAndAnswerList = ({questionAnswers, belongsToFilter, onEditAnswer, canEditAnswers = true}: QuestionAndAnswerListProps) => {
     const filteredQuestions = belongsToFilter?.length
         ? questionAnswers.filter(qa => belongsToFilter.includes(qa.belongs_to))
         : questionAnswers;
@@ -368,11 +376,13 @@ export const QuestionAndAnswerList = ({questionAnswers, belongsToFilter, onEditA
                     <AttendeeQuestionsList
                         attendeeQuestions={questions}
                         onEditAnswer={onEditAnswer}
+                        canEditAnswers={canEditAnswers}
                     />
                 ) : (
                     <QuestionList
                         questions={questions}
                         onEditAnswer={onEditAnswer}
+                        canEditAnswers={canEditAnswers}
                     />
                 )}
             </div>
