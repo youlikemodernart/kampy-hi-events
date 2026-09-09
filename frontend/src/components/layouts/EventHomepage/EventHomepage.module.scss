@@ -97,7 +97,7 @@ $feedback: var(--motion-feedback) ease-out;
   min-height: 62vh;
   max-height: 760px;
   overflow: hidden;
-  background-color: var(--kamp-forest, #2f5147);
+  background-color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
 
   &[style*="--cover-aspect-ratio"] {
     aspect-ratio: var(--cover-aspect-ratio);
@@ -216,11 +216,11 @@ $feedback: var(--motion-feedback) ease-out;
   flex-direction: column;
   justify-content: flex-end;
   gap: var(--space-4);
-  background: var(--university-accent, var(--kamp-forest));
-  color: var(--kamp-cream);
+  background: var(--page-brand-primary, var(--kamp-forest));
+  color: var(--page-on-primary, var(--kamp-cream));
 
   .eventTitle {
-    color: var(--kamp-cream);
+    color: var(--page-on-primary, var(--kamp-cream));
   }
 }
 
@@ -262,11 +262,11 @@ a.organizerPill:hover {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--kamp-forest, #2f5147);
+  background: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--kamp-cream, #f9f4f0);
+  color: var(--page-on-secondary, var(--kamp-cream, #f9f4f0));
   font-family: $util;
   font-size: 0.85rem;
   font-weight: 700;
@@ -313,8 +313,8 @@ a.organizerPill:hover {
 // Essentials: Kamp-owned logistics in a solid rectangular field.
 .essentialsBand {
   @include band(var(--band-py-material));
-  background: var(--university-secondary, var(--kamp-forest));
-  color: var(--kamp-cream);
+  background: var(--page-brand-secondary, var(--kamp-forest));
+  color: var(--page-on-secondary, var(--kamp-cream));
 }
 
 .essentialsGrid {
@@ -334,7 +334,7 @@ a.organizerPill:hover {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.8125rem;
-  color: var(--kamp-cream);
+  color: var(--page-on-secondary, var(--kamp-cream));
   margin-bottom: 10px;
 }
 
@@ -344,13 +344,14 @@ a.organizerPill:hover {
   font-size: clamp(1.75rem, 1rem + 2.6vw, 3rem);
   line-height: 1.04;
   letter-spacing: -0.03em;
-  color: var(--kamp-cream, #f9f4f0);
+  color: var(--page-on-secondary, var(--kamp-cream, #f9f4f0));
 }
 
 .essentialSub {
   margin-top: 8px;
   font-size: 1.0625rem;
-  color: rgba(249, 244, 240, 0.82);
+  color: var(--page-on-secondary, var(--kamp-cream));
+  opacity: 0.82;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -377,9 +378,9 @@ a.organizerPill:hover {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  background: var(--kamp-cream, #f9f4f0);
-  color: var(--kamp-ink, #171717);
-  border: 1px solid var(--kamp-cream, #f9f4f0);
+  background: var(--page-on-secondary, var(--kamp-cream));
+  color: var(--page-brand-secondary, var(--kamp-ink));
+  border: 1px solid var(--page-on-secondary, var(--kamp-cream));
   border-radius: $radius-pill;
   font-family: $util;
   font-weight: 700;
@@ -397,19 +398,19 @@ a.organizerPill:hover {
 
   &:hover {
     background: transparent;
-    color: var(--kamp-cream, #f9f4f0);
+    color: var(--page-on-secondary, var(--kamp-cream));
   }
 }
 
 .ghostPill {
   background: transparent;
-  color: var(--kamp-cream, #f9f4f0);
-  border-color: rgba(249, 244, 240, 0.55);
+  color: var(--page-on-secondary, var(--kamp-cream));
+  border-color: currentColor;
 
   &:hover {
-    background: var(--kamp-cream, #f9f4f0);
-    color: var(--kamp-ink, #171717);
-    border-color: var(--kamp-cream, #f9f4f0);
+    background: var(--page-on-secondary, var(--kamp-cream));
+    color: var(--page-brand-secondary, var(--kamp-ink));
+    border-color: var(--page-on-secondary, var(--kamp-cream));
   }
 }
 
@@ -440,7 +441,7 @@ a.organizerPill:hover {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.8125rem;
-  color: var(--kamp-forest, #2f5147);
+  color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   margin-bottom: 10px;
 }
 
@@ -459,7 +460,7 @@ a.organizerPill:hover {
   }
 
   a {
-    color: var(--kamp-forest, #2f5147);
+    color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -503,7 +504,7 @@ a.organizerPill:hover {
 }
 
 .readMoreToggle {
-  color: var(--kamp-forest, #2f5147);
+  color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   font-family: $util;
   font-weight: 700;
   font-size: 0.9rem;
@@ -544,7 +545,7 @@ a.organizerPill:hover {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.8125rem;
-  color: var(--kamp-forest, #2f5147);
+  color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   margin-bottom: 10px;
 }
 
@@ -843,10 +844,10 @@ a.organizerPill:hover {
     min-height: 60px;
     padding: 18px 24px !important;
     height: auto !important;
-    background: var(--university-secondary, var(--kamp-forest)) !important;
-    background-color: var(--university-secondary, var(--kamp-forest)) !important;
-    color: var(--kamp-cream, #f9f4f0) !important;
-    border: 1px solid var(--university-secondary, var(--kamp-forest)) !important;
+    background: var(--page-brand-secondary, var(--kamp-forest)) !important;
+    background-color: var(--page-brand-secondary, var(--kamp-forest)) !important;
+    color: var(--page-on-secondary, var(--kamp-cream, #f9f4f0)) !important;
+    border: 1px solid var(--page-brand-secondary, var(--kamp-forest)) !important;
     border-radius: $radius-pill !important;
     font-family: $util;
     font-size: 1rem !important;
@@ -861,12 +862,17 @@ a.organizerPill:hover {
     transition: background $feedback, color $feedback;
 
     :global(.mantine-Button-label) {
-      color: var(--kamp-cream, #f9f4f0) !important;
+      color: var(--page-on-secondary, var(--kamp-cream, #f9f4f0)) !important;
     }
 
     &:hover:not(:disabled) {
-      background: var(--university-accent, var(--kamp-forest-deep)) !important;
-      background-color: var(--university-accent, var(--kamp-forest-deep)) !important;
+      background: var(--page-brand-primary, var(--kamp-forest-deep)) !important;
+      background-color: var(--page-brand-primary, var(--kamp-forest-deep)) !important;
+      color: var(--page-on-primary, var(--kamp-cream)) !important;
+
+      :global(.mantine-Button-label) {
+        color: var(--page-on-primary, var(--kamp-cream)) !important;
+      }
     }
 
     &:disabled {
@@ -890,7 +896,7 @@ a.organizerPill:hover {
     text-underline-offset: 3px;
 
     &:hover {
-      color: var(--kamp-forest, #2f5147);
+      color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
     }
   }
 
@@ -963,7 +969,7 @@ a.organizerPill:hover {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.75rem;
-  color: var(--kamp-forest, #2f5147);
+  color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
 }
 
 .logisticsValue {
@@ -989,7 +995,7 @@ a.organizerPill:hover {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: var(--kamp-forest, #2f5147);
+  color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   font-family: $util;
   font-weight: 700;
   font-size: 0.75rem;
@@ -1114,11 +1120,11 @@ a.organizerPill:hover {
   width: 76px;
   height: 76px;
   border-radius: $radius-card;
-  background: var(--kamp-forest, #2f5147);
+  background: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--kamp-cream, #f9f4f0);
+  color: var(--page-on-secondary, var(--kamp-cream, #f9f4f0));
   font-family: $util;
   font-size: 1.5rem;
   font-weight: 700;
@@ -1197,7 +1203,7 @@ a.organizerPill:hover {
   }
 
   a {
-    color: var(--kamp-forest, #2f5147);
+    color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -1241,9 +1247,9 @@ a.organizerPill:hover {
 .contactButton {
   padding: 0 22px;
   min-height: 48px;
-  border: 1px solid var(--kamp-forest, #2f5147);
-  background: var(--kamp-forest, #2f5147);
-  color: var(--kamp-cream, #f9f4f0);
+  border: 1px solid var(--page-brand-secondary, var(--kamp-forest, #2f5147));
+  background: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
+  color: var(--page-on-secondary, var(--kamp-cream, #f9f4f0));
   border-radius: $radius-pill;
   font-family: $util;
   font-weight: 700;
@@ -1263,7 +1269,7 @@ a.organizerPill:hover {
 
   &:hover {
     background: transparent;
-    color: var(--kamp-forest, #2f5147);
+    color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   }
 }
 
@@ -1299,7 +1305,7 @@ a.organizerPill:hover {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--kamp-forest, #2f5147);
+    background: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   }
 
   &:last-child::after {
@@ -1336,7 +1342,7 @@ a.organizerPill:hover {
   text-underline-offset: 3px;
 
   &:hover {
-    color: var(--kamp-forest, #2f5147);
+    color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   }
 }
 
@@ -1360,7 +1366,7 @@ a.organizerPill:hover {
     text-underline-offset: 3px;
 
     &:hover {
-      color: var(--kamp-forest, #2f5147);
+      color: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
     }
   }
 }
@@ -1374,8 +1380,8 @@ a.organizerPill:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--kamp-forest, #2f5147);
-  color: var(--kamp-cream, #f9f4f0);
+  background: var(--page-brand-secondary, var(--kamp-forest, #2f5147));
+  color: var(--page-on-secondary, var(--kamp-cream, #f9f4f0));
   font-family: $util;
   font-weight: 700;
   font-size: 0.8125rem;
@@ -1384,7 +1390,7 @@ a.organizerPill:hover {
   min-height: 52px;
   padding: 0 24px;
   border-radius: $radius-pill;
-  border: 1px solid var(--kamp-forest, #2f5147);
+  border: 1px solid var(--page-brand-secondary, var(--kamp-forest, #2f5147));
   cursor: pointer;
   box-shadow: var(--elev-2);
   transition: background $feedback;
@@ -1397,7 +1403,8 @@ a.organizerPill:hover {
   }
 
   &:hover {
-    background: var(--kamp-forest-deep, #223b34);
+    background: var(--page-brand-primary, var(--kamp-forest-deep, #223b34));
+    color: var(--page-on-primary, var(--kamp-cream));
   }
 }
 

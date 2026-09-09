@@ -34,8 +34,6 @@ export const KAMP_PRIMITIVES = {
     '--kamp-stop-tint': '#f5e2dc',
     '--kamp-forest': '#2b663d',
     '--kamp-forest-deep': '#1f4a2d',
-    '--kamp-university-gvsu': '#0032a0',
-    '--kamp-university-gvsu-secondary': '#13155c',
     '--kamp-moss': '#5c6551',
     '--kamp-clay': '#b3654a',
     '--kamp-clay-tint': '#efe0d8',

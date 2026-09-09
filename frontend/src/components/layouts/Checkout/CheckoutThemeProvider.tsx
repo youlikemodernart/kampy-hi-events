@@ -5,6 +5,7 @@ import {kamp} from "../../../styles/kampPrimitives";
 
 interface CheckoutThemeProviderProps {
     accentColor: string;
+    accentContrastColor?: string;
     mode: 'light' | 'dark';
 }
 
@@ -90,9 +91,9 @@ function createColorPalette(accentColor: string): MantineColorsTuple {
 /**
  * Creates a Mantine theme with the user's accent color.
  */
-function createCheckoutTheme(accentColor: string, mode: 'light' | 'dark'): MantineThemeOverride {
+function createCheckoutTheme(accentColor: string, accentContrastColor: string | undefined, mode: 'light' | 'dark'): MantineThemeOverride {
     const primaryColors = createColorPalette(accentColor);
-    const contrastColor = getContrastColor(accentColor);
+    const contrastColor = accentContrastColor ?? getContrastColor(accentColor);
 
     return {
         primaryColor: 'primary',
@@ -157,10 +158,10 @@ function createCheckoutTheme(accentColor: string, mode: 'light' | 'dark'): Manti
  * Surface, text, and border colors are FIXED based on light/dark mode.
  * Only accent color is customizable.
  */
-function createCSSVariablesResolver(accentColor: string, mode: 'light' | 'dark'): CSSVariablesResolver {
+function createCSSVariablesResolver(accentColor: string, accentContrastColor: string | undefined, mode: 'light' | 'dark'): CSSVariablesResolver {
     return () => {
         const palette = mode === 'light' ? LIGHT_PALETTE : DARK_PALETTE;
-        const accentContrast = getContrastColor(accentColor);
+        const accentContrast = accentContrastColor ?? getContrastColor(accentColor);
         // Unparseable accent falls back to the Kamp forest channel values rather
         // than to a neutral ink tint.
         const rgb = hexToRgb(accentColor) ?? hexToRgb(kamp.forest)!;
@@ -235,17 +236,18 @@ function createCSSVariablesResolver(accentColor: string, mode: 'light' | 'dark')
  */
 export const CheckoutThemeProvider = ({
     accentColor,
+    accentContrastColor,
     mode,
     children,
 }: PropsWithChildren<CheckoutThemeProviderProps>) => {
     const theme = useMemo(
-        () => createCheckoutTheme(accentColor, mode),
-        [accentColor, mode]
+        () => createCheckoutTheme(accentColor, accentContrastColor, mode),
+        [accentColor, accentContrastColor, mode]
     );
 
     const cssVariablesResolver = useMemo(
-        () => createCSSVariablesResolver(accentColor, mode),
-        [accentColor, mode]
+        () => createCSSVariablesResolver(accentColor, accentContrastColor, mode),
+        [accentColor, accentContrastColor, mode]
     );
 
     return (

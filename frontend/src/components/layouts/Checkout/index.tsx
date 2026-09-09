@@ -19,7 +19,7 @@ import {useAbandonOrderPublic} from "../../../mutations/useAbandonOrderPublic.ts
 import {showError, showInfo} from "../../../utilites/notifications.tsx";
 import {isDateInFuture} from "../../../utilites/dates.ts";
 import {CheckoutThemeProvider} from "./CheckoutThemeProvider.tsx";
-import {kamp} from "../../../styles/kampPrimitives.ts";
+import {resolveUniversityTheme} from "../../../styles/universityThemes.ts";
 import {useOrganizerTrackingPixels} from "../../../hooks/useOrganizerTrackingPixels";
 import {trackPixelEvent, hasActivePixels} from "../../../utilites/trackingPixels";
 import {CookieConsentBanner} from "../../common/CookieConsentBanner";
@@ -180,15 +180,17 @@ const Checkout = () => {
         }
     }, [order?.status, order?.short_id, consentGranted]);
 
-    // Kamp Love uses one fixed, high-contrast checkout foundation. The dominant action carries
-    // forest green from the Kamper page so the invitation and the transaction feel like one
-    // material. Event content and transaction behavior remain dynamic; organizer theme settings
-    // do not restyle checkout. The accent reads from the canonical primitive set, so a change to
-    // --kamp-forest reaches checkout.
+    // Kamp owns checkout's white foundation and interaction system. The event's
+    // university adapter supplies the customer-facing accent across the journey.
     const checkoutMode = 'light' as const;
+    const universityTheme = resolveUniversityTheme(event?.slug);
 
     return (
-        <CheckoutThemeProvider accentColor={kamp.forest} mode={checkoutMode}>
+        <CheckoutThemeProvider
+            accentColor={universityTheme.secondary}
+            accentContrastColor={universityTheme.onSecondary}
+            mode={checkoutMode}
+        >
             <div className={classes.container} data-mode={checkoutMode}>
                 <div className={classes.mainContent}>
                     <header className={classes.header}>

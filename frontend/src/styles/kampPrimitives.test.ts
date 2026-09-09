@@ -74,10 +74,9 @@ describe('checkout theme derives from the primitive source', () => {
 });
 
 describe('mutation proof', () => {
-    it('propagates a primitive change into the checkout theme values', async () => {
-        // The acceptance test from the specification: a change to --kamp-forest must
-        // reach checkout. Before Phase 1, CheckoutThemeProvider held its own copy of
-        // the palette, so this stopped at the checkout boundary.
+    it('propagates foundation and university roles into checkout', async () => {
+        // Kamp foundation values and the resolved university adapter must both
+        // cross the checkout boundary without repeated literals.
         const providerSource = readFileSync(
             join(here, '../components/layouts/Checkout/CheckoutThemeProvider.tsx'),
             'utf8'
@@ -96,8 +95,11 @@ describe('mutation proof', () => {
         expect(lightPalette).not.toMatch(/#[0-9a-fA-F]{3,8}/);
         expect(lightPalette).toMatch(/kamp\./);
 
-        // The accent must be the primitive, not a repeated literal.
-        expect(checkoutSource).toMatch(/accentColor=\{kamp\.forest\}/);
+        // University accents must arrive through the shared semantic resolver,
+        // never as a repeated school or Kamp literal in checkout.
+        expect(checkoutSource).toMatch(/resolveUniversityTheme\(event\?\.slug\)/);
+        expect(checkoutSource).toMatch(/accentColor=\{universityTheme\.secondary\}/);
+        expect(checkoutSource).toMatch(/accentContrastColor=\{universityTheme\.onSecondary\}/);
         expect(checkoutSource).not.toMatch(/accentColor="#/);
 
         // No font stack literals left in the provider.
@@ -115,9 +117,8 @@ describe('mutation proof', () => {
         expect(eventStyles).toMatch(/\$serif: var\(--kamp-font-serif\)/);
         expect(eventStyles).toMatch(/\$util: var\(--kamp-font-utility\)/);
         expect(eventStyles).not.toMatch(/'DM Sans'/);
-        expect(eventSource).toMatch(/'grand-valley-state-university'/);
-        expect(eventSource).toMatch(/primary: 'var\(--kamp-university-gvsu\)'/);
-        expect(eventSource).toMatch(/secondary: 'var\(--kamp-university-gvsu-secondary\)'/);
+        expect(eventSource).toMatch(/resolveUniversityTheme\(event\.slug\)/);
+        expect(eventSource).toMatch(/'--page-brand-secondary': universityTheme\.secondary/);
         expect(eventSource).not.toMatch(/event\.id === 7/);
     });
 });

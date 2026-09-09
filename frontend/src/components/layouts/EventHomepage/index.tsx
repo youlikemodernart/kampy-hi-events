@@ -34,6 +34,7 @@ import {CookieConsentBanner} from "../../common/CookieConsentBanner";
 import {ShareComponent} from "../../common/ShareIcon";
 import {CalendarOptionsPopover} from "../../common/CalendarOptionsPopover";
 import {formatDateWithLocale, isDateInPast} from "../../../utilites/dates.ts";
+import {resolveUniversityTheme} from "../../../styles/universityThemes.ts";
 
 // Future Shopify merch lives on this same Kamper page: one coherent surface for tickets,
 // event information, and later merchandise. The section, its Kamp Love styling, and its mount
@@ -43,13 +44,6 @@ const SHOW_MERCH_SECTION = false;
 // "Your Kamp" prep modules (what to bring, schedule). These render as honest, clearly-empty
 // future insertion points — no fabricated event content. Set false to hide them entirely.
 const SHOW_KAMP_PREP = true;
-
-const UNIVERSITY_THEMES: Record<string, {primary: string; secondary: string}> = {
-    'grand-valley-state-university': {
-        primary: 'var(--kamp-university-gvsu)',
-        secondary: 'var(--kamp-university-gvsu-secondary)',
-    },
-};
 
 interface EventHomepageProps {
     event?: Event;
@@ -120,23 +114,23 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         return <EventNotAvailable/>;
     }
 
-    const universityTheme = UNIVERSITY_THEMES[event.slug] ?? {
-        primary: 'var(--kamp-forest)',
-        secondary: 'var(--kamp-forest-deep)',
-    };
+    const universityTheme = resolveUniversityTheme(event.slug);
 
     const themeStyles = {
-        '--university-accent': universityTheme.primary,
-        '--university-secondary': universityTheme.secondary,
+        '--page-brand-primary': universityTheme.primary,
+        '--page-brand-secondary': universityTheme.secondary,
+        '--page-on-primary': universityTheme.onPrimary,
+        '--page-on-secondary': universityTheme.onSecondary,
+        '--page-brand-secondary-soft': universityTheme.secondarySoft,
         '--event-bg-color': 'var(--kamp-cream)',
         '--event-content-bg-color': 'var(--kamp-paper)',
         '--event-primary-color': 'var(--kamp-ink)',
         '--event-primary-text-color': 'var(--kamp-ink)',
         '--event-secondary-color': 'var(--kamp-muted)',
         '--event-secondary-text-color': 'var(--kamp-muted)',
-        '--event-accent-contrast': 'var(--kamp-cream)',
-        '--event-accent-soft': 'var(--kamp-orange-tint)',
-        '--event-accent-muted': 'var(--kamp-orange)',
+        '--event-accent-contrast': 'var(--page-on-secondary)',
+        '--event-accent-soft': 'var(--page-brand-secondary-soft)',
+        '--event-accent-muted': 'var(--page-brand-secondary)',
         '--event-border-color': 'var(--kamp-line)',
         '--theme-font-family': 'var(--kamp-font-utility)',
         fontFamily: 'var(--kamp-font-utility)',
@@ -451,7 +445,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                                 background: "transparent",
                                                 primary: "var(--event-primary-color)",
                                                 primaryText: "var(--event-primary-text-color)",
-                                                secondary: "var(--university-secondary)",
+                                                secondary: "var(--page-brand-secondary)",
                                                 secondaryText: "var(--event-accent-contrast)",
                                                 bodyBackground: "var(--event-bg-color)",
                                             }}
