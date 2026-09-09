@@ -2,6 +2,7 @@
 
 namespace HiEvents\Http\Actions\Common\Webhooks;
 
+use HiEvents\Exceptions\Stripe\StripeForeignWebhookEventException;
 use HiEvents\Exceptions\Stripe\StripeLocalPaymentNotFoundException;
 use HiEvents\Exceptions\StripeWebhookEventClaimBusyException;
 use HiEvents\Http\Actions\BaseAction;
@@ -25,6 +26,8 @@ class StripeIncomingWebhookAction extends BaseAction
                 headerSignature: $request->server('HTTP_STRIPE_SIGNATURE'),
                 payload: $request->getContent(),
             ));
+        } catch (StripeForeignWebhookEventException) {
+            return $this->noContentResponse();
         } catch (StripeWebhookEventClaimBusyException) {
             return $this->noContentResponse(ResponseCodes::HTTP_CONFLICT);
         } catch (StripeLocalPaymentNotFoundException) {

@@ -11,12 +11,14 @@ use HiEvents\DomainObjects\Status\OrderPaymentStatus;
 use HiEvents\DomainObjects\Status\OrderStatus;
 use HiEvents\DomainObjects\StripePaymentDomainObject;
 use HiEvents\Events\OrderStatusChangedEvent;
+use HiEvents\Exceptions\Stripe\StripeLocalPaymentNotFoundException;
 use HiEvents\Repository\Eloquent\StripePaymentsRepository;
 use HiEvents\Repository\Interfaces\AffiliateRepositoryInterface;
 use HiEvents\Repository\Interfaces\AttendeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\EventSettingsRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Repository\Interfaces\StripeDisputeRepositoryInterface;
+use HiEvents\Repository\Interfaces\StripeWebhookReconciliationRepositoryInterface;
 use HiEvents\Services\Domain\Order\OrderApplicationFeeService;
 use HiEvents\Services\Domain\Order\OrderEffectOutboxService;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PaymentIntentSucceededHandler;
@@ -29,7 +31,6 @@ use Illuminate\Support\Facades\Event;
 use Mockery;
 use Mockery\MockInterface;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 use Stripe\PaymentIntent;
 use Tests\TestCase;
 
@@ -59,6 +60,8 @@ class PaymentIntentSucceededHandlerTest extends TestCase
 
     private StripeDisputeRepositoryInterface|MockInterface $disputes;
 
+    private StripeWebhookReconciliationRepositoryInterface|MockInterface $reconciliations;
+
     private StripeProviderObjectLockService|MockInterface $providerObjectLock;
 
     private PaymentIntentSucceededHandler $handler;
@@ -79,6 +82,7 @@ class PaymentIntentSucceededHandlerTest extends TestCase
         $this->applicationFees = Mockery::mock(OrderApplicationFeeService::class);
         $this->eventSettings = Mockery::mock(EventSettingsRepositoryInterface::class);
         $this->disputes = Mockery::mock(StripeDisputeRepositoryInterface::class);
+        $this->reconciliations = Mockery::mock(StripeWebhookReconciliationRepositoryInterface::class);
         $this->providerObjectLock = Mockery::mock(StripeProviderObjectLockService::class);
 
         $this->handler = new PaymentIntentSucceededHandler(
@@ -93,6 +97,7 @@ class PaymentIntentSucceededHandlerTest extends TestCase
             $this->applicationFees,
             $this->eventSettings,
             $this->disputes,
+            $this->reconciliations,
             $this->providerObjectLock,
             $this->outbox,
         );
@@ -231,8 +236,40 @@ class PaymentIntentSucceededHandlerTest extends TestCase
         );
         $this->disputes->shouldNotReceive('linkPendingToPayment');
 
-        $this->expectException(RuntimeException::class);
+        $this->reconciliations->shouldNotReceive('recordPending');
+        $this->expectException(StripeLocalPaymentNotFoundException::class);
 
         $this->handler->handleEvent($paymentIntent);
+    }
+
+    public function test_missing_webhook_payment_persists_reconciliation_before_retrying(): void
+    {
+        $paymentIntent = PaymentIntent::constructFrom([
+            'id' => 'pi_not_local_webhook',
+            'status' => 'succeeded',
+            'latest_charge' => 'ch_not_local_webhook',
+            'amount_received' => 5695,
+            'currency' => 'usd',
+        ]);
+
+        $this->database->shouldReceive('transaction')->once()->andReturnUsing(static fn ($callback) => $callback());
+        $this->providerObjectLock->shouldReceive('acquirePaymentIdentity')->once()->with('pi_not_local_webhook', 'ch_not_local_webhook');
+        $this->payments->shouldReceive('loadRelation')->once()->andReturnSelf();
+        $this->payments->shouldReceive('findFirstWhere')->once()->andReturnNull();
+        $this->logger->shouldReceive('error')->once();
+        $this->reconciliations->shouldReceive('recordPending')->once()->with(
+            Mockery::on(static fn ($reconciliation): bool => $reconciliation->eventId === 'evt_not_local_webhook'
+                && $reconciliation->paymentIntentId === 'pi_not_local_webhook'
+                && $reconciliation->chargeId === 'ch_not_local_webhook'),
+            StripeLocalPaymentNotFoundException::class,
+        );
+
+        $this->expectException(StripeLocalPaymentNotFoundException::class);
+        $this->handler->handleEvent(
+            $paymentIntent,
+            'acct_kamp',
+            'evt_not_local_webhook',
+            'payment_intent.succeeded',
+        );
     }
 }

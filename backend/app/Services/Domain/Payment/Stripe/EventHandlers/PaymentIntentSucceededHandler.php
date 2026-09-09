@@ -8,6 +8,7 @@ use Brick\Math\Exception\RoundingNecessaryException;
 use Brick\Money\Exception\UnknownCurrencyException;
 use Carbon\Carbon;
 use HiEvents\DomainObjects\Enums\PaymentProviders;
+use HiEvents\DomainObjects\Enums\StripeWebhookReconciliationReason;
 use HiEvents\DomainObjects\EventSettingDomainObject;
 use HiEvents\DomainObjects\Generated\EventSettingDomainObjectAbstract;
 use HiEvents\DomainObjects\Generated\OrderDomainObjectAbstract;
@@ -21,6 +22,7 @@ use HiEvents\DomainObjects\Status\OrderStatus;
 use HiEvents\Events\OrderStatusChangedEvent;
 use HiEvents\Exceptions\CannotAcceptPaymentException;
 use HiEvents\Exceptions\Stripe\StripeClientConfigurationException;
+use HiEvents\Exceptions\Stripe\StripeLocalPaymentNotFoundException;
 use HiEvents\Repository\Eloquent\StripePaymentsRepository;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\AffiliateRepositoryInterface;
@@ -28,8 +30,10 @@ use HiEvents\Repository\Interfaces\AttendeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\EventSettingsRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Repository\Interfaces\StripeDisputeRepositoryInterface;
+use HiEvents\Repository\Interfaces\StripeWebhookReconciliationRepositoryInterface;
 use HiEvents\Services\Domain\Order\OrderApplicationFeeService;
 use HiEvents\Services\Domain\Order\OrderEffectOutboxService;
+use HiEvents\Services\Domain\Payment\Stripe\DTOs\StripeWebhookReconciliationDTO;
 use HiEvents\Services\Domain\Payment\Stripe\StripeProviderErrorSanitizer;
 use HiEvents\Services\Domain\Payment\Stripe\StripeProviderObjectLockService;
 use HiEvents\Services\Domain\Payment\Stripe\StripeRefundExpiredOrderService;
@@ -37,7 +41,6 @@ use HiEvents\Services\Domain\Product\ProductQuantityUpdateService;
 use HiEvents\Services\Infrastructure\DomainEvents\Enums\DomainEventType;
 use Illuminate\Database\DatabaseManager;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 use Stripe\Exception\ApiErrorException;
 use Stripe\PaymentIntent;
 use Throwable;
@@ -56,6 +59,7 @@ class PaymentIntentSucceededHandler
         private readonly OrderApplicationFeeService $orderApplicationFeeService,
         private readonly EventSettingsRepositoryInterface $eventSettingsRepository,
         private readonly StripeDisputeRepositoryInterface $stripeDisputeRepository,
+        private readonly StripeWebhookReconciliationRepositoryInterface $reconciliationRepository,
         private readonly StripeProviderObjectLockService $providerObjectLockService,
         private readonly OrderEffectOutboxService $orderEffectOutboxService,
     ) {}
@@ -63,9 +67,18 @@ class PaymentIntentSucceededHandler
     /**
      * @throws Throwable
      */
-    public function handleEvent(PaymentIntent $paymentIntent): void
-    {
-        $updatedOrder = $this->databaseManager->transaction(function () use ($paymentIntent): OrderDomainObject {
+    public function handleEvent(
+        PaymentIntent $paymentIntent,
+        ?string $stripeAccountId = null,
+        ?string $eventId = null,
+        ?string $eventType = null,
+    ): void {
+        $updatedOrder = $this->databaseManager->transaction(function () use (
+            $paymentIntent,
+            $stripeAccountId,
+            $eventId,
+            $eventType,
+        ): OrderDomainObject {
             $this->providerObjectLockService->acquirePaymentIdentity(
                 $paymentIntent->id,
                 $this->chargeId($paymentIntent),
@@ -84,7 +97,26 @@ class PaymentIntentSucceededHandler
                     'payment_intent_status' => $paymentIntent->status,
                 ]);
 
-                throw new RuntimeException('Stripe payment is not locally available for the succeeded PaymentIntent.');
+                if ($eventId !== null && $eventType !== null) {
+                    $this->reconciliationRepository->recordPending(
+                        new StripeWebhookReconciliationDTO(
+                            eventId: $eventId,
+                            eventType: $eventType,
+                            stripeAccountId: $stripeAccountId,
+                            providerObjectType: 'payment_intent',
+                            providerObjectId: $paymentIntent->id,
+                            paymentIntentId: $paymentIntent->id,
+                            chargeId: $this->chargeId($paymentIntent),
+                            refundId: null,
+                            orderId: null,
+                            stripePaymentId: null,
+                            reason: StripeWebhookReconciliationReason::LOCAL_PAYMENT_MISSING,
+                        ),
+                        StripeLocalPaymentNotFoundException::class,
+                    );
+                }
+
+                throw new StripeLocalPaymentNotFoundException;
             }
 
             if ($this->isDurablyHandled($stripePayment)) {

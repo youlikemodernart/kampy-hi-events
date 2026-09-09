@@ -59,6 +59,10 @@ return [
         // Local-only missing-payment reconciliation aging policy
         'webhook_reconciliation_grace_hours' => env('STRIPE_WEBHOOK_RECONCILIATION_GRACE_HOURS', 72),
         'webhook_reconciliation_batch_size' => env('STRIPE_WEBHOOK_RECONCILIATION_BATCH_SIZE', 100),
+        'webhook_admission' => [
+            'mode' => env('STRIPE_WEBHOOK_ADMISSION_MODE', 'off'),
+            'trusted_account_bindings' => env('STRIPE_WEBHOOK_TRUSTED_ACCOUNT_BINDINGS', '[]'),
+        ],
     ],
     'order_effect_outbox' => [
         'batch_size' => env('ORDER_EFFECT_OUTBOX_BATCH_SIZE', 25),

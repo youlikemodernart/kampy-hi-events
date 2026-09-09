@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Actions\Common\Webhooks;
 
+use HiEvents\Exceptions\Stripe\StripeForeignWebhookEventException;
 use HiEvents\Exceptions\Stripe\StripeLocalPaymentNotFoundException;
 use HiEvents\Exceptions\StripeWebhookEventClaimBusyException;
 use HiEvents\Http\Actions\Common\Webhooks\StripeIncomingWebhookAction;
@@ -73,6 +74,25 @@ class StripeIncomingWebhookActionTest extends TestCase
         $response = (new StripeIncomingWebhookAction($handler))($request);
 
         self::assertSame(503, $response->getStatusCode());
+    }
+
+    public function test_acknowledges_a_conclusively_foreign_event(): void
+    {
+        $handler = Mockery::mock(IncomingWebhookHandler::class);
+        $handler->shouldReceive('handle')
+            ->once()
+            ->andThrow(new StripeForeignWebhookEventException);
+
+        $request = Request::create(
+            '/public/webhooks/stripe',
+            'POST',
+            server: ['HTTP_STRIPE_SIGNATURE' => 't=1,v1=test'],
+            content: '{"id":"evt_foreign"}',
+        );
+
+        $response = (new StripeIncomingWebhookAction($handler))($request);
+
+        self::assertSame(204, $response->getStatusCode());
     }
 
     public function test_returns_bad_request_when_processing_fails(): void

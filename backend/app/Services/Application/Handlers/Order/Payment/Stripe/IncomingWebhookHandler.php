@@ -2,10 +2,13 @@
 
 namespace HiEvents\Services\Application\Handlers\Order\Payment\Stripe;
 
+use HiEvents\DomainObjects\Enums\StripeWebhookAdmissionDisposition;
 use HiEvents\Exceptions\CannotAcceptPaymentException;
+use HiEvents\Exceptions\Stripe\StripeForeignWebhookEventException;
 use HiEvents\Exceptions\Stripe\StripeLocalPaymentNotFoundException;
 use HiEvents\Repository\Interfaces\StripeWebhookEventRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Order\Payment\Stripe\DTO\StripeWebhookDTO;
+use HiEvents\Services\Application\Handlers\Order\Payment\Stripe\DTO\VerifiedStripeWebhookEventDTO;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\AccountUpdateHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\ChargeRefundUpdatedHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\ChargeSucceededHandler;
@@ -15,6 +18,7 @@ use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PaymentIntentSucceeded
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PayoutPaidHandler;
 use HiEvents\Services\Infrastructure\Stripe\StripeConfigurationService;
 use HiEvents\Services\Infrastructure\Stripe\StripeConnectWebhookContract;
+use HiEvents\Services\Infrastructure\Stripe\StripeWebhookAdmissionService;
 use Illuminate\Log\Logger;
 use JsonException;
 use Stripe\Charge;
@@ -37,6 +41,7 @@ class IncomingWebhookHandler
         private readonly Logger $logger,
         private readonly StripeWebhookEventRepositoryInterface $webhookEventRepository,
         private readonly StripeConfigurationService $stripeConfigurationService,
+        private readonly StripeWebhookAdmissionService $webhookAdmissionService,
     ) {}
 
     /**
@@ -47,7 +52,27 @@ class IncomingWebhookHandler
     public function handle(StripeWebhookDTO $webhookDTO): void
     {
         try {
-            $event = $this->constructEventWithValidPlatform($webhookDTO);
+            $verifiedEvent = $this->constructEventWithValidPlatform($webhookDTO);
+            $event = $verifiedEvent->event;
+            $disposition = $this->webhookAdmissionService->disposition(
+                $verifiedEvent->signingPlatforms,
+                $event->account,
+            );
+
+            if ($this->webhookAdmissionService->observes()) {
+                $this->logger->info('Stripe webhook admission evaluated', [
+                    'event_id' => $event->id,
+                    'event_type' => $event->type,
+                    'signing_platforms' => $verifiedEvent->signingPlatforms,
+                    'stripe_account_id' => $event->account,
+                    'disposition' => $disposition->value,
+                ]);
+            }
+
+            if ($disposition === StripeWebhookAdmissionDisposition::FOREIGN
+                && $this->webhookAdmissionService->enforcementEnabled()) {
+                throw new StripeForeignWebhookEventException;
+            }
 
             if (! in_array($event->type, StripeConnectWebhookContract::EVENT_TYPES, true)) {
                 $this->logger->debug(__('Received a :event Stripe event, which has no handler', [
@@ -83,7 +108,12 @@ class IncomingWebhookHandler
             try {
                 switch ($event->type) {
                     case Event::PAYMENT_INTENT_SUCCEEDED:
-                        $this->paymentIntentSucceededHandler->handleEvent($event->data->object);
+                        $this->paymentIntentSucceededHandler->handleEvent(
+                            $event->data->object,
+                            $event->account,
+                            $event->id,
+                            $event->type,
+                        );
                         break;
                     case Event::PAYMENT_INTENT_PAYMENT_FAILED:
                         $this->paymentIntentFailedHandler->handleEvent(
@@ -152,6 +182,8 @@ class IncomingWebhookHandler
 
                 throw $exception;
             }
+        } catch (StripeForeignWebhookEventException $exception) {
+            throw $exception;
         } catch (CannotAcceptPaymentException $exception) {
             $this->logSanitizedFailure('Cannot accept payment from Stripe webhook', $exception);
             throw $exception;
@@ -167,10 +199,12 @@ class IncomingWebhookHandler
         }
     }
 
-    private function constructEventWithValidPlatform(StripeWebhookDTO $webhookDTO): Event
+    private function constructEventWithValidPlatform(StripeWebhookDTO $webhookDTO): VerifiedStripeWebhookEventDTO
     {
         $webhookSecrets = $this->stripeConfigurationService->getAllWebhookSecrets();
         $lastException = null;
+        $event = null;
+        $matchedPlatforms = [];
 
         foreach ($webhookSecrets as $platform => $webhookSecret) {
             try {
@@ -178,18 +212,14 @@ class IncomingWebhookHandler
                     continue;
                 }
 
-                $event = Webhook::constructEvent(
+                $matchedEvent = Webhook::constructEvent(
                     $webhookDTO->payload,
                     $webhookDTO->headerSignature,
                     $webhookSecret
                 );
 
-                $this->logger->debug('Webhook validated with platform: '.$platform, [
-                    'event_id' => $event->id,
-                    'platform' => $platform,
-                ]);
-
-                return $event;
+                $event ??= $matchedEvent;
+                $matchedPlatforms[] = $platform;
             } catch (SignatureVerificationException $exception) {
                 $lastException = $exception;
 
@@ -197,7 +227,16 @@ class IncomingWebhookHandler
             }
         }
 
-        throw $lastException ?? new SignatureVerificationException(__('Unable to verify Stripe signature with any platform'));
+        if ($event === null) {
+            throw $lastException ?? new SignatureVerificationException(__('Unable to verify Stripe signature with any platform'));
+        }
+
+        $this->logger->debug('Webhook validated with platforms', [
+            'event_id' => $event->id,
+            'platforms' => $matchedPlatforms,
+        ]);
+
+        return new VerifiedStripeWebhookEventDTO($event, $matchedPlatforms);
     }
 
     private function handleChargeRefunded(

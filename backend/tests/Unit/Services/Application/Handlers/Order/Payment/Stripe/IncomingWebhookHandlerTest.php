@@ -16,6 +16,7 @@ use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PaymentIntentFailedHan
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PaymentIntentSucceededHandler;
 use HiEvents\Services\Domain\Payment\Stripe\EventHandlers\PayoutPaidHandler;
 use HiEvents\Services\Infrastructure\Stripe\StripeConfigurationService;
+use HiEvents\Services\Infrastructure\Stripe\StripeWebhookAdmissionService;
 use Illuminate\Log\Logger;
 use Mockery;
 use Mockery\MockInterface;
@@ -51,6 +52,8 @@ class IncomingWebhookHandlerTest extends TestCase
 
     private StripeConfigurationService|MockInterface $stripeConfiguration;
 
+    private StripeWebhookAdmissionService|MockInterface $webhookAdmission;
+
     private IncomingWebhookHandler $handler;
 
     protected function setUp(): void
@@ -67,9 +70,14 @@ class IncomingWebhookHandlerTest extends TestCase
         $this->logger = Mockery::mock(Logger::class);
         $this->eventRepository = Mockery::mock(StripeWebhookEventRepositoryInterface::class);
         $this->stripeConfiguration = Mockery::mock(StripeConfigurationService::class);
+        $this->webhookAdmission = Mockery::mock(StripeWebhookAdmissionService::class);
+        $this->webhookAdmission->shouldReceive('disposition')->byDefault()->andReturn(\HiEvents\DomainObjects\Enums\StripeWebhookAdmissionDisposition::LOCAL);
+        $this->webhookAdmission->shouldReceive('observes')->byDefault()->andReturnFalse();
+        $this->webhookAdmission->shouldReceive('enforcementEnabled')->byDefault()->andReturnFalse();
 
         $this->stripeConfiguration
             ->shouldReceive('getAllWebhookSecrets')
+            ->byDefault()
             ->andReturn(['primary' => self::WEBHOOK_SECRET]);
 
         $this->handler = new IncomingWebhookHandler(
@@ -83,6 +91,7 @@ class IncomingWebhookHandlerTest extends TestCase
             $this->logger,
             $this->eventRepository,
             $this->stripeConfiguration,
+            $this->webhookAdmission,
         );
     }
 
@@ -112,8 +121,39 @@ class IncomingWebhookHandlerTest extends TestCase
 
         $this->paymentSucceededHandler->shouldReceive('handleEvent')
             ->once()
-            ->with(Mockery::type(PaymentIntent::class));
+            ->with(Mockery::type(PaymentIntent::class), 'acct_test_connected', 'evt_test_success', 'payment_intent.succeeded');
 
+        $this->handler->handle($dto);
+    }
+
+    public function test_duplicate_secret_foreign_event_requires_all_matched_platforms_before_acknowledgement(): void
+    {
+        $dto = $this->signedPaymentIntentSucceededEvent();
+        $this->stripeConfiguration->shouldReceive('getAllWebhookSecrets')->once()->andReturn([
+            'primary' => self::WEBHOOK_SECRET,
+            'secondary' => self::WEBHOOK_SECRET,
+        ]);
+        $this->webhookAdmission->shouldReceive('disposition')
+            ->once()
+            ->with(['primary', 'secondary'], 'acct_test_connected')
+            ->andReturn(\HiEvents\DomainObjects\Enums\StripeWebhookAdmissionDisposition::FOREIGN);
+        $this->webhookAdmission->shouldReceive('observes')->once()->andReturnTrue();
+        $this->webhookAdmission->shouldReceive('enforcementEnabled')->once()->andReturnTrue();
+        $this->logger->shouldReceive('debug')->once()->with('Webhook validated with platforms', [
+            'event_id' => 'evt_test_success',
+            'platforms' => ['primary', 'secondary'],
+        ]);
+        $this->logger->shouldReceive('info')->once()->with('Stripe webhook admission evaluated', [
+            'event_id' => 'evt_test_success',
+            'event_type' => 'payment_intent.succeeded',
+            'signing_platforms' => ['primary', 'secondary'],
+            'stripe_account_id' => 'acct_test_connected',
+            'disposition' => 'FOREIGN',
+        ]);
+        $this->eventRepository->shouldReceive('claim')->never();
+        $this->paymentSucceededHandler->shouldReceive('handleEvent')->never();
+
+        $this->expectException(\HiEvents\Exceptions\Stripe\StripeForeignWebhookEventException::class);
         $this->handler->handle($dto);
     }
 
@@ -212,8 +252,8 @@ class IncomingWebhookHandlerTest extends TestCase
         $seenRefunds = [];
 
         $this->logger->shouldReceive('debug')->once()->with(
-            'Webhook validated with platform: primary',
-            ['event_id' => 'evt_test_refunds', 'platform' => 'primary'],
+            'Webhook validated with platforms',
+            ['event_id' => 'evt_test_refunds', 'platforms' => ['primary']],
         );
         $this->logger->shouldReceive('debug')->once()->with('Stripe event received', Mockery::type('array'));
         $this->logger->shouldReceive('error')->once()->with(
@@ -279,8 +319,8 @@ class IncomingWebhookHandlerTest extends TestCase
         ], JSON_THROW_ON_ERROR));
 
         $this->logger->shouldReceive('debug')->once()->with(
-            'Webhook validated with platform: primary',
-            ['event_id' => 'evt_test_dispute', 'platform' => 'primary'],
+            'Webhook validated with platforms',
+            ['event_id' => 'evt_test_dispute', 'platforms' => ['primary']],
         );
         $this->logger->shouldReceive('debug')->once()->with(
             'Stripe event received',
@@ -382,9 +422,9 @@ class IncomingWebhookHandlerTest extends TestCase
     {
         $this->logger->shouldReceive('debug')
             ->once()
-            ->with('Webhook validated with platform: primary', [
+            ->with('Webhook validated with platforms', [
                 'event_id' => 'evt_test_success',
-                'platform' => 'primary',
+                'platforms' => ['primary'],
             ]);
     }
 
