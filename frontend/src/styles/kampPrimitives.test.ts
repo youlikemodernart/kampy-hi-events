@@ -115,7 +115,9 @@ describe('mutation proof', () => {
         expect(eventStyles).toMatch(/\$serif: var\(--kamp-font-serif\)/);
         expect(eventStyles).toMatch(/\$util: var\(--kamp-font-utility\)/);
         expect(eventStyles).not.toMatch(/'DM Sans'/);
-        expect(eventSource).toMatch(/'grand-valley-state-university': 'var\(--kamp-university-gvsu\)'/);
+        expect(eventSource).toMatch(/'grand-valley-state-university'/);
+        expect(eventSource).toMatch(/primary: 'var\(--kamp-university-gvsu\)'/);
+        expect(eventSource).toMatch(/secondary: 'var\(--kamp-university-gvsu-secondary\)'/);
         expect(eventSource).not.toMatch(/event\.id === 7/);
     });
 });

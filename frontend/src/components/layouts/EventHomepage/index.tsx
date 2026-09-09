@@ -44,8 +44,11 @@ const SHOW_MERCH_SECTION = false;
 // future insertion points — no fabricated event content. Set false to hide them entirely.
 const SHOW_KAMP_PREP = true;
 
-const UNIVERSITY_ACCENTS: Record<string, string> = {
-    'grand-valley-state-university': 'var(--kamp-university-gvsu)',
+const UNIVERSITY_THEMES: Record<string, {primary: string; secondary: string}> = {
+    'grand-valley-state-university': {
+        primary: 'var(--kamp-university-gvsu)',
+        secondary: 'var(--kamp-university-gvsu-secondary)',
+    },
 };
 
 interface EventHomepageProps {
@@ -117,10 +120,14 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         return <EventNotAvailable/>;
     }
 
-    const universityAccent = UNIVERSITY_ACCENTS[event.slug] ?? 'var(--kamp-forest)';
+    const universityTheme = UNIVERSITY_THEMES[event.slug] ?? {
+        primary: 'var(--kamp-forest)',
+        secondary: 'var(--kamp-forest-deep)',
+    };
 
     const themeStyles = {
-        '--university-accent': universityAccent,
+        '--university-accent': universityTheme.primary,
+        '--university-secondary': universityTheme.secondary,
         '--event-bg-color': 'var(--kamp-cream)',
         '--event-content-bg-color': 'var(--kamp-paper)',
         '--event-primary-color': 'var(--kamp-ink)',
@@ -310,6 +317,12 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                                 alt={organizer.name}
                                                 className={classes.organizerPillAvatar}
                                             />
+                                        ) : organizer.name === 'Kamp Love' ? (
+                                            <img
+                                                src="/brand/kamp-love-fire.png"
+                                                alt=""
+                                                className={classes.organizerPillAvatar}
+                                            />
                                         ) : (
                                             <span className={classes.organizerPillAvatarPlaceholder}>
                                                 {organizer.name.charAt(0).toUpperCase()}
@@ -325,6 +338,12 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                             <img
                                                 src={organizerLogo}
                                                 alt={organizer?.name || ''}
+                                                className={classes.organizerPillAvatar}
+                                            />
+                                        ) : organizer?.name === 'Kamp Love' ? (
+                                            <img
+                                                src="/brand/kamp-love-fire.png"
+                                                alt=""
                                                 className={classes.organizerPillAvatar}
                                             />
                                         ) : (
@@ -432,7 +451,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                                 background: "transparent",
                                                 primary: "var(--event-primary-color)",
                                                 primaryText: "var(--event-primary-text-color)",
-                                                secondary: "var(--event-primary-color)",
+                                                secondary: "var(--university-secondary)",
                                                 secondaryText: "var(--event-accent-contrast)",
                                                 bodyBackground: "var(--event-bg-color)",
                                             }}

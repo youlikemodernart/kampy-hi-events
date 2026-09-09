@@ -313,7 +313,7 @@ a.organizerPill:hover {
 // Essentials: Kamp-owned logistics in a solid rectangular field.
 .essentialsBand {
   @include band(var(--band-py-material));
-  background: var(--kamp-forest);
+  background: var(--university-secondary, var(--kamp-forest));
   color: var(--kamp-cream);
 }
 
@@ -535,11 +535,7 @@ a.organizerPill:hover {
   border-radius: $radius-panel;
   box-shadow: var(--elev-1);
   padding: var(--panel-pad);
-  margin-top: clamp(-72px, -6vw, -40px);
-
-  @include mixins.respond-below(md) {
-    margin-top: -32px;
-  }
+  margin-top: 0;
 }
 
 .ticketsEyebrow {
@@ -680,7 +676,7 @@ a.organizerPill:hover {
   }
 
   :global(.hi-product-content) {
-    padding: 0 24px 22px;
+    padding: var(--space-2) var(--space-5) var(--space-6);
     border-top: 1px solid var(--border-color);
   }
 
@@ -696,12 +692,16 @@ a.organizerPill:hover {
     }
   }
 
+  :global(.hi-price-tier-layout) {
+    gap: var(--space-5);
+  }
+
   :global(.hi-price-tier) {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: var(--space-5);
   }
 
   :global(.hi-price-tier-label) {
@@ -718,14 +718,27 @@ a.organizerPill:hover {
     font-variant-numeric: tabular-nums lining-nums;
   }
 
+  :global(.hi-price-tier-price-amount) {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
+
+  :global(.hi-price-fee-summary) {
+    flex-wrap: nowrap;
+    margin-top: 0;
+    white-space: nowrap;
+  }
+
   :global(.hi-product-quantity-selector) {
     .button-input {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: var(--space-2);
+      width: max-content;
       background: var(--content-bg-color);
       border-radius: $radius-card;
-      padding: 4px;
+      padding: var(--space-2);
       border: 1px solid var(--kamp-line-control, #8a8a8a);
 
       button {
@@ -762,6 +775,19 @@ a.organizerPill:hover {
         background: transparent;
         font-variant-numeric: tabular-nums lining-nums;
       }
+    }
+  }
+
+  @include mixins.respond-below(md) {
+    :global(.hi-price-tier-layout) {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    :global(.hi-price-tier-price-amount),
+    :global(.hi-price-fee-summary) {
+      flex-wrap: wrap;
+      white-space: normal;
     }
   }
 
@@ -817,10 +843,10 @@ a.organizerPill:hover {
     min-height: 60px;
     padding: 18px 24px !important;
     height: auto !important;
-    background: var(--kamp-forest, #2f5147) !important;
-    background-color: var(--kamp-forest, #2f5147) !important;
+    background: var(--university-secondary, var(--kamp-forest)) !important;
+    background-color: var(--university-secondary, var(--kamp-forest)) !important;
     color: var(--kamp-cream, #f9f4f0) !important;
-    border: 1px solid var(--kamp-forest, #2f5147) !important;
+    border: 1px solid var(--university-secondary, var(--kamp-forest)) !important;
     border-radius: $radius-pill !important;
     font-family: $util;
     font-size: 1rem !important;
@@ -839,8 +865,8 @@ a.organizerPill:hover {
     }
 
     &:hover:not(:disabled) {
-      background: var(--kamp-forest-deep, #223b34) !important;
-      background-color: var(--kamp-forest-deep, #223b34) !important;
+      background: var(--university-accent, var(--kamp-forest-deep)) !important;
+      background-color: var(--university-accent, var(--kamp-forest-deep)) !important;
     }
 
     &:disabled {
@@ -1273,7 +1299,7 @@ a.organizerPill:hover {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--kamp-orange, #ff7b00);
+    background: var(--kamp-forest, #2f5147);
   }
 
   &:last-child::after {

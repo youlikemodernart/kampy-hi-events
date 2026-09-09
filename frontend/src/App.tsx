@@ -42,9 +42,9 @@ export const App: FC<
     const [isLoadedOnBrowser, setIsLoadedOnBrowser] = React.useState(false);
     const showGlobalConsentBanner = getConfig('VITE_COOKIE_CONSENT_ENABLED') === 'true'
         && !isSsr() && isConsentPending();
-    // public/favicon.ico exists; public/favicon.svg does not. The declared type has
-    // to follow the href, or a user agent that honours it discards the icon.
-    const faviconHref = getConfig("VITE_APP_FAVICON", "/favicon.ico") as string;
+    // The default uses the square, white-backed Kamp fire mark. The declared type
+    // follows any configured override so standards-compliant browsers accept it.
+    const faviconHref = getConfig("VITE_APP_FAVICON", "/manifest-icons/favicon-32x32.png") as string;
 
     const handleGlobalConsent = useCallback((granted: boolean) => {
         setConsentState(granted ? 'granted' : 'denied');
