@@ -166,6 +166,12 @@ envs:
   - key: STRIPE_WEBHOOK_RECONCILIATION_GRACE_HOURS
     scope: RUN_AND_BUILD_TIME
     value: "72"
+  - key: STRIPE_WEBHOOK_ADMISSION_MODE
+    scope: RUN_AND_BUILD_TIME
+    value: observe
+  - key: STRIPE_WEBHOOK_TRUSTED_ACCOUNT_BINDINGS
+    scope: RUN_AND_BUILD_TIME
+    value: "{}"
   - key: KAMP_STRIPE_METADATA_ENABLED
     scope: RUN_AND_BUILD_TIME
     value: "false"
