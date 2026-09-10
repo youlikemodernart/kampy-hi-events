@@ -37,7 +37,7 @@ $feedback: var(--motion-feedback) ease-out;
   font-family: $util;
   font-weight: 700;
 
-  &:focus {
+  &:focus-visible {
     transform: none;
   }
 }

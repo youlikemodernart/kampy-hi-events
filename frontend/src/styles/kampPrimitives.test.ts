@@ -121,4 +121,24 @@ describe('mutation proof', () => {
         expect(eventSource).toMatch(/'--page-brand-secondary': universityTheme\.secondary/);
         expect(eventSource).not.toMatch(/event\.id === 7/);
     });
+
+    it('keeps mobile navigation aids from appearing during touch and overscroll', () => {
+        const eventStyles = readFileSync(
+            join(here, '../components/layouts/EventHomepage/EventHomepage.module.scss'),
+            'utf8'
+        );
+        const eventSource = readFileSync(
+            join(here, '../components/layouts/EventHomepage/index.tsx'),
+            'utf8'
+        );
+
+        const skipLinkStyles = eventStyles.slice(
+            eventStyles.indexOf('.skipLink'),
+            eventStyles.indexOf('.background')
+        );
+        expect(skipLinkStyles).toMatch(/&:focus-visible\s*\{/);
+        expect(skipLinkStyles).not.toMatch(/&:focus\s*\{/);
+        expect(eventSource).toContain('shouldShowTicketScrollButton(rect.top, window.innerHeight)');
+        expect(eventSource).not.toMatch(/rect\.bottom < 0/);
+    });
 });

@@ -35,6 +35,7 @@ import {ShareComponent} from "../../common/ShareIcon";
 import {CalendarOptionsPopover} from "../../common/CalendarOptionsPopover";
 import {formatDateWithLocale, isDateInPast} from "../../../utilites/dates.ts";
 import {resolveUniversityTheme} from "../../../styles/universityThemes.ts";
+import {shouldShowTicketScrollButton} from "../../../utilites/eventHomepageScroll.ts";
 
 // Future Shopify merch lives on this same Kamper page: one coherent surface for tickets,
 // event information, and later merchandise. The section, its Kamp Love styling, and its mount
@@ -77,11 +78,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         const checkTicketsPosition = () => {
             if (ticketsSectionRef.current) {
                 const rect = ticketsSectionRef.current.getBoundingClientRect();
-                const scrollButtonRevealDistance = 96;
-                const isBelowFold = rect.top > window.innerHeight + scrollButtonRevealDistance;
-                const isAboveView = rect.bottom < 0;
-                const shouldShowButton = isBelowFold || isAboveView;
-                setShowScrollButton(shouldShowButton);
+                setShowScrollButton(shouldShowTicketScrollButton(rect.top, window.innerHeight));
             }
         };
 
