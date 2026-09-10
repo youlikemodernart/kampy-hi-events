@@ -215,8 +215,10 @@
 
   .hi-donation-input,
   .select-input input,
+  .button-input input,
   .hi-promo-code-input {
     min-height: 44px;
+    font-size: 16px;
     color: var(--kamp-ink, #171717);
     background: var(--kamp-paper, #ffffff);
     border: 1px solid var(--kamp-line-control, #8a8a8a);
@@ -347,12 +349,34 @@
       padding-inline: 14px;
     }
 
+    .button-input button {
+      min-width: 44px;
+    }
+
     .hi-promo-code-row {
       align-items: stretch;
       flex-direction: column;
     }
 
+    .hi-promo-code-input-wrapper {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 44px;
+      gap: 12px;
+    }
+
+    .hi-promo-code-input-wrapper .mantine-TextInput-root {
+      grid-column: 1;
+      min-width: 0;
+    }
+
+    .hi-close-promo-code-input-button {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
     .hi-apply-promo-code-button {
+      grid-column: 1 / -1;
+      grid-row: 2;
       width: 100%;
     }
   }

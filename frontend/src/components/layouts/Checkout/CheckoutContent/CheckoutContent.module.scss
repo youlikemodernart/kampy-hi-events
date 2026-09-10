@@ -21,7 +21,9 @@
   }
 
   @include mixins.respond-below(sm) {
-    :global(.mantine-Input-input) {
+    :global(.mantine-Input-input),
+    :global(.mantine-Select-input),
+    :global(.mantine-Textarea-input) {
       min-height: 44px;
     }
 
@@ -52,5 +54,6 @@
   :global(.mantine-Textarea-input) {
     border-color: var(--checkout-border, #8a8a8a);
     border-radius: 10px;
+    font-size: 16px;
   }
 }

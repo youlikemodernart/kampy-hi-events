@@ -10,7 +10,7 @@ import {ShareComponent} from "../../common/ShareIcon";
 import {AddToEventCalendarButton} from "../../common/AddEventToCalendarButton";
 import {ProgressStepper} from "../../common/ProgressStepper";
 import {useMediaQuery} from "@mantine/hooks";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useLayoutEffect, useState} from "react";
 import {Invoice} from "../../../types.ts";
 import {orderClientPublic} from "../../../api/order.client.ts";
 import {downloadBinary} from "../../../utilites/download.ts";
@@ -50,6 +50,10 @@ const Checkout = () => {
         return 'details';
     };
     const currentStep = getCurrentStep();
+
+    useLayoutEffect(() => {
+        window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+    }, [location.pathname]);
 
     const isOrderReservedAndNotExpired = orderIsReserved && order?.reserved_until
         && isDateInFuture(order.reserved_until);

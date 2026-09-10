@@ -141,4 +141,36 @@ describe('mutation proof', () => {
         expect(eventSource).toContain('shouldShowTicketScrollButton(rect.top, window.innerHeight)');
         expect(eventSource).not.toMatch(/rect\.bottom < 0/);
     });
+
+    it('resets checkout routes to the top and prevents iPhone input zoom', () => {
+        const checkoutSource = readFileSync(
+            join(here, '../components/layouts/Checkout/index.tsx'),
+            'utf8'
+        );
+        const checkoutStyles = readFileSync(
+            join(here, '../components/layouts/Checkout/CheckoutContent/CheckoutContent.module.scss'),
+            'utf8'
+        );
+
+        expect(checkoutSource).toContain("window.scrollTo({top: 0, left: 0, behavior: 'auto'})");
+        expect(checkoutSource).toContain('}, [location.pathname]);');
+        const checkoutInputRules = checkoutStyles.slice(
+            checkoutStyles.lastIndexOf(':global(.mantine-Input-input)'),
+            checkoutStyles.lastIndexOf('}')
+        );
+        expect(checkoutInputRules).toContain('font-size: 16px');
+
+        const widgetStyles = readFileSync(join(here, 'widget/default.scss'), 'utf8');
+        const widgetInputRules = widgetStyles.slice(
+            widgetStyles.indexOf('.hi-donation-input'),
+            widgetStyles.indexOf('.button-input button')
+        );
+        expect(widgetInputRules).toContain('.button-input input');
+        expect(widgetInputRules).toContain('.hi-promo-code-input');
+        expect(widgetInputRules).toContain('font-size: 16px');
+
+        const mobileWidgetStyles = widgetStyles.slice(widgetStyles.indexOf('@media (max-width: 680px)'));
+        expect(mobileWidgetStyles).toMatch(/\.button-input button\s*{[\s\S]*min-width: 44px/);
+        expect(mobileWidgetStyles).toMatch(/grid-template-columns: minmax\(0, 1fr\) 44px/);
+    });
 });
