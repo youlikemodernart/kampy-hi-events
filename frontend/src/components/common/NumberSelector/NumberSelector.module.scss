@@ -5,6 +5,10 @@
   width: 100px;
 }
 
+.buttonInput {
+  width: auto;
+  min-width: 132px;
+}
 
 .control {
   background-color:#6319ff;
@@ -19,7 +23,8 @@
 .input {
   padding-right: 10px !important;
   padding-left: 10px !important;
-  height: 20px !important;
+  min-width: 44px;
+  height: 44px !important;
   flex: 1 !important;
   text-align: center !important;
 }

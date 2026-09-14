@@ -9448,7 +9448,7 @@ msgstr ""
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:368
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:405
 msgid "Ticket quantity"
-msgstr ""
+msgstr "Aantal tickets"
 
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:528
 msgid "Ticket resent successfully"
@@ -11077,3 +11077,15 @@ msgstr "Postcode"
 #: src/components/routes/product-widget/CollectInformation/index.tsx:553
 msgid "ZIP or Postal Code"
 msgstr "Postcode"
+
+#: src/components/common/NumberSelector/index.tsx:82
+msgid "Decrease"
+msgstr "Verlagen"
+
+#: src/components/common/NumberSelector/index.tsx:106
+msgid "Increase"
+msgstr "Verhogen"
+
+#: src/components/layouts/EventHomepage/index.tsx:417
+msgid "To be announced"
+msgstr "Wordt nog bekendgemaakt"

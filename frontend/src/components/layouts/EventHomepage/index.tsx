@@ -34,6 +34,7 @@ import {CookieConsentBanner} from "../../common/CookieConsentBanner";
 import {ShareComponent} from "../../common/ShareIcon";
 import {CalendarOptionsPopover} from "../../common/CalendarOptionsPopover";
 import {formatDateWithLocale, isDateInPast} from "../../../utilites/dates.ts";
+import {getPublicVenueAttribute} from "../../../utilites/eventLocation.ts";
 import {resolveUniversityTheme} from "../../../styles/universityThemes.ts";
 import {shouldShowTicketScrollButton} from "../../../utilites/eventHomepageScroll.ts";
 
@@ -71,6 +72,27 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
             });
         }
     }, [event?.id, consentGranted]);
+
+    useEffect(() => {
+        const root = document.documentElement;
+        const markKeyboardNavigation = (event: KeyboardEvent) => {
+            if (event.key === 'Tab') {
+                root.dataset.kampKeyboardNavigation = 'true';
+            }
+        };
+        const clearKeyboardNavigation = () => {
+            delete root.dataset.kampKeyboardNavigation;
+        };
+
+        window.addEventListener('keydown', markKeyboardNavigation);
+        window.addEventListener('pointerdown', clearKeyboardNavigation);
+
+        return () => {
+            window.removeEventListener('keydown', markKeyboardNavigation);
+            window.removeEventListener('pointerdown', clearKeyboardNavigation);
+            clearKeyboardNavigation();
+        };
+    }, []);
 
     useEffect(() => {
         let showTimer: NodeJS.Timeout;
@@ -141,9 +163,14 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
     const organizerLogo = imageUrl('ORGANIZER_LOGO', organizer?.images);
     const organizerLocation = organizer?.settings?.location_details;
     const websiteUrl = organizer?.website;
-    const locationDetails = event.settings?.location_details;
+    const locationDetails = event.settings?.location_details || event.location_details;
     const isOnlineEvent = event.settings?.is_online_event;
     const hasLocation = isAddressSet(locationDetails) && !isOnlineEvent;
+    const publicVenueAttribute = getPublicVenueAttribute(event);
+    const structuredLocationDisplay = hasLocation && locationDetails
+        ? (getShortLocationDisplay(locationDetails) || formatAddress(locationDetails))
+        : undefined;
+    const whereDisplay = structuredLocationDisplay || publicVenueAttribute;
 
     const socialLinks = organizerSocials ? Object.entries(organizerSocials)
         .filter(([platform, handle]) => handle && socialMediaConfig[platform as keyof typeof socialMediaConfig])
@@ -180,7 +207,7 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
         ? (getShortLocationDisplay(locationDetails) || locationDetails.venue_name || organizer?.name)
         : (isOnlineEvent ? t`Online Event` : organizer?.name);
 
-    const mapUrl = event.settings?.maps_url || (locationDetails ? getGoogleMapsUrl(locationDetails) : null);
+    const mapUrl = event.settings?.maps_url || (hasLocation && locationDetails ? getGoogleMapsUrl(locationDetails) : null);
     const isSameDay = Boolean(event.end_date && event.start_date.substring(0, 10) === event.end_date.substring(0, 10));
     const startDateDisplay = formatDateWithLocale(event.start_date, 'shortDate', event.timezone);
     const endDateDisplay = event.end_date
@@ -383,14 +410,18 @@ const EventHomepage = ({...loaderData}: EventHomepageProps) => {
                                         </div>
                                     )}
 
-                                    {hasLocation && locationDetails && (
+                                    {!isOnlineEvent && (
                                         <div className={classes.essentialBlock}>
                                             <div className={classes.essentialLabel}>{t`Where`}</div>
-                                            <div className={classes.essentialValue}>{locationDetails.venue_name}</div>
-                                            <div className={classes.essentialSub}>
-                                                <IconMapPin/>
-                                                {getShortLocationDisplay(locationDetails) || formatAddress(locationDetails)}
+                                            <div className={classes.essentialValue}>
+                                                {whereDisplay || t`To be announced`}
                                             </div>
+                                            {hasLocation && locationDetails && (
+                                                <div className={classes.essentialSub}>
+                                                    <IconMapPin aria-hidden="true"/>
+                                                    {formatAddress(locationDetails)}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

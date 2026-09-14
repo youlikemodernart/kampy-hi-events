@@ -9447,7 +9447,7 @@ msgstr ""
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:368
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:405
 msgid "Ticket quantity"
-msgstr ""
+msgstr "票数"
 
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:528
 msgid "Ticket resent successfully"
@@ -11076,3 +11076,15 @@ msgstr "邮政编码"
 #: src/components/routes/product-widget/CollectInformation/index.tsx:553
 msgid "ZIP or Postal Code"
 msgstr "邮政编码"
+
+#: src/components/common/NumberSelector/index.tsx:82
+msgid "Decrease"
+msgstr "减少"
+
+#: src/components/common/NumberSelector/index.tsx:106
+msgid "Increase"
+msgstr "增加"
+
+#: src/components/layouts/EventHomepage/index.tsx:417
+msgid "To be announced"
+msgstr "待公布"

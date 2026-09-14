@@ -5,6 +5,7 @@ import {IconMinus, IconPlus} from "@tabler/icons-react";
 import classes from './NumberSelector.module.scss';
 import classNames from "classnames";
 import _ from "lodash";
+import {t} from "@lingui/macro";
 
 interface NumberSelectorProps extends TextInputProps {
     formInstance: UseFormReturnType<any>;
@@ -64,26 +65,33 @@ export const NumberSelector = ({formInstance, fieldName, min, max, sharedValues}
         }
     };
 
-    const changeValue = (newValue: number) => {
-        let adjustedDifference = sharedVals.changeValue(newValue - value);
+    const changeValue = (newValue: string | number) => {
+        const numericValue = typeof newValue === 'number' ? newValue : Number(newValue);
+        if (!Number.isFinite(numericValue)) {
+            return;
+        }
+
+        const adjustedDifference = sharedVals.changeValue(numericValue - value);
         setValue(value + adjustedDifference);
     };
 
     return (
-        <div className={classNames(classes.wrapper, 'button-input')}>
+        <div className={classNames(classes.wrapper, classes.buttonInput, 'button-input')}>
             <ActionIcon
-                size={28}
+                size={44}
+                aria-label={t`Decrease`}
                 onClick={decrement}
                 disabled={value === 0}
                 onMouseDown={(event) => event.preventDefault()}
                 className={classes.control}
             >
-                <IconMinus size="1rem" stroke={1.5}/>
+                <IconMinus size="1rem" stroke={1.5} aria-hidden="true"/>
             </ActionIcon>
 
             <NumberInput
                 mb={0}
                 variant="unstyled"
+                aria-label={t`Ticket quantity`}
                 min={minValue}
                 max={maxValue}
                 handlersRef={handlers}
@@ -94,13 +102,14 @@ export const NumberSelector = ({formInstance, fieldName, min, max, sharedValues}
             />
 
             <ActionIcon
-                size={28}
+                size={44}
+                aria-label={t`Increase`}
                 onClick={increment}
                 disabled={value >= maxValue || sharedVals.quantityRemaining == 0}
                 onMouseDown={(event) => event.preventDefault()}
                 className={classes.control}
             >
-                <IconPlus size="1rem" stroke={1.5}/>
+                <IconPlus size="1rem" stroke={1.5} aria-hidden="true"/>
             </ActionIcon>
         </div>
     );

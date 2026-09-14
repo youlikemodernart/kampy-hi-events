@@ -29,17 +29,28 @@ $feedback: var(--motion-feedback) ease-out;
   top: var(--space-4);
   left: var(--space-4);
   z-index: 1100;
-  transform: translateY(-200%);
-  padding: var(--space-3) var(--space-4);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+  padding: 0;
   border-radius: var(--radius-pill);
   background: var(--kamp-ink);
   color: var(--kamp-cream);
   font-family: $util;
   font-weight: 700;
+}
 
-  &:focus-visible {
-    transform: none;
-  }
+:global(html[data-kamp-keyboard-navigation="true"]) .skipLink:focus {
+  width: max-content;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  pointer-events: auto;
+  padding: var(--space-3) var(--space-4);
 }
 
 .background {

@@ -136,8 +136,10 @@ describe('mutation proof', () => {
             eventStyles.indexOf('.skipLink'),
             eventStyles.indexOf('.background')
         );
-        expect(skipLinkStyles).toMatch(/&:focus-visible\s*\{/);
-        expect(skipLinkStyles).not.toMatch(/&:focus\s*\{/);
+        expect(skipLinkStyles).toMatch(/clip-path:\s*inset\(50%\)/);
+        expect(skipLinkStyles).toMatch(/pointer-events:\s*none/);
+        expect(skipLinkStyles).toContain(':global(html[data-kamp-keyboard-navigation="true"]) .skipLink:focus');
+        expect(eventSource).toContain("window.addEventListener('pointerdown', clearKeyboardNavigation)");
         expect(eventSource).toContain('shouldShowTicketScrollButton(rect.top, window.innerHeight)');
         expect(eventSource).not.toMatch(/rect\.bottom < 0/);
     });

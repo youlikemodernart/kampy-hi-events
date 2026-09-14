@@ -346,6 +346,12 @@ export enum EventLifecycleStatus {
     ENDED = 'ENDED'
 }
 
+export interface EventAttribute {
+    name: string;
+    value: string;
+    is_public: boolean;
+}
+
 export interface Event extends EventBase {
     id?: IdParam;
     slug: string;
@@ -357,6 +363,7 @@ export interface Event extends EventBase {
     product_categories?: ProductCategory[];
     images?: Image[];
     organizer?: Organizer;
+    attributes?: EventAttribute[];
     currency: string;
     timezone: string;
     organizer_id?: IdParam;

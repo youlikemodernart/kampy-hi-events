@@ -11080,3 +11080,15 @@ msgstr "Zip or Postal Code"
 #: src/components/routes/product-widget/CollectInformation/index.tsx:553
 msgid "ZIP or Postal Code"
 msgstr "ZIP or Postal Code"
+
+#: src/components/common/NumberSelector/index.tsx:82
+msgid "Decrease"
+msgstr "Decrease"
+
+#: src/components/common/NumberSelector/index.tsx:106
+msgid "Increase"
+msgstr "Increase"
+
+#: src/components/layouts/EventHomepage/index.tsx:417
+msgid "To be announced"
+msgstr "To be announced"

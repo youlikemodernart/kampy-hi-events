@@ -9447,7 +9447,7 @@ msgstr ""
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:368
 #: src/components/routes/event/Reports/FinancialReport/index.tsx:405
 msgid "Ticket quantity"
-msgstr ""
+msgstr "Số lượng vé"
 
 #: src/components/routes/product-widget/OrderSummaryAndProducts/index.tsx:528
 msgid "Ticket resent successfully"
@@ -11076,3 +11076,15 @@ msgstr "mã zip hoặc bưu điện"
 #: src/components/routes/product-widget/CollectInformation/index.tsx:553
 msgid "ZIP or Postal Code"
 msgstr "mã zip hoặc bưu điện"
+
+#: src/components/common/NumberSelector/index.tsx:82
+msgid "Decrease"
+msgstr "Giảm"
+
+#: src/components/common/NumberSelector/index.tsx:106
+msgid "Increase"
+msgstr "Tăng"
+
+#: src/components/layouts/EventHomepage/index.tsx:417
+msgid "To be announced"
+msgstr "Sẽ được công bố"
