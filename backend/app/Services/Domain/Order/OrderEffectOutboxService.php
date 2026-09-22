@@ -9,6 +9,7 @@ use HiEvents\DomainObjects\Enums\OrderEffectType;
 use HiEvents\Exceptions\ResourceConflictException;
 use HiEvents\Repository\Interfaces\OrderEffectOutboxRepositoryInterface;
 use HiEvents\Services\Domain\Order\DTOs\OrderEffectRequestDTO;
+use HiEvents\Services\Domain\Registration\GvsuRegistrationBridgeConfig;
 use HiEvents\Services\Infrastructure\DomainEvents\Enums\DomainEventType;
 use Illuminate\Database\DatabaseManager;
 
@@ -29,6 +30,7 @@ class OrderEffectOutboxService
 
     public function enqueueCompletedOrder(
         int $orderId,
+        int $eventId,
         string $transitionKey,
         DomainEventType $webhookEventType,
         OrderEffectEmailKind $emailKind = OrderEffectEmailKind::DETAILS_AND_TICKETS,
@@ -45,6 +47,14 @@ class OrderEffectOutboxService
             $transitionKey,
             new OrderEffectRequestDTO(OrderEffectType::WEBHOOK, domainEventType: $webhookEventType),
         );
+        // Only the exact enabled event-seven order can create bridge-only work; the service rechecks paid/current bindings.
+        if (GvsuRegistrationBridgeConfig::mayEnqueueOrder($eventId, $orderId)) {
+            $this->repository->enqueue(
+                $orderId,
+                $transitionKey,
+                new OrderEffectRequestDTO(OrderEffectType::GVSU_REGISTRATION_BRIDGE),
+            );
+        }
     }
 
     public function enqueueOfflineSubmission(int $orderId): void

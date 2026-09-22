@@ -20,6 +20,7 @@ use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Services\Domain\EventStatistics\EventStatisticsIncrementService;
 use HiEvents\Services\Domain\Mail\SendOrderDetailsService;
 use HiEvents\Services\Domain\Order\DTOs\ClaimedOrderEffectDTO;
+use HiEvents\Services\Domain\Registration\GvsuRegistrationBridgeService;
 use HiEvents\Services\Infrastructure\Webhook\WebhookDispatchService;
 use Illuminate\Database\DatabaseManager;
 use Psr\Log\LoggerInterface;
@@ -36,6 +37,7 @@ class OrderEffectRelayService
         private readonly WebhookDispatchService $webhookDispatchService,
         private readonly DatabaseManager $databaseManager,
         private readonly LoggerInterface $logger,
+        private readonly ?GvsuRegistrationBridgeService $registrationBridgeService = null,
     ) {}
 
     public function processBatch(int $limit = 25): int
@@ -79,6 +81,15 @@ class OrderEffectRelayService
         if ($effect->effectType === OrderEffectType::EMAIL) {
             $this->deliverEmail($effect);
             $this->requireDeliveredClaim($effect);
+
+            return;
+        }
+
+        if ($effect->effectType === OrderEffectType::GVSU_REGISTRATION_BRIDGE) {
+            // An unassigned attendee is not a delivery failure: leave the exact outbox claim pending.
+            if (($this->registrationBridgeService ?? app(GvsuRegistrationBridgeService::class))->provisionCompletedOrder($effect->orderId)) {
+                $this->requireDeliveredClaim($effect);
+            }
 
             return;
         }

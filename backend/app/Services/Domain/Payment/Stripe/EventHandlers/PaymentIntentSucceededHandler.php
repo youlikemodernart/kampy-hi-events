@@ -150,6 +150,7 @@ class PaymentIntentSucceededHandler
 
             $this->orderEffectOutboxService->enqueueCompletedOrder(
                 $updatedOrder->getId(),
+                $updatedOrder->getEventId(),
                 OrderEffectOutboxService::TRANSITION_STRIPE_COMPLETED,
                 DomainEventType::ORDER_CREATED,
             );

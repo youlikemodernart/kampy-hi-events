@@ -101,6 +101,7 @@ class CompleteOrderHandler
             if ($updatedOrder->isOrderCompleted()) {
                 $this->orderEffectOutboxService->enqueueCompletedOrder(
                     $updatedOrder->getId(),
+                    $updatedOrder->getEventId(),
                     OrderEffectOutboxService::TRANSITION_FREE_COMPLETED,
                     DomainEventType::ORDER_CREATED,
                 );

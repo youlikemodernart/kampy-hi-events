@@ -20,6 +20,7 @@ use HiEvents\Services\Application\Handlers\CheckInList\Public\DTO\AttendeeAndAct
 use HiEvents\Services\Domain\CheckInList\DTO\CheckInResultDTO;
 use HiEvents\Services\Domain\CheckInList\DTO\CreateAttendeeCheckInsResponseDTO;
 use HiEvents\Services\Domain\Order\MarkOrderAsPaidService;
+use HiEvents\Services\Domain\Registration\GvsuRegistrationCheckInClearanceService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -28,28 +29,24 @@ class CreateAttendeeCheckInService
 {
     public function __construct(
         private readonly AttendeeCheckInRepositoryInterface $attendeeCheckInRepository,
-        private readonly CheckInListDataService             $checkInListDataService,
-        private readonly EventSettingsRepositoryInterface   $eventSettingsRepository,
-        private readonly ConnectionInterface                $db,
-        private readonly MarkOrderAsPaidService             $markOrderAsPaidService,
-    )
-    {
-    }
+        private readonly CheckInListDataService $checkInListDataService,
+        private readonly EventSettingsRepositoryInterface $eventSettingsRepository,
+        private readonly ConnectionInterface $db,
+        private readonly MarkOrderAsPaidService $markOrderAsPaidService,
+        private readonly GvsuRegistrationCheckInClearanceService $registrationClearance,
+    ) {}
 
     /**
-     * @param string $checkInListUuid
-     * @param string $checkInUserIpAddress
-     * @param Collection<int, AttendeeAndActionDTO> $attendeesAndActions
-     * @return CreateAttendeeCheckInsResponseDTO
+     * @param  Collection<int, AttendeeAndActionDTO>  $attendeesAndActions
+     *
      * @throws CannotCheckInException
      * @throws Exception|Throwable
      */
     public function checkInAttendees(
-        string     $checkInListUuid,
-        string     $checkInUserIpAddress,
+        string $checkInListUuid,
+        string $checkInUserIpAddress,
         Collection $attendeesAndActions
-    ): CreateAttendeeCheckInsResponseDTO
-    {
+    ): CreateAttendeeCheckInsResponseDTO {
         $checkInList = $this->checkInListDataService->getCheckInList($checkInListUuid);
         $this->validateCheckInListIsActive($checkInList);
 
@@ -82,15 +79,17 @@ class CreateAttendeeCheckInService
     }
 
     /**
-     * @param Collection<int, AttendeeAndActionDTO> $attendeesAndActions
+     * @param  Collection<int, AttendeeAndActionDTO>  $attendeesAndActions
      * @return Collection<int, AttendeeDomainObject>
+     *
      * @throws CannotCheckInException
      */
     private function fetchAttendees(Collection $attendeesAndActions): Collection
     {
         $publicIds = $attendeesAndActions->map(
-            fn(AttendeeAndActionDTO $attendeeAndAction) => $attendeeAndAction->public_id
+            fn (AttendeeAndActionDTO $attendeeAndAction) => $attendeeAndAction->public_id
         );
+
         return $this->checkInListDataService->getAttendees($publicIds);
     }
 
@@ -102,14 +101,13 @@ class CreateAttendeeCheckInService
     }
 
     /**
-     * @param Collection<int, AttendeeDomainObject> $attendees
-     * @param CheckInListDomainObject $checkInList
-     * @return Collection
+     * @param  Collection<int, AttendeeDomainObject>  $attendees
+     *
      * @throws Exception
      */
     private function fetchExistingCheckIns(Collection $attendees, CheckInListDomainObject $checkInList): Collection
     {
-        $attendeeIds = $attendees->map(fn(AttendeeDomainObject $attendee) => $attendee->getId())->toArray();
+        $attendeeIds = $attendees->map(fn (AttendeeDomainObject $attendee) => $attendee->getId())->toArray();
 
         return $this->attendeeCheckInRepository->findWhereIn(
             field: AttendeeCheckInDomainObjectAbstract::ATTENDEE_ID,
@@ -126,16 +124,15 @@ class CreateAttendeeCheckInService
      * @throws CannotCheckInException
      */
     private function processAttendeeCheckIns(
-        Collection               $attendees,
-        Collection               $attendeesAndActions,
-        CheckInListDomainObject  $checkInList,
+        Collection $attendees,
+        Collection $attendeesAndActions,
+        CheckInListDomainObject $checkInList,
         EventSettingDomainObject $eventSettings,
-        Collection               $existingCheckIns,
-        string                   $checkInUserIpAddress
-    ): CreateAttendeeCheckInsResponseDTO
-    {
-        $errors = new ErrorBagDTO();
-        $checkIns = new Collection();
+        Collection $existingCheckIns,
+        string $checkInUserIpAddress
+    ): CreateAttendeeCheckInsResponseDTO {
+        $errors = new ErrorBagDTO;
+        $checkIns = new Collection;
 
         foreach ($attendees as $attendee) {
             $result = $this->processIndividualCheckIn(
@@ -166,18 +163,17 @@ class CreateAttendeeCheckInService
      * @throws CannotCheckInException
      */
     private function processIndividualCheckIn(
-        AttendeeDomainObject     $attendee,
-        Collection               $attendeesAndActions,
-        CheckInListDomainObject  $checkInList,
+        AttendeeDomainObject $attendee,
+        Collection $attendeesAndActions,
+        CheckInListDomainObject $checkInList,
         EventSettingDomainObject $eventSettings,
-        Collection               $existingCheckIns,
-        string                   $checkInUserIpAddress
-    ): CheckInResultDTO
-    {
+        Collection $existingCheckIns,
+        string $checkInUserIpAddress
+    ): CheckInResultDTO {
         $this->checkInListDataService->verifyAttendeeBelongsToCheckInList($checkInList, $attendee);
 
         $attendeeAction = $attendeesAndActions->first(
-            fn(AttendeeAndActionDTO $action) => $action->public_id === $attendee->getPublicId()
+            fn (AttendeeAndActionDTO $action) => $action->public_id === $attendee->getPublicId()
         );
         $checkInAction = $attendeeAction->action;
 
@@ -193,6 +189,12 @@ class CreateAttendeeCheckInService
         if ($error = $this->validateAttendeeStatus($attendee, $checkInAction, $eventSettings)) {
             return new CheckInResultDTO(error: $error);
         }
+
+        // This precedes both check-in creation and the mark-paid variant.
+        $this->registrationClearance->assertAttendeeCleared(
+            $attendee->getEventId(),
+            $attendee->getPublicId(),
+        );
 
         return $this->db->transaction(function () use ($attendee, $checkInList, $checkInAction, $checkInUserIpAddress) {
             $checkIn = $this->createCheckIn($attendee, $checkInList, $checkInUserIpAddress);
@@ -211,16 +213,15 @@ class CreateAttendeeCheckInService
     private function getExistingCheckIn(Collection $existingCheckIns, AttendeeDomainObject $attendee): ?object
     {
         return $existingCheckIns->first(
-            fn($checkIn) => $checkIn->getAttendeeId() === $attendee->getId()
+            fn ($checkIn) => $checkIn->getAttendeeId() === $attendee->getId()
         );
     }
 
     private function validateAttendeeStatus(
-        AttendeeDomainObject      $attendee,
+        AttendeeDomainObject $attendee,
         AttendeeCheckInActionType $checkInAction,
-        EventSettingDomainObject  $eventSettings
-    ): ?string
-    {
+        EventSettingDomainObject $eventSettings
+    ): ?string {
         $allowAttendeesAwaitingPaymentToCheckIn = $eventSettings->getAllowOrdersAwaitingOfflinePaymentToCheckIn();
 
         if ($attendee->getStatus() === AttendeeStatus::CANCELLED->name) {
@@ -229,7 +230,7 @@ class CreateAttendeeCheckInService
             ]);
         }
 
-        if (!$allowAttendeesAwaitingPaymentToCheckIn) {
+        if (! $allowAttendeesAwaitingPaymentToCheckIn) {
             if ($checkInAction->value === AttendeeCheckInActionType::CHECK_IN->value
                 && $attendee->getStatus() === AttendeeStatus::AWAITING_PAYMENT->name
             ) {
@@ -249,11 +250,10 @@ class CreateAttendeeCheckInService
     }
 
     private function createCheckIn(
-        AttendeeDomainObject    $attendee,
+        AttendeeDomainObject $attendee,
         CheckInListDomainObject $checkInList,
-        string                  $checkInUserIpAddress
-    ): AttendeeCheckInDomainObject
-    {
+        string $checkInUserIpAddress
+    ): AttendeeCheckInDomainObject {
         return $this->attendeeCheckInRepository->create([
             AttendeeCheckInDomainObjectAbstract::ORDER_ID => $attendee->getOrderId(),
             AttendeeCheckInDomainObjectAbstract::ATTENDEE_ID => $attendee->getId(),

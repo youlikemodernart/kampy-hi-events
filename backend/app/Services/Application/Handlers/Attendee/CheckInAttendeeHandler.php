@@ -11,6 +11,7 @@ use HiEvents\Exceptions\CannotCheckInException;
 use HiEvents\Repository\Interfaces\AttendeeRepositoryInterface;
 use HiEvents\Repository\Interfaces\UserRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Attendee\DTO\CheckInAttendeeDTO;
+use HiEvents\Services\Domain\Registration\GvsuRegistrationCheckInClearanceService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
@@ -18,11 +19,10 @@ class CheckInAttendeeHandler
 {
     public function __construct(
         private readonly AttendeeRepositoryInterface $attendeeRepository,
-        private readonly UserRepositoryInterface     $userRepository,
-        private readonly LoggerInterface             $logger,
-    )
-    {
-    }
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly LoggerInterface $logger,
+        private readonly GvsuRegistrationCheckInClearanceService $registrationClearance,
+    ) {}
 
     /**
      * @throws CannotCheckInException
@@ -33,6 +33,12 @@ class CheckInAttendeeHandler
         $attendee = $this->fetchAttendee($checkInAttendeeDTO);
 
         $this->validateAttendeeStatus($attendee);
+        if ($checkInAttendeeDTO->action === CheckInAction::CHECK_IN) {
+            $this->registrationClearance->assertAttendeeCleared(
+                $checkInAttendeeDTO->event_id,
+                $checkInAttendeeDTO->attendee_public_id,
+            );
+        }
         $this->validateAction($attendee, $checkInAttendeeDTO);
 
         $this->updateCheckInStatus($checkInAttendeeDTO);
@@ -49,8 +55,8 @@ class CheckInAttendeeHandler
 
         $attendee = $this->attendeeRepository->findFirstWhere($criteria);
 
-        if (!$attendee) {
-            throw new ResourceNotFoundException();
+        if (! $attendee) {
+            throw new ResourceNotFoundException;
         }
 
         return $attendee;
@@ -90,7 +96,7 @@ class CheckInAttendeeHandler
 
             throw new CannotCheckInException(
                 __(
-                    "Cannot check :actionName attendee as they were already checked :actionName by :fullName :time.",
+                    'Cannot check :actionName attendee as they were already checked :actionName by :fullName :time.',
                     [
                         'actionName' => $actionName,
                         'fullName' => $user->getFullName(),
@@ -125,7 +131,7 @@ class CheckInAttendeeHandler
         $this->attendeeRepository->updateWhere($updateData, $criteria);
 
         $this->logger->info(
-            'Attendee checked ' . $checkInAttendeeDTO->action . ' by user ' . $checkInAttendeeDTO->checked_in_by_user_id,
+            'Attendee checked '.$checkInAttendeeDTO->action.' by user '.$checkInAttendeeDTO->checked_in_by_user_id,
             [
                 'attendee_public_id' => $checkInAttendeeDTO->attendee_public_id,
                 'event_id' => $checkInAttendeeDTO->event_id,

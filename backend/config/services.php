@@ -76,6 +76,18 @@ return [
     'kamp_financial_reports' => [
         'bindings_json' => (string) env('KAMP_FINANCIAL_REPORT_BINDINGS', '[]'),
     ],
+    'gvsu_registration_bridge' => [
+        'enabled' => env('KAMP_GVSU_REGISTRATION_BRIDGE_ENABLED', false),
+        'mode' => env('KAMP_GVSU_REGISTRATION_BRIDGE_MODE', 'disabled'),
+        // Canary scope is an exact order allowlist. Never select only one attendee from an order.
+        'canary_order_ids' => array_values(array_filter(array_map('intval', explode(',', (string) env('KAMP_GVSU_REGISTRATION_BRIDGE_CANARY_ORDER_IDS', ''))))),
+        'portal_host' => env('KAMP_GVSU_REGISTRATION_PORTAL_HOST'),
+        'outgoing_bearer' => env('KAMP_GVSU_REGISTRATION_OUTGOING_BEARER'),
+        'incoming_current_digest' => env('KAMP_GVSU_REGISTRATION_INCOMING_CURRENT_SHA256'),
+        'incoming_prior_digest' => env('KAMP_GVSU_REGISTRATION_INCOMING_PRIOR_SHA256'),
+        'email_hmac_current_key' => env('KAMP_GVSU_REGISTRATION_EMAIL_HMAC_CURRENT_KEY'),
+        'email_hmac_prior_key' => env('KAMP_GVSU_REGISTRATION_EMAIL_HMAC_PRIOR_KEY'),
+    ],
     'open_exchange_rates' => [
         'app_id' => env('OPEN_EXCHANGE_RATES_APP_ID'),
     ],

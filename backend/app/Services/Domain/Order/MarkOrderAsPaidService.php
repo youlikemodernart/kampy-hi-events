@@ -94,6 +94,7 @@ class MarkOrderAsPaidService
 
             $this->orderEffectOutboxService->enqueueCompletedOrder(
                 $updatedOrder->getId(),
+                $updatedOrder->getEventId(),
                 OrderEffectOutboxService::TRANSITION_OFFLINE_MARKED_PAID,
                 DomainEventType::ORDER_MARKED_AS_PAID,
                 OrderEffectEmailKind::CUSTOMER_SUMMARY,

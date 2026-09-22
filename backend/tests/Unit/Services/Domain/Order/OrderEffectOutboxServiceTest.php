@@ -18,7 +18,7 @@ use Tests\TestCase;
 
 class OrderEffectOutboxServiceTest extends TestCase
 {
-    public function test_completed_order_records_three_identifier_only_effect_contracts(): void
+    public function test_disabled_bridge_does_not_add_registration_outbox_noise(): void
     {
         $repository = Mockery::mock(OrderEffectOutboxRepositoryInterface::class);
         $database = Mockery::mock(DatabaseManager::class);
@@ -42,14 +42,56 @@ class OrderEffectOutboxServiceTest extends TestCase
             Mockery::on(static fn (OrderEffectRequestDTO $effect): bool => $effect->effectType === OrderEffectType::WEBHOOK
                 && $effect->domainEventType === DomainEventType::ORDER_CREATED),
         );
-
+        config()->set('services.gvsu_registration_bridge.mode', 'disabled');
         (new OrderEffectOutboxService($repository, $database))->enqueueCompletedOrder(
             10,
+            7,
             OrderEffectOutboxService::TRANSITION_STRIPE_COMPLETED,
             DomainEventType::ORDER_CREATED,
         );
 
         self::assertTrue(true);
+    }
+
+    public function test_non_gvsu_completed_order_does_not_add_bridge_outbox_noise_when_enabled(): void
+    {
+        config()->set('services.gvsu_registration_bridge.mode', 'live');
+        $repository = Mockery::mock(OrderEffectOutboxRepositoryInterface::class);
+        $database = Mockery::mock(DatabaseManager::class);
+        $connection = Mockery::mock(Connection::class);
+        $database->shouldReceive('connection')->once()->andReturn($connection);
+        $connection->shouldReceive('transactionLevel')->once()->andReturn(1);
+        $repository->shouldReceive('enqueue')->times(3);
+
+        (new OrderEffectOutboxService($repository, $database))->enqueueCompletedOrder(
+            10,
+            8,
+            OrderEffectOutboxService::TRANSITION_STRIPE_COMPLETED,
+            DomainEventType::ORDER_CREATED,
+        );
+    }
+
+    public function test_enabled_event_seven_completed_order_enqueues_bridge_effect(): void
+    {
+        config()->set('services.gvsu_registration_bridge.mode', 'live');
+        $repository = Mockery::mock(OrderEffectOutboxRepositoryInterface::class);
+        $database = Mockery::mock(DatabaseManager::class);
+        $connection = Mockery::mock(Connection::class);
+        $database->shouldReceive('connection')->once()->andReturn($connection);
+        $connection->shouldReceive('transactionLevel')->once()->andReturn(1);
+        $repository->shouldReceive('enqueue')->times(3);
+        $repository->shouldReceive('enqueue')->once()->with(
+            10,
+            OrderEffectOutboxService::TRANSITION_STRIPE_COMPLETED,
+            Mockery::on(static fn (OrderEffectRequestDTO $effect): bool => $effect->effectType === OrderEffectType::GVSU_REGISTRATION_BRIDGE),
+        );
+
+        (new OrderEffectOutboxService($repository, $database))->enqueueCompletedOrder(
+            10,
+            7,
+            OrderEffectOutboxService::TRANSITION_STRIPE_COMPLETED,
+            DomainEventType::ORDER_CREATED,
+        );
     }
 
     public function test_offline_submission_records_only_details_email_and_order_created_webhook(): void

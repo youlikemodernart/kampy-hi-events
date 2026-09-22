@@ -47,6 +47,7 @@ use HiEvents\Http\Actions\CheckInLists\Public\GetCheckInListPublicAction;
 use HiEvents\Http\Actions\CheckInLists\UpdateCheckInListAction;
 use HiEvents\Http\Actions\Common\GetColorThemesAction;
 use HiEvents\Http\Actions\Common\Webhooks\StripeIncomingWebhookAction;
+use HiEvents\Http\Actions\Registration\GvsuRegistrationCurrentStateAction;
 use HiEvents\Http\Actions\Events\CreateEventAction;
 use HiEvents\Http\Actions\Events\DuplicateEventAction;
 use HiEvents\Http\Actions\Events\GetEventAction;
@@ -490,6 +491,9 @@ $router->prefix('/admin')->middleware(['auth:api', 'route.permission'])->group(
         $router->get('/system-info', GetSystemInfoAction::class);
     }
 );
+
+$router->post('/internal/gvsu-registration/current-state', GvsuRegistrationCurrentStateAction::class)
+    ->middleware('throttle:30,1');
 
 /**
  * Public routes
