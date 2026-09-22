@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace HiEvents\Services\Domain\Registration;
 
+use HiEvents\Exceptions\ResourceConflictException;
+
 final class GvsuRegistrationBridgeCredentialVerifier
 {
     public function accepts(?string $presentedBearer): bool
@@ -13,8 +15,12 @@ final class GvsuRegistrationBridgeCredentialVerifier
         }
 
         $presentedDigest = hash('sha256', $presentedBearer);
-        $current = GvsuRegistrationBridgeConfig::incomingCurrentDigest();
-        $prior = GvsuRegistrationBridgeConfig::incomingPriorDigest();
+        try {
+            $current = GvsuRegistrationBridgeConfig::incomingCurrentDigest();
+            $prior = GvsuRegistrationBridgeConfig::incomingPriorDigest();
+        } catch (ResourceConflictException) {
+            return false;
+        }
 
         $currentMatch = hash_equals($current, $presentedDigest);
         $priorMatch = $prior !== null && hash_equals($prior, $presentedDigest);

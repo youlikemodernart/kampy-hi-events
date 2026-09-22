@@ -11,6 +11,7 @@ use HiEvents\Services\Domain\Registration\GvsuRegistrationBridgeConfig;
 use HiEvents\Services\Domain\Registration\GvsuRegistrationBridgeCredentialVerifier;
 use HiEvents\Services\Domain\Registration\GvsuRegistrationBridgeService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GvsuRegistrationCurrentStateAction extends BaseAction
 {
@@ -19,13 +20,15 @@ class GvsuRegistrationCurrentStateAction extends BaseAction
         private readonly GvsuRegistrationBridgeService $bridge,
     ) {}
 
-    public function __invoke(GvsuRegistrationCurrentStateRequest $request): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
         if (! GvsuRegistrationBridgeConfig::enabled() || ! $this->credentialVerifier->accepts($this->bearer($request->header('Authorization')))) {
             return $this->errorResponse(__('Not found.'), ResponseCodes::HTTP_NOT_FOUND);
         }
 
-        return $this->jsonResponse($this->bridge->currentState($request->validated()));
+        $validated = $request->validate((new GvsuRegistrationCurrentStateRequest)->rules());
+
+        return $this->jsonResponse($this->bridge->currentState($validated));
     }
 
     private function bearer(?string $authorization): ?string

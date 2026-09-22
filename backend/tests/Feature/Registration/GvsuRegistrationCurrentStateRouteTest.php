@@ -34,11 +34,36 @@ class GvsuRegistrationCurrentStateRouteTest extends TestCase
         config()->set('services.gvsu_registration_bridge.mode', 'disabled');
         $this->postJson('/internal/gvsu-registration/current-state', $this->candidate)
             ->assertNotFound();
+        $this->postJson('/internal/gvsu-registration/current-state', [])
+            ->assertNotFound();
 
         config()->set('services.gvsu_registration_bridge.mode', 'live');
+        $this->withHeader('Authorization', 'Bearer '.str_repeat('b', 43))
+            ->postJson('/internal/gvsu-registration/current-state', [])
+            ->assertNotFound();
+        config()->set('services.gvsu_registration_bridge.incoming_current_digest', 'invalid');
+        $this->withHeader('Authorization', 'Bearer '.str_repeat('b', 43))
+            ->postJson('/internal/gvsu-registration/current-state', [])
+            ->assertNotFound();
         config()->set('services.gvsu_registration_bridge.incoming_current_digest', hash('sha256', str_repeat('a', 43)));
         $this->postJson('/internal/gvsu-registration/current-state', $this->candidate)
             ->assertNotFound();
+        $this->postJson('/internal/gvsu-registration/current-state', [])
+            ->assertNotFound();
+    }
+
+    public function test_authenticated_malformed_current_state_request_is_rejected_after_the_credential_gate(): void
+    {
+        $bearer = str_repeat('a', 43);
+        config()->set('services.gvsu_registration_bridge.mode', 'live');
+        config()->set('services.gvsu_registration_bridge.incoming_current_digest', hash('sha256', $bearer));
+        $bridge = Mockery::mock(GvsuRegistrationBridgeService::class);
+        $bridge->shouldNotReceive('currentState');
+        $this->app->instance(GvsuRegistrationBridgeService::class, $bridge);
+
+        $this->withHeader('Authorization', 'Bearer '.$bearer)
+            ->postJson('/internal/gvsu-registration/current-state', [])
+            ->assertUnprocessable();
     }
 
     public function test_current_state_validates_request_only_attendee_context_and_delivery_email_without_echoing_them(): void
