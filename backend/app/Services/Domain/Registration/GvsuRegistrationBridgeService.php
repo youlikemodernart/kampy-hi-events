@@ -320,7 +320,8 @@ class GvsuRegistrationBridgeService
         $order = Order::withTrashed()->find($candidate['order_id']);
         $attendee = Attendee::withTrashed()->find($candidate['attendee_id']);
         if ($assignment === null || $order === null || $attendee === null
-            || $assignment->status !== 'delivered' || ! $this->isCurrentPaidOrder($order) || $attendee->deleted_at !== null || $attendee->status !== 'ACTIVE'
+            || ! in_array($assignment->status, ['bound', 'attempted', 'unknown', 'delivered'], true)
+            || ! $this->isCurrentPaidOrder($order) || $attendee->deleted_at !== null || $attendee->status !== 'ACTIVE'
             || (string) $order->event_id !== $candidate['event_id'] || (string) $attendee->event_id !== $candidate['event_id']
             || (string) $attendee->order_id !== $candidate['order_id'] || $attendee->public_id !== $candidate['public_ticket_id']
             || (string) $assignment->event_id !== $candidate['event_id'] || (string) $assignment->order_id !== $candidate['order_id']
