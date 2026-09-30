@@ -97,6 +97,22 @@ class RecoverAccountOwnerAccessCommandTest extends TestCase
         $this->assertStringNotContainsString("'stored_email' => \$exception", $this->source);
     }
 
+    public function test_owner_email_reveal_follows_exact_owner_user_binding_but_precedes_role_and_status_checks(): void
+    {
+        $ownerUserPosition = strpos($this->source, '(int) $membership->user_id !== $userId');
+        $storedEmailPosition = strpos($this->source, "'stored_email' => \$user->email");
+        $rolePosition = strpos($this->source, '$membership->role !== Role::ADMIN->name');
+        $statusPosition = strpos($this->source, '$membership->status !== UserStatus::ACTIVE->name');
+
+        $this->assertIsInt($ownerUserPosition);
+        $this->assertIsInt($storedEmailPosition);
+        $this->assertIsInt($rolePosition);
+        $this->assertIsInt($statusPosition);
+        $this->assertTrue($ownerUserPosition < $storedEmailPosition);
+        $this->assertTrue($storedEmailPosition < $rolePosition);
+        $this->assertTrue($storedEmailPosition < $statusPosition);
+    }
+
     public function test_command_does_not_change_passwords(): void
     {
         $this->assertStringNotContainsString('password', strtolower($this->source));
