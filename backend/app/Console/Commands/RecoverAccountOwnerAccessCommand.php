@@ -132,10 +132,14 @@ class RecoverAccountOwnerAccessCommand extends Command
         }
 
         $membership = $owners->first();
-        if ((int) $membership->user_id !== $userId
-            || $membership->role !== Role::ADMIN->name
-            || $membership->status !== UserStatus::ACTIVE->name) {
-            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::OWNER_MEMBERSHIP_MISMATCH);
+        if ((int) $membership->user_id !== $userId) {
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::OWNER_USER_MISMATCH);
+        }
+        if ($membership->role !== Role::ADMIN->name) {
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::OWNER_ROLE_MISMATCH);
+        }
+        if ($membership->status !== UserStatus::ACTIVE->name) {
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::OWNER_STATUS_MISMATCH);
         }
 
         if (!hash_equals($email, strtolower($user->email))) {

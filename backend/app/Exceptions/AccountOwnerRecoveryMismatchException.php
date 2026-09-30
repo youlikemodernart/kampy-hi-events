@@ -13,7 +13,9 @@ class AccountOwnerRecoveryMismatchException extends Exception
     public const USER_NOT_FOUND = 'user_not_found';
     public const IDENTITY_MISMATCH = 'identity_mismatch';
     public const OWNER_COUNT_MISMATCH = 'owner_count_mismatch';
-    public const OWNER_MEMBERSHIP_MISMATCH = 'owner_membership_mismatch';
+    public const OWNER_USER_MISMATCH = 'owner_user_mismatch';
+    public const OWNER_ROLE_MISMATCH = 'owner_role_mismatch';
+    public const OWNER_STATUS_MISMATCH = 'owner_status_mismatch';
     public const RESTORE_FAILED = 'restore_failed';
     public const READBACK_FAILED = 'readback_failed';
 
@@ -22,7 +24,9 @@ class AccountOwnerRecoveryMismatchException extends Exception
         self::USER_NOT_FOUND,
         self::IDENTITY_MISMATCH,
         self::OWNER_COUNT_MISMATCH,
-        self::OWNER_MEMBERSHIP_MISMATCH,
+        self::OWNER_USER_MISMATCH,
+        self::OWNER_ROLE_MISMATCH,
+        self::OWNER_STATUS_MISMATCH,
         self::RESTORE_FAILED,
         self::READBACK_FAILED,
     ];

@@ -48,7 +48,9 @@ class RecoverAccountOwnerAccessCommandTest extends TestCase
             'user_not_found',
             'identity_mismatch',
             'owner_count_mismatch',
-            'owner_membership_mismatch',
+            'owner_user_mismatch',
+            'owner_role_mismatch',
+            'owner_status_mismatch',
             'restore_failed',
             'readback_failed',
         ] as $reason) {
@@ -57,6 +59,16 @@ class RecoverAccountOwnerAccessCommandTest extends TestCase
 
         $this->assertStringContainsString("'reason' => \$exception->reason", $this->source);
         $this->assertStringNotContainsString("'email' =>", $this->source);
+    }
+
+    public function test_owner_membership_diagnostic_distinguishes_user_role_and_status_without_row_values(): void
+    {
+        $this->assertStringContainsString('AccountOwnerRecoveryMismatchException::OWNER_USER_MISMATCH', $this->source);
+        $this->assertStringContainsString('AccountOwnerRecoveryMismatchException::OWNER_ROLE_MISMATCH', $this->source);
+        $this->assertStringContainsString('AccountOwnerRecoveryMismatchException::OWNER_STATUS_MISMATCH', $this->source);
+        $this->assertStringNotContainsString("'owner_user_id' =>", $this->source);
+        $this->assertStringNotContainsString("'owner_role' =>", $this->source);
+        $this->assertStringNotContainsString("'owner_status' =>", $this->source);
     }
 
     public function test_recovery_refuses_permission_or_status_changes(): void
