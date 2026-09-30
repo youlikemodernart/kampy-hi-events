@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {kamp} from './kampPrimitives';
+import manifest from './universityThemes.json';
 import {KAMP_FALLBACK_THEME, resolveUniversityTheme} from './universityThemes';
 
 function contrastRatio(foreground: string, background: string): number {
@@ -25,6 +26,10 @@ describe('university theme adapters', () => {
             onSecondary: '#ffffff',
             secondarySoft: '#e7e7ed',
         });
+    });
+
+    it('uses the machine-readable projection as the single source for GVSU roles', () => {
+        expect(resolveUniversityTheme('grand-valley-state-university')).toEqual(manifest['grand-valley-state-university']);
     });
 
     it('requires readable foregrounds for both GVSU brand fields', () => {

@@ -1,0 +1,9 @@
+{
+  "grand-valley-state-university": {
+    "primary": "#0032a0",
+    "secondary": "#13155c",
+    "onPrimary": "#ffffff",
+    "onSecondary": "#ffffff",
+    "secondarySoft": "#e7e7ed"
+  }
+}

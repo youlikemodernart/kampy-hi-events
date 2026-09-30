@@ -1,4 +1,5 @@
 import {kamp} from './kampPrimitives';
+import universityThemeManifest from './universityThemes.json';
 
 export interface UniversityTheme {
     primary: string;
@@ -9,20 +10,7 @@ export interface UniversityTheme {
     heroImage?: string;
 }
 
-/**
- * University-owned visual adapters. Kamp owns the white foundation, typography,
- * geometry, interaction patterns, and fallback. Public components consume
- * semantic page roles produced from this registry, never school-specific names.
- */
-const UNIVERSITY_THEMES: Readonly<Record<string, UniversityTheme>> = {
-    'grand-valley-state-university': {
-        primary: '#0032a0',
-        secondary: '#13155c',
-        onPrimary: '#ffffff',
-        onSecondary: '#ffffff',
-        secondarySoft: '#e7e7ed',
-    },
-};
+const UNIVERSITY_THEMES: Readonly<Record<string, UniversityTheme>> = universityThemeManifest;
 
 export const KAMP_FALLBACK_THEME: UniversityTheme = {
     primary: kamp.forest,

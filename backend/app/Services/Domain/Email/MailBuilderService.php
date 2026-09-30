@@ -18,6 +18,7 @@ class MailBuilderService
     public function __construct(
         private readonly EmailTemplateService $emailTemplateService,
         private readonly EmailTokenContextBuilder $tokenContextBuilder,
+        private readonly UniversityThemeResolver $universityThemeResolver,
     ) {
     }
 
@@ -67,6 +68,7 @@ class MailBuilderService
             eventSettings: $eventSettings,
             invoice: $invoice,
             renderedTemplate: $renderedTemplate,
+            universityTheme: $this->universityThemeResolver->resolveForEvent($event),
         );
     }
 
