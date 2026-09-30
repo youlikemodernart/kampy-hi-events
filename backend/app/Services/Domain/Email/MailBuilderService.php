@@ -44,6 +44,7 @@ class MailBuilderService
             eventSettings: $eventSettings,
             organizer: $organizer,
             renderedTemplate: $renderedTemplate,
+            universityTheme: $this->universityThemeResolver->resolveForEvent($event),
         );
     }
 

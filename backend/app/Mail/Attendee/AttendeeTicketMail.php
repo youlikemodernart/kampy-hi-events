@@ -12,6 +12,8 @@ use HiEvents\Helper\StringHelper;
 use HiEvents\Helper\Url;
 use HiEvents\Mail\BaseMail;
 use HiEvents\Services\Domain\Email\DTO\RenderedEmailTemplateDTO;
+use HiEvents\Services\Domain\Email\DTO\UniversityEmailThemeDTO;
+use HiEvents\Services\Domain\Email\EmailHtmlToTextConverter;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -33,6 +35,7 @@ class AttendeeTicketMail extends BaseMail
         private readonly EventSettingDomainObject $eventSettings,
         private readonly OrganizerDomainObject    $organizer,
         ?RenderedEmailTemplateDTO                 $renderedTemplate = null,
+        private readonly ?UniversityEmailThemeDTO $universityTheme = null,
     )
     {
         parent::__construct();
@@ -53,6 +56,14 @@ class AttendeeTicketMail extends BaseMail
 
     public function content(): Content
     {
+        if ($this->universityTheme) {
+            return new Content(
+                view: 'emails.orders.university-attendee-ticket',
+                text: 'emails.orders.university-attendee-ticket-text',
+                with: $this->viewData(),
+            );
+        }
+
         if ($this->renderedTemplate) {
             return new Content(
                 markdown: 'emails.custom-template',
@@ -67,19 +78,29 @@ class AttendeeTicketMail extends BaseMail
         // If no template is provided, use the default blade template
         return new Content(
             markdown: 'emails.orders.attendee-ticket',
-            with: [
-                'event' => $this->event,
-                'attendee' => $this->attendee,
-                'eventSettings' => $this->eventSettings,
-                'organizer' => $this->organizer,
-                'order' => $this->order,
-                'ticketUrl' => sprintf(
-                    Url::getFrontEndUrlFromConfig(Url::ATTENDEE_TICKET),
-                    $this->event->getId(),
-                    $this->attendee->getShortId(),
-                )
-            ]
+            with: $this->viewData(),
         );
+    }
+
+    private function viewData(): array
+    {
+        return [
+            'event' => $this->event,
+            'attendee' => $this->attendee,
+            'eventSettings' => $this->eventSettings,
+            'organizer' => $this->organizer,
+            'order' => $this->order,
+            'renderedTemplate' => $this->renderedTemplate,
+            'universityTheme' => $this->universityTheme,
+            'location' => $this->eventSettings->getConfirmationVenueName() ?: $this->event->getLocation(),
+            'plainRenderedBody' => $this->renderedTemplate ? EmailHtmlToTextConverter::convert($this->renderedTemplate->body) : null,
+            'plainEmailFooter' => EmailHtmlToTextConverter::convert($this->eventSettings->getGetEmailFooterHtml() ?? ''),
+            'ticketUrl' => sprintf(
+                Url::getFrontEndUrlFromConfig(Url::ATTENDEE_TICKET),
+                $this->event->getId(),
+                $this->attendee->getShortId(),
+            ),
+        ];
     }
 
     public function attachments(): array
