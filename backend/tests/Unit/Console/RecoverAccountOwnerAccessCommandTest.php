@@ -37,6 +37,28 @@ class RecoverAccountOwnerAccessCommandTest extends TestCase
         $this->assertStringContainsString('(int) $membership->user_id !== $userId', $this->source);
     }
 
+    public function test_dry_run_reports_only_allowlisted_mismatch_categories(): void
+    {
+        $exceptionPath = dirname(__DIR__, 3).'/app/Exceptions/AccountOwnerRecoveryMismatchException.php';
+        $this->assertFileExists($exceptionPath);
+        $exception = file_get_contents($exceptionPath);
+
+        foreach ([
+            'event_not_found',
+            'user_not_found',
+            'identity_mismatch',
+            'owner_count_mismatch',
+            'owner_membership_mismatch',
+            'restore_failed',
+            'readback_failed',
+        ] as $reason) {
+            $this->assertStringContainsString("'{$reason}'", $exception);
+        }
+
+        $this->assertStringContainsString("'reason' => \$exception->reason", $this->source);
+        $this->assertStringNotContainsString("'email' =>", $this->source);
+    }
+
     public function test_recovery_refuses_permission_or_status_changes(): void
     {
         $this->assertStringContainsString('$membership->role !== Role::ADMIN->name', $this->source);

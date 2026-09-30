@@ -56,13 +56,24 @@ class RecoverAccountOwnerAccessCommand extends Command
             $result = $this->databaseManager->transaction(
                 fn (): array => $this->reconcile($userId, $email, $eventId, $apply),
             );
+        } catch (AccountOwnerRecoveryMismatchException $exception) {
+            $this->logger->warning('Account owner recovery binding mismatch.', [
+                'user_id' => $userId,
+                'event_id' => $eventId,
+                'reason' => $exception->reason,
+            ]);
+            $this->error(json_encode([
+                'ok' => false,
+                'reason' => $exception->reason,
+            ], JSON_THROW_ON_ERROR));
+            return self::FAILURE;
         } catch (Throwable $exception) {
             $this->logger->error('Account owner recovery failed closed.', [
                 'user_id' => $userId,
                 'event_id' => $eventId,
                 'error_class' => $exception::class,
             ]);
-            $this->error('Recovery stopped because the bound records did not match.');
+            $this->error('Recovery stopped because of an unexpected internal error.');
             return self::FAILURE;
         }
 
@@ -81,11 +92,18 @@ class RecoverAccountOwnerAccessCommand extends Command
             $userQuery->lockForUpdate();
         }
 
-        $event = $eventQuery->firstOrFail();
-        $user = $userQuery->firstOrFail();
+        $event = $eventQuery->first();
+        if ($event === null) {
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::EVENT_NOT_FOUND);
+        }
+
+        $user = $userQuery->first();
+        if ($user === null) {
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::USER_NOT_FOUND);
+        }
 
         if (!hash_equals($email, strtolower($user->email))) {
-            throw new AccountOwnerRecoveryMismatchException('Identity mismatch.');
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::IDENTITY_MISMATCH);
         }
 
         $ownerQuery = AccountUser::withTrashed()
@@ -98,14 +116,14 @@ class RecoverAccountOwnerAccessCommand extends Command
 
         $owners = $ownerQuery->get();
         if ($owners->count() !== 1) {
-            throw new AccountOwnerRecoveryMismatchException('Expected exactly one owner membership.');
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::OWNER_COUNT_MISMATCH);
         }
 
         $membership = $owners->first();
         if ((int) $membership->user_id !== $userId
             || $membership->role !== Role::ADMIN->name
             || $membership->status !== UserStatus::ACTIVE->name) {
-            throw new AccountOwnerRecoveryMismatchException('Owner membership mismatch.');
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::OWNER_MEMBERSHIP_MISMATCH);
         }
 
         $userWasDeleted = $user->trashed();
@@ -113,16 +131,16 @@ class RecoverAccountOwnerAccessCommand extends Command
 
         if ($apply) {
             if ($userWasDeleted && !$user->restore()) {
-                throw new AccountOwnerRecoveryMismatchException('User restore failed.');
+                throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::RESTORE_FAILED);
             }
             if ($membershipWasDeleted && !$membership->restore()) {
-                throw new AccountOwnerRecoveryMismatchException('Owner membership restore failed.');
+                throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::RESTORE_FAILED);
             }
 
             $user->refresh();
             $membership->refresh();
             if ($user->trashed() || $membership->trashed()) {
-                throw new AccountOwnerRecoveryMismatchException('Restore readback failed.');
+                throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::READBACK_FAILED);
             }
 
             $this->logger->critical('Account owner access recovered through guarded command.', [
