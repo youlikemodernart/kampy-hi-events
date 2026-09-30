@@ -18,13 +18,16 @@ use Throwable;
 class RecoverAccountOwnerAccessCommand extends Command
 {
     private const CONFIRMATION = 'RECOVER-OWNER-ACCESS';
+    private const REVEAL_CONFIRMATION = 'REVEAL-OWNER-EMAIL';
 
     protected $signature = 'user:recover-owner-access
         {userId : Expected user ID}
         {email : Expected user email}
         {eventId : Event whose account ownership must match}
         {--apply : Restore the exact soft-deleted records}
-        {--confirm= : Required confirmation phrase when applying}';
+        {--confirm= : Required confirmation phrase when applying}
+        {--reveal-owner-email : Reveal the bound user email during a dry run}
+        {--reveal-confirm= : Required confirmation phrase when revealing the owner email}';
 
     protected $description = 'Restore an exact soft-deleted account owner without granting new permissions.';
 
@@ -41,6 +44,7 @@ class RecoverAccountOwnerAccessCommand extends Command
         $eventId = filter_var($this->argument('eventId'), FILTER_VALIDATE_INT);
         $email = strtolower(trim((string) $this->argument('email')));
         $apply = (bool) $this->option('apply');
+        $revealOwnerEmail = (bool) $this->option('reveal-owner-email');
 
         if ($userId === false || $userId < 1 || $eventId === false || $eventId < 1 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             $this->error('Invalid recovery binding.');
@@ -52,9 +56,15 @@ class RecoverAccountOwnerAccessCommand extends Command
             return self::INVALID;
         }
 
+        if ($revealOwnerEmail
+            && ($apply || !hash_equals(self::REVEAL_CONFIRMATION, (string) $this->option('reveal-confirm')))) {
+            $this->error('Owner email reveal is allowed only in a separately confirmed dry run.');
+            return self::INVALID;
+        }
+
         try {
             $result = $this->databaseManager->transaction(
-                fn (): array => $this->reconcile($userId, $email, $eventId, $apply),
+                fn (): array => $this->reconcile($userId, $email, $eventId, $apply, $revealOwnerEmail),
             );
         } catch (AccountOwnerRecoveryMismatchException $exception) {
             $this->logger->warning('Account owner recovery binding mismatch.', [
@@ -82,7 +92,13 @@ class RecoverAccountOwnerAccessCommand extends Command
         return self::SUCCESS;
     }
 
-    private function reconcile(int $userId, string $email, int $eventId, bool $apply): array
+    private function reconcile(
+        int $userId,
+        string $email,
+        int $eventId,
+        bool $apply,
+        bool $revealOwnerEmail,
+    ): array
     {
         $eventQuery = Event::query()->whereKey($eventId);
         $userQuery = User::withTrashed()->whereKey($userId);
@@ -100,10 +116,6 @@ class RecoverAccountOwnerAccessCommand extends Command
         $user = $userQuery->first();
         if ($user === null) {
             throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::USER_NOT_FOUND);
-        }
-
-        if (!hash_equals($email, strtolower($user->email))) {
-            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::IDENTITY_MISMATCH);
         }
 
         $ownerQuery = AccountUser::withTrashed()
@@ -124,6 +136,19 @@ class RecoverAccountOwnerAccessCommand extends Command
             || $membership->role !== Role::ADMIN->name
             || $membership->status !== UserStatus::ACTIVE->name) {
             throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::OWNER_MEMBERSHIP_MISMATCH);
+        }
+
+        if (!hash_equals($email, strtolower($user->email))) {
+            if ($revealOwnerEmail) {
+                return [
+                    'ok' => false,
+                    'reason' => AccountOwnerRecoveryMismatchException::IDENTITY_MISMATCH,
+                    'user_id' => $userId,
+                    'stored_email' => $user->email,
+                ];
+            }
+
+            throw new AccountOwnerRecoveryMismatchException(AccountOwnerRecoveryMismatchException::IDENTITY_MISMATCH);
         }
 
         $userWasDeleted = $user->trashed();

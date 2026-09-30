@@ -76,9 +76,17 @@ class RecoverAccountOwnerAccessCommandTest extends TestCase
         $this->assertStringContainsString('$user->trashed() || $membership->trashed()', $this->source);
     }
 
-    public function test_command_does_not_emit_the_email_or_change_passwords(): void
+    public function test_owner_email_reveal_requires_a_separately_confirmed_dry_run(): void
     {
-        $this->assertStringNotContainsString("'email' =>", $this->source);
+        $this->assertStringContainsString("private const REVEAL_CONFIRMATION = 'REVEAL-OWNER-EMAIL'", $this->source);
+        $this->assertStringContainsString('{--reveal-owner-email', $this->source);
+        $this->assertStringContainsString('$apply || !hash_equals(self::REVEAL_CONFIRMATION', $this->source);
+        $this->assertStringContainsString("'stored_email' => \$user->email", $this->source);
+        $this->assertStringNotContainsString("'stored_email' => \$exception", $this->source);
+    }
+
+    public function test_command_does_not_change_passwords(): void
+    {
         $this->assertStringNotContainsString('password', strtolower($this->source));
     }
 }
