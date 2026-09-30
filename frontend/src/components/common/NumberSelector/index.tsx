@@ -76,7 +76,7 @@ export const NumberSelector = ({formInstance, fieldName, min, max, sharedValues}
     };
 
     return (
-        <div className={classNames(classes.wrapper, classes.buttonInput, 'button-input')}>
+        <div className={classNames(classes.wrapper, classes.buttonGroup, 'button-input')}>
             <ActionIcon
                 size={44}
                 aria-label={t`Decrease`}
@@ -98,7 +98,7 @@ export const NumberSelector = ({formInstance, fieldName, min, max, sharedValues}
                 value={value}
                 hideControls
                 onChange={changeValue}
-                classNames={{input: classes.input}}
+                classNames={{root: classes.field, input: classes.input}}
             />
 
             <ActionIcon
@@ -139,10 +139,10 @@ export const NumberSelectorSelect = ({formInstance, fieldName, min, max, classNa
     }
 
     return (
-        <div className={classNames(classes.wrapper, 'select-input')}>
+        <div className={classNames(classes.wrapper, classes.selectGroup, 'select-input')}>
             <Select
                 classNames={{
-                    input: classes.input,
+                    input: classes.selectInput,
                 }}
                 className={className}
                 onChange={(value) => setValue(value ?? '0')} // Ensure the value is set correctly on change
