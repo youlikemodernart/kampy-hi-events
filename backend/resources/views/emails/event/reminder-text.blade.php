@@ -1,3 +1,5 @@
+{{ $context['preheader'] }}
+
 {{ __('Your event is coming up') }}
 
 {{ __('You are registered for :event.', ['event' => $context['event_title']]) }}
@@ -7,6 +9,8 @@
 @if(!empty($context['location'])){{ $context['location'] }}
 @endif
 {{ __('View event details') }}: {{ $context['event_url'] }}
+
+{{ __('Need help? Contact :support.', ['support' => $context['support_email']]) }}
 
 {{ $context['physical_address'] }}
 {{ __('Email preferences') }}: {{ $context['preference_url'] }}

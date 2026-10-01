@@ -11,6 +11,7 @@ return [
     ],
     'late_grace_minutes' => 360,
     'event_allowlist' => [7],
+    'sender' => 'tickets@kamplove.org',
     // These activation bindings deliberately remain unresolved. Dispatch fails closed.
     'reply_to' => null,
     'physical_address' => null,

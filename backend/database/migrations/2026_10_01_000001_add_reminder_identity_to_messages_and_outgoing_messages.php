@@ -29,19 +29,9 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::table('outgoing_messages', static function (Blueprint $table) {
-            $table->dropUnique('outgoing_messages_normalized_recipient_unique');
-            $table->dropForeign(['attendee_id']);
-            $table->dropColumn([
-                'recipient_normalized', 'attendee_id', 'payload_digest', 'attempt_count', 'last_error_class',
-                'provider_message_id', 'provider_accepted_at', 'claimed_at', 'submitted_at',
-            ]);
-        });
-
-        Schema::table('messages', static function (Blueprint $table) {
-            $table->dropUnique(['source_key']);
-            $table->dropColumn(['source', 'source_key']);
-            $table->foreignId('sent_by_user_id')->nullable(false)->change();
-        });
+        throw new LogicException(
+            'This migration is intentionally non-reversible once system-authored reminder messages exist. '
+            .'Use forward recovery or a separately reviewed data cleanup that removes those messages before restoring NOT NULL actors.'
+        );
     }
 };

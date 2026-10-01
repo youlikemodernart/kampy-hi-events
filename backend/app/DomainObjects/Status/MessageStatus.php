@@ -14,4 +14,5 @@ enum MessageStatus
     case FAILED;
     case SCHEDULED;
     case CANCELLED;
+    case UNKNOWN;
 }
