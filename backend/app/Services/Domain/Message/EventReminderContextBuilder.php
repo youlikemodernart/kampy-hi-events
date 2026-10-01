@@ -4,15 +4,12 @@ namespace HiEvents\Services\Domain\Message;
 
 use Carbon\CarbonImmutable;
 use HiEvents\Models\Event;
-use HiEvents\Services\Domain\Email\DTO\UniversityEmailThemeDTO;
 use HiEvents\Services\Domain\Email\UniversityThemeResolver;
 use HiEvents\Services\Domain\Message\DTO\EventReminderContext;
 use Illuminate\Support\Str;
 
 class EventReminderContextBuilder
 {
-    private const KAMP_FALLBACK = ['#2b663d', '#1f4a2d', '#ffffff', '#ffffff', '#e7f0ea'];
-
     public function __construct(private readonly UniversityThemeResolver $themes)
     {
     }
@@ -46,7 +43,10 @@ class EventReminderContextBuilder
         if (!filter_var($eventUrl, FILTER_VALIDATE_URL)) {
             return null;
         }
-        $theme = $this->themes->resolveForSlug(Str::slug($event->title)) ?? $this->kampFallback();
+        $theme = $this->themes->resolveForSlug(Str::slug($event->title)) ?? $this->themes->resolveFallback();
+        if ($theme === null) {
+            return null;
+        }
 
         return new EventReminderContext(
             $event->title,
@@ -64,8 +64,4 @@ class EventReminderContextBuilder
         );
     }
 
-    private function kampFallback(): UniversityEmailThemeDTO
-    {
-        return new UniversityEmailThemeDTO(...self::KAMP_FALLBACK);
-    }
 }

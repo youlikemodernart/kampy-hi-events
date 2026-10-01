@@ -59,9 +59,18 @@ class EventReminderRecipientClaimService
             ]) === 1;
     }
 
+    public function markFailedBeforeStart(OutgoingMessage $claim, string $errorClass): void
+    {
+        OutgoingMessage::query()->whereKey($claim->id)->where('status', OutgoingMessageStatus::CLAIMED->name)->update([
+            'status' => OutgoingMessageStatus::FAILED_CONFIRMED->name,
+            'last_error_class' => $errorClass,
+            'updated_at' => now(),
+        ]);
+    }
+
     public function markUnknownAfterUncertainHandoff(OutgoingMessage $claim, string $errorClass): void
     {
-        OutgoingMessage::query()->whereKey($claim->id)->update([
+        OutgoingMessage::query()->whereKey($claim->id)->where('status', OutgoingMessageStatus::SUBMITTING->name)->update([
             'status' => OutgoingMessageStatus::UNKNOWN->name,
             'last_error_class' => $errorClass,
             'updated_at' => now(),

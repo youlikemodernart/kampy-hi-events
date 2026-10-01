@@ -10,6 +10,7 @@ return [
         '24-hours' => -1440,
     ],
     'late_grace_minutes' => 360,
+    'recovery_stale_minutes' => 15,
     'event_allowlist' => [7],
     'sender' => 'tickets@kamplove.org',
     // These activation bindings deliberately remain unresolved. Dispatch fails closed.

@@ -1,4 +1,3 @@
-import {kamp} from './kampPrimitives';
 import universityThemeManifest from './universityThemes.json';
 
 export interface UniversityTheme {
@@ -10,17 +9,11 @@ export interface UniversityTheme {
     heroImage?: string;
 }
 
+export const KAMP_FALLBACK_KEY = '_kampFallback';
 const UNIVERSITY_THEMES: Readonly<Record<string, UniversityTheme>> = universityThemeManifest;
-
-export const KAMP_FALLBACK_THEME: UniversityTheme = {
-    primary: kamp.forest,
-    secondary: kamp.forestDeep,
-    onPrimary: kamp.paper,
-    onSecondary: kamp.paper,
-    secondarySoft: '#e9efe9',
-};
+export const KAMP_FALLBACK_THEME: UniversityTheme = UNIVERSITY_THEMES[KAMP_FALLBACK_KEY];
 
 export function resolveUniversityTheme(slug?: string | null): UniversityTheme {
-    if (!slug) return KAMP_FALLBACK_THEME;
+    if (!slug || slug === KAMP_FALLBACK_KEY) return KAMP_FALLBACK_THEME;
     return UNIVERSITY_THEMES[slug] ?? KAMP_FALLBACK_THEME;
 }

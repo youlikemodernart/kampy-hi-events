@@ -23,6 +23,17 @@ class UniversityThemeResolverTest extends TestCase
         $this->assertSame('#e7e7ed', $theme->secondarySoft);
     }
 
+    public function test_resolves_the_reserved_shared_kamp_fallback_through_the_same_validation_path(): void
+    {
+        $resolver = new UniversityThemeResolver(base_path('../frontend/src/styles/universityThemes.json'));
+
+        $fallback = $resolver->resolveFallback();
+
+        $this->assertNotNull($fallback);
+        $this->assertSame('#2b663d', $fallback->primary);
+        $this->assertNull($resolver->resolveForSlug('_kampFallback'));
+    }
+
     public function test_uses_a_changed_manifest_secondary_for_the_email_cta_role(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'university-theme-');

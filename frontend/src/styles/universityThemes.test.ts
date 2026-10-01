@@ -1,5 +1,4 @@
 import {describe, expect, it} from 'vitest';
-import {kamp} from './kampPrimitives';
 import manifest from './universityThemes.json';
 import {KAMP_FALLBACK_THEME, resolveUniversityTheme} from './universityThemes';
 
@@ -38,12 +37,9 @@ describe('university theme adapters', () => {
         expect(contrastRatio(theme.onSecondary, theme.secondary)).toBeGreaterThanOrEqual(4.5);
     });
 
-    it('uses the Kamp theme when no university adapter exists', () => {
+    it('uses the reserved shared projection for the Kamp fallback without exposing it as an adapter', () => {
         expect(resolveUniversityTheme('unknown-school')).toBe(KAMP_FALLBACK_THEME);
-        expect(KAMP_FALLBACK_THEME).toMatchObject({
-            primary: kamp.forest,
-            secondary: kamp.forestDeep,
-            secondarySoft: '#e9efe9',
-        });
+        expect(resolveUniversityTheme('_kampFallback')).toBe(KAMP_FALLBACK_THEME);
+        expect(KAMP_FALLBACK_THEME).toEqual(manifest._kampFallback);
     });
 });

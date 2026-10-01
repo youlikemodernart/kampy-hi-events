@@ -1,4 +1,11 @@
 {
+  "_kampFallback": {
+    "primary": "#2b663d",
+    "secondary": "#1f4a2d",
+    "onPrimary": "#ffffff",
+    "onSecondary": "#ffffff",
+    "secondarySoft": "#e7f0ea"
+  },
   "grand-valley-state-university": {
     "primary": "#0032a0",
     "secondary": "#13155c",
