@@ -73,13 +73,20 @@ class EventReminderReconciliationService
 
     private function resumeClaimedRecipients(): void
     {
-        OutgoingMessage::query()->where('status', OutgoingMessageStatus::CLAIMED->name)->each(function (OutgoingMessage $claim): void {
-            try {
-                SendEventReminderRecipientJob::dispatch($claim->id);
-            } catch (\Throwable $exception) {
-                $this->recipients->markFailedBeforeStart($claim, $exception::class);
-            }
-        });
+        $dispatchableMessageIds = EventReminderOccurrence::query()
+            ->select('message_id')
+            ->where('status', EventReminderOccurrenceStatus::DISPATCHING->value)
+            ->whereNotNull('message_id')
+            ->whereNotNull('audience_claimed_at');
+        OutgoingMessage::query()->where('status', OutgoingMessageStatus::CLAIMED->name)
+            ->whereIn('message_id', $dispatchableMessageIds)
+            ->each(function (OutgoingMessage $claim): void {
+                try {
+                    SendEventReminderRecipientJob::dispatch($claim->id);
+                } catch (\Throwable $exception) {
+                    $this->recipients->markFailedBeforeStart($claim, $exception::class);
+                }
+            });
     }
 
     private function cancelNowIneligible(array $policy): void

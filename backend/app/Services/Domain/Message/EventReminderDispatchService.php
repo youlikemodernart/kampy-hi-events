@@ -61,7 +61,7 @@ class EventReminderDispatchService
         $html = $mail->render();
         $text = view('emails.event.reminder-text', ['context' => $context->payload(), 'theme' => $context->theme])->render();
         $digest = hash('sha256', $html . "\n" . $text);
-        $message = DB::transaction(function () use ($occurrence, $event, $context, $html, $text, $digest): Message {
+        $message = DB::transaction(function () use ($occurrence, $event, $context, $html, $text, $digest): ?Message {
             $fresh = EventReminderOccurrence::query()->lockForUpdate()->findOrFail($occurrence->id);
             if ($fresh->status !== EventReminderOccurrenceStatus::CLAIMING->value) throw new \LogicException('Reminder occurrence claim was lost');
             $message = Message::query()->firstOrCreate(['source_key' => 'event-reminder:' . $fresh->id], [
@@ -70,9 +70,15 @@ class EventReminderDispatchService
                 'status' => MessageStatus::PROCESSING->name, 'source' => 'EVENT_REMINDER',
                 'sent_by_user_id' => null, 'send_data' => ['payload_digest' => $digest, 'text' => $text],
             ]);
+            $storedDigest = $message->send_data['payload_digest'] ?? null;
+            if (!is_string($storedDigest) || !hash_equals($storedDigest, $digest)) return null;
             $fresh->update(['message_id' => $message->id, 'payload_digest' => $digest]);
             return $message;
         });
+        if ($message === null) {
+            $this->failOccurrence(EventReminderOccurrence::query()->findOrFail($occurrenceId), 'payload_changed_during_audience_claim');
+            return;
+        }
 
         $occurrence = EventReminderOccurrence::query()->findOrFail($occurrenceId);
         if ($occurrence->audience_claimed_at === null) {
@@ -131,7 +137,7 @@ class EventReminderDispatchService
         $occurrence = EventReminderOccurrence::query()->where('message_id', $claim->message_id)->first();
         $event = $occurrence === null ? null : Event::query()->with('event_settings')->find($claim->event_id);
         $context = $event === null ? null : $this->contexts->build($event);
-        if (!$this->recipientMayReceive($claim, $occurrence, $event, $context, true)) {
+        if (!$this->recipientMayReceive($claim, $occurrence, $event, $context)) {
             $this->recipients->markSuppressedBeforeHandoff($claim, 'binding_changed_before_handoff');
             if ($occurrence !== null) $this->aggregate($occurrence->id, $claim->message_id);
             return;
@@ -148,7 +154,8 @@ class EventReminderDispatchService
     public function aggregate(int $occurrenceId, int $messageId): void
     {
         $occurrence = EventReminderOccurrence::query()->find($occurrenceId);
-        if ($occurrence === null || $occurrence->audience_claimed_at === null || $occurrence->expected_recipient_count === null) return;
+        if ($occurrence === null || !in_array($occurrence->status, [EventReminderOccurrenceStatus::DISPATCHING->value, EventReminderOccurrenceStatus::UNKNOWN->value], true)
+            || $occurrence->audience_claimed_at === null || $occurrence->expected_recipient_count === null) return;
         $statuses = OutgoingMessage::query()->where('message_id', $messageId)->pluck('status')->all();
         if (count($statuses) !== $occurrence->expected_recipient_count) return;
         if (in_array(OutgoingMessageStatus::UNKNOWN->name, $statuses, true)) {
@@ -164,9 +171,11 @@ class EventReminderDispatchService
         }
     }
 
-    private function recipientMayReceive(OutgoingMessage $claim, ?EventReminderOccurrence $occurrence, ?Event $event, mixed $context, bool $final = false): bool
+    private function recipientMayReceive(OutgoingMessage $claim, ?EventReminderOccurrence $occurrence, ?Event $event, mixed $context): bool
     {
-        if ($context === null || !$this->isStillDispatchable($occurrence, $event) || ($final && $occurrence->status !== EventReminderOccurrenceStatus::DISPATCHING->value)) return false;
+        if ($context === null || !$this->isStillDispatchable($occurrence, $event)
+            || $occurrence->status !== EventReminderOccurrenceStatus::DISPATCHING->value
+            || $occurrence->audience_claimed_at === null || $occurrence->expected_recipient_count === null) return false;
         if ($this->messagingEligibility->checkEligibility($event->account_id, $event->id) !== null) return false;
         $html = (new EventReminder($context))->render();
         if ($this->messagingEligibility->checkTierLimits($event->account_id, OutgoingMessage::query()->where('message_id', $claim->message_id)->count(), $html) !== null) return false;
