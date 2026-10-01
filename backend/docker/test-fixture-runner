@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+readonly BYTE_LIMIT=1000000
+readonly JUNIT=/tmp/event-reminder-junit.xml
+readonly MIGRATION_LOG=/tmp/event-reminder-migration.log
+readonly TEST_LOG=/tmp/event-reminder-test.log
+
+cd /work/backend
+[ "${EVENT_REMINDER_POSTGRES_FIXTURE:-}" = "1" ]
+php -r 'exit(PHP_VERSION === "8.4.21" && extension_loaded("pdo_pgsql") ? 0 : 1);'
+
+# POSIX file-size limit units are 512-byte blocks. The resulting files are also
+# measured before the oracle reads them.
+ulimit -f 1953
+php artisan migrate:fresh --force >"$MIGRATION_LOG" 2>&1
+[ "$(wc -c <"$MIGRATION_LOG")" -le "$BYTE_LIMIT" ]
+php artisan test --log-junit="$JUNIT" tests/Feature/Message/EventReminderLifecyclePostgresTest.php >"$TEST_LOG" 2>&1
+[ "$(wc -c <"$TEST_LOG")" -le "$BYTE_LIMIT" ]
+[ "$(wc -c <"$JUNIT")" -le "$BYTE_LIMIT" ]
+exec php /usr/local/lib/kampy-test-fixture-oracle.php "$JUNIT"
