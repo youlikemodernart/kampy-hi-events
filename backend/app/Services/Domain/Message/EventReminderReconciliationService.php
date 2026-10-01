@@ -29,6 +29,8 @@ class EventReminderReconciliationService
             return;
         }
         $this->cancelNowIneligible($policy);
+        EventReminderOccurrence::query()->where('status', EventReminderOccurrenceStatus::CLAIMING->value)->whereNotNull('message_id')
+            ->each(fn (EventReminderOccurrence $occurrence) => $this->dispatch->dispatchClaimed($occurrence->id));
         $now = CarbonImmutable::now('UTC');
         Event::query()->whereIn('id', $policy['event_allowlist'] ?? [])->where('status', EventStatus::LIVE->name)
             ->whereNotNull('start_date')->whereNotNull('timezone')->each(function (Event $event) use ($policy, $now): void {

@@ -20,6 +20,9 @@ return new class extends Migration {
             $table->string('status');
             $table->foreignId('message_id')->nullable()->constrained()->nullOnDelete();
             $table->string('payload_digest', 64)->nullable();
+            $table->unsignedInteger('expected_recipient_count')->nullable();
+            $table->unsignedInteger('invalid_recipient_count')->nullable();
+            $table->dateTime('audience_claimed_at')->nullable();
             $table->string('reason_code')->nullable();
             $table->dateTime('claimed_at')->nullable();
             $table->dateTime('completed_at')->nullable();

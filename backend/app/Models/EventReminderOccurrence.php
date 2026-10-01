@@ -22,6 +22,7 @@ class EventReminderOccurrence extends BaseModel
             'due_at_utc' => 'datetime',
             'source_event_start_at_utc' => 'datetime',
             'claimed_at' => 'datetime',
+            'audience_claimed_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
     }

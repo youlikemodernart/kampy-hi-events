@@ -68,6 +68,15 @@ class EventReminderRecipientClaimService
         ]);
     }
 
+    public function markSuppressedBeforeHandoff(OutgoingMessage $claim, string $reason): void
+    {
+        OutgoingMessage::query()->whereKey($claim->id)->where('status', OutgoingMessageStatus::SUBMITTING->name)->update([
+            'status' => OutgoingMessageStatus::SUPPRESSED->name,
+            'last_error_class' => $reason,
+            'updated_at' => now(),
+        ]);
+    }
+
     public function markUnknownAfterUncertainHandoff(OutgoingMessage $claim, string $errorClass): void
     {
         OutgoingMessage::query()->whereKey($claim->id)->where('status', OutgoingMessageStatus::SUBMITTING->name)->update([
