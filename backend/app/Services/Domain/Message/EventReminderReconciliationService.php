@@ -18,8 +18,7 @@ class EventReminderReconciliationService
         private readonly EventReminderOccurrenceRepositoryInterface $occurrences,
         private readonly EventReminderDispatchService $dispatch,
         private readonly EventReminderRecipientClaimService $recipients,
-    ) {
-    }
+    ) {}
 
     public function reconcile(): void
     {
@@ -95,11 +94,13 @@ class EventReminderReconciliationService
             $event = Event::withTrashed()->find($occurrence->event_id);
             $reason = match (true) {
                 $event === null || $event->trashed() => 'event_deleted',
-                !in_array($event->id, $policy['event_allowlist'] ?? [], true) => 'event_not_allowlisted',
+                ! in_array($event->id, $policy['event_allowlist'] ?? [], true) => 'event_not_allowlisted',
                 $event->status !== EventStatus::LIVE->name => 'event_ineligible',
                 default => null,
             };
-            if ($reason !== null) $this->occurrences->cancelUnclaimedForEvent($occurrence->event_id, $reason);
+            if ($reason !== null) {
+                $this->occurrences->cancelUnclaimedForEvent($occurrence->event_id, $reason);
+            }
         });
     }
 }

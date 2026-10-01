@@ -16,8 +16,10 @@ class EventReminderCancellationService
     {
         return DB::transaction(function () use ($occurrenceId, $reason): array {
             $occurrence = EventReminderOccurrence::query()->lockForUpdate()->find($occurrenceId);
-            if ($occurrence === null) return ['cancelled' => false, 'reason' => 'occurrence_not_found'];
-            if (!in_array($occurrence->status, [EventReminderOccurrenceStatus::PLANNED->value, EventReminderOccurrenceStatus::CLAIMING->value, EventReminderOccurrenceStatus::DISPATCHING->value], true)) {
+            if ($occurrence === null) {
+                return ['cancelled' => false, 'reason' => 'occurrence_not_found'];
+            }
+            if (! in_array($occurrence->status, [EventReminderOccurrenceStatus::PLANNED->value, EventReminderOccurrenceStatus::CLAIMING->value, EventReminderOccurrenceStatus::DISPATCHING->value], true)) {
                 return ['cancelled' => false, 'reason' => 'occurrence_not_unsent'];
             }
             if ($occurrence->message_id !== null) {
@@ -33,7 +35,10 @@ class EventReminderCancellationService
                 ]);
             }
             $occurrence->update(['status' => EventReminderOccurrenceStatus::CANCELLED->value, 'reason_code' => $reason]);
-            if ($occurrence->message_id !== null) Message::query()->whereKey($occurrence->message_id)->update(['status' => MessageStatus::CANCELLED->name]);
+            if ($occurrence->message_id !== null) {
+                Message::query()->whereKey($occurrence->message_id)->update(['status' => MessageStatus::CANCELLED->name]);
+            }
+
             return ['cancelled' => true, 'reason' => $reason];
         });
     }
