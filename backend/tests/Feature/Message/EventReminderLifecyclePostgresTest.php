@@ -49,41 +49,95 @@ class EventReminderLifecyclePostgresTest extends TestCase
         self::assertTrue(Schema::hasColumns('event_reminder_occurrences', [
             'message_id', 'payload_digest', 'expected_recipient_count', 'invalid_recipient_count', 'audience_claimed_at',
         ]));
-        $indexes = collect(DB::select("SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = 'public'"))->keyBy('indexname');
-        self::assertStringContainsString('CREATE UNIQUE INDEX', $indexes->get('event_reminder_occurrences_identity_unique')->indexdef);
-        self::assertStringContainsString('(event_id, policy_version, offset_key)', $indexes->get('event_reminder_occurrences_identity_unique')->indexdef);
-        self::assertStringContainsString('CREATE UNIQUE INDEX', $indexes->get('outgoing_messages_normalized_recipient_unique')->indexdef);
-        self::assertStringContainsString('(message_id, recipient_normalized)', $indexes->get('outgoing_messages_normalized_recipient_unique')->indexdef);
-        self::assertSame('YES', DB::table('information_schema.columns')->where([
-            'table_schema' => 'public', 'table_name' => 'messages', 'column_name' => 'sent_by_user_id',
-        ])->value('is_nullable'));
+        $indexes = collect(DB::select(<<<'SQL'
+SELECT index_class.relname AS index_name, index_row.indisunique, index_row.indisvalid,
+       index_row.indpred IS NULL AS no_predicate, index_row.indexprs IS NULL AS no_expressions,
+       index_row.indnatts, index_row.indnkeyatts,
+       array_to_json((SELECT array_agg(attribute.attname::text ORDER BY key.position)
+                      FROM unnest(index_row.indkey::smallint[]) WITH ORDINALITY key(attnum, position)
+                      JOIN pg_attribute attribute ON attribute.attrelid = index_row.indrelid AND attribute.attnum = key.attnum))::text AS columns
+FROM pg_index index_row
+JOIN pg_class index_class ON index_class.oid = index_row.indexrelid
+JOIN pg_class table_class ON table_class.oid = index_row.indrelid
+JOIN pg_namespace table_namespace ON table_namespace.oid = table_class.relnamespace
+WHERE table_namespace.nspname = 'public' AND index_class.relname IN (
+    'event_reminder_occurrences_identity_unique', 'outgoing_messages_normalized_recipient_unique'
+)
+SQL))->keyBy('index_name');
+        foreach ([
+            'event_reminder_occurrences_identity_unique' => ['event_id', 'policy_version', 'offset_key'],
+            'outgoing_messages_normalized_recipient_unique' => ['message_id', 'recipient_normalized'],
+        ] as $name => $expectedColumns) {
+            $index = $indexes->get($name);
+            self::assertNotNull($index);
+            self::assertTrue((bool) $index->indisunique);
+            self::assertTrue((bool) $index->indisvalid);
+            self::assertTrue((bool) $index->no_predicate);
+            self::assertTrue((bool) $index->no_expressions);
+            self::assertSame(count($expectedColumns), (int) $index->indnatts);
+            self::assertSame(count($expectedColumns), (int) $index->indnkeyatts);
+            self::assertSame($expectedColumns, json_decode($index->columns, true, flags: JSON_THROW_ON_ERROR));
+        }
+        $columns = collect(DB::select(<<<'SQL'
+SELECT table_name, column_name, data_type, character_maximum_length, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_schema = 'public' AND (table_name, column_name) IN (
+    ('messages', 'sent_by_user_id'),
+    ('event_reminder_occurrences', 'payload_digest'),
+    ('outgoing_messages', 'attempt_count')
+)
+SQL))->keyBy(static fn (object $column): string => "$column->table_name.$column->column_name");
+        self::assertSame(['bigint', null, 'YES'], [
+            $columns->get('messages.sent_by_user_id')->data_type,
+            $columns->get('messages.sent_by_user_id')->character_maximum_length,
+            $columns->get('messages.sent_by_user_id')->is_nullable,
+        ]);
+        self::assertSame(['character varying', 64, 'YES'], [
+            $columns->get('event_reminder_occurrences.payload_digest')->data_type,
+            $columns->get('event_reminder_occurrences.payload_digest')->character_maximum_length,
+            $columns->get('event_reminder_occurrences.payload_digest')->is_nullable,
+        ]);
+        self::assertSame(['integer', 'NO', '0'], [
+            $columns->get('outgoing_messages.attempt_count')->data_type,
+            $columns->get('outgoing_messages.attempt_count')->is_nullable,
+            $columns->get('outgoing_messages.attempt_count')->column_default,
+        ]);
         $foreignKeys = collect(DB::select(<<<'SQL'
-SELECT source_column.column_name AS source_column, target.relname AS target_table,
-       target_column.attname AS target_column, constraint_row.confdeltype AS delete_action
+SELECT source_namespace.nspname AS source_namespace, source.relname AS source_table,
+       source_column.attname AS source_column, target_namespace.nspname AS target_namespace,
+       target.relname AS target_table, target_column.attname AS target_column,
+       constraint_row.confdeltype AS delete_action, cardinality(constraint_row.conkey) AS source_key_count,
+       cardinality(constraint_row.confkey) AS target_key_count
 FROM pg_constraint constraint_row
 JOIN pg_class source ON source.oid = constraint_row.conrelid
+JOIN pg_namespace source_namespace ON source_namespace.oid = source.relnamespace
 JOIN pg_class target ON target.oid = constraint_row.confrelid
-JOIN LATERAL unnest(constraint_row.conkey) WITH ORDINALITY source_key(attnum, position) ON true
-JOIN LATERAL unnest(constraint_row.confkey) WITH ORDINALITY target_key(attnum, position)
-  ON target_key.position = source_key.position
-JOIN pg_attribute source_column ON source_column.attrelid = source.oid AND source_column.attnum = source_key.attnum
-JOIN pg_attribute target_column ON target_column.attrelid = target.oid AND target_column.attnum = target_key.attnum
-WHERE constraint_row.contype = 'f' AND source.relname = 'event_reminder_occurrences'
+JOIN pg_namespace target_namespace ON target_namespace.oid = target.relnamespace
+JOIN pg_attribute source_column ON source_column.attrelid = source.oid AND source_column.attnum = constraint_row.conkey[1]
+JOIN pg_attribute target_column ON target_column.attrelid = target.oid AND target_column.attnum = constraint_row.confkey[1]
+WHERE constraint_row.contype = 'f' AND source_namespace.nspname = 'public'
+  AND source.relname = 'event_reminder_occurrences' AND source_column.attname IN ('event_id', 'message_id')
 SQL))->keyBy('source_column');
-        self::assertSame(['events', 'id', 'c'], [
-            $foreignKeys->get('event_id')->target_table,
-            $foreignKeys->get('event_id')->target_column,
-            $foreignKeys->get('event_id')->delete_action,
+        self::assertSame(['public', 'event_reminder_occurrences', 'events', 'id', 'public', 'c', 1, 1], [
+            $foreignKeys->get('event_id')->source_namespace, $foreignKeys->get('event_id')->source_table,
+            $foreignKeys->get('event_id')->target_table, $foreignKeys->get('event_id')->target_column,
+            $foreignKeys->get('event_id')->target_namespace, $foreignKeys->get('event_id')->delete_action,
+            (int) $foreignKeys->get('event_id')->source_key_count, (int) $foreignKeys->get('event_id')->target_key_count,
         ]);
-        self::assertSame(['messages', 'id', 'n'], [
-            $foreignKeys->get('message_id')->target_table,
-            $foreignKeys->get('message_id')->target_column,
-            $foreignKeys->get('message_id')->delete_action,
+        self::assertSame(['public', 'event_reminder_occurrences', 'messages', 'id', 'public', 'n', 1, 1], [
+            $foreignKeys->get('message_id')->source_namespace, $foreignKeys->get('message_id')->source_table,
+            $foreignKeys->get('message_id')->target_table, $foreignKeys->get('message_id')->target_column,
+            $foreignKeys->get('message_id')->target_namespace, $foreignKeys->get('message_id')->delete_action,
+            (int) $foreignKeys->get('message_id')->source_key_count, (int) $foreignKeys->get('message_id')->target_key_count,
         ]);
-        self::assertSame(2, DB::table('migrations')->whereIn('migration', [
+        $migrations = DB::table('migrations')->selectRaw('migration, count(*) AS row_count')->whereIn('migration', [
             '2026_10_01_000000_create_event_reminder_occurrences_table',
             '2026_10_01_000001_add_reminder_identity_to_messages_and_outgoing_messages',
-        ])->count());
+        ])->groupBy('migration')->pluck('row_count', 'migration')->map(static fn (mixed $count): int => (int) $count)->all();
+        self::assertSame([
+            '2026_10_01_000000_create_event_reminder_occurrences_table' => 1,
+            '2026_10_01_000001_add_reminder_identity_to_messages_and_outgoing_messages' => 1,
+        ], $migrations);
 
         [$eventId] = $this->seedScope('legacy');
         $legacyId = DB::table('messages')->insertGetId([
