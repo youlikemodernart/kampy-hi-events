@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Message;
 
 use HiEvents\DomainObjects\Enums\MessagingTierViolationEnum;
+use HiEvents\DomainObjects\Status\AttendeeStatus;
 use HiEvents\DomainObjects\Status\EventReminderOccurrenceStatus;
 use HiEvents\DomainObjects\Status\OutgoingMessageStatus;
 use HiEvents\Jobs\Message\SendEventReminderRecipientJob;
@@ -49,13 +50,39 @@ class EventReminderLifecyclePostgresTest extends TestCase
             'message_id', 'payload_digest', 'expected_recipient_count', 'invalid_recipient_count', 'audience_claimed_at',
         ]));
         $indexes = collect(DB::select("SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = 'public'"))->keyBy('indexname');
-        self::assertStringContainsString('UNIQUE', $indexes->get('event_reminder_occurrences_identity_unique')->indexdef);
-        self::assertStringContainsString('UNIQUE', $indexes->get('outgoing_messages_normalized_recipient_unique')->indexdef);
+        self::assertStringContainsString('CREATE UNIQUE INDEX', $indexes->get('event_reminder_occurrences_identity_unique')->indexdef);
+        self::assertStringContainsString('(event_id, policy_version, offset_key)', $indexes->get('event_reminder_occurrences_identity_unique')->indexdef);
+        self::assertStringContainsString('CREATE UNIQUE INDEX', $indexes->get('outgoing_messages_normalized_recipient_unique')->indexdef);
+        self::assertStringContainsString('(message_id, recipient_normalized)', $indexes->get('outgoing_messages_normalized_recipient_unique')->indexdef);
         self::assertSame('YES', DB::table('information_schema.columns')->where([
             'table_schema' => 'public', 'table_name' => 'messages', 'column_name' => 'sent_by_user_id',
         ])->value('is_nullable'));
-        self::assertGreaterThan(0, DB::table('information_schema.table_constraints')->where([
-            'table_schema' => 'public', 'table_name' => 'event_reminder_occurrences', 'constraint_type' => 'FOREIGN KEY',
+        $foreignKeys = collect(DB::select(<<<'SQL'
+SELECT source_column.column_name AS source_column, target.relname AS target_table,
+       target_column.attname AS target_column, constraint_row.confdeltype AS delete_action
+FROM pg_constraint constraint_row
+JOIN pg_class source ON source.oid = constraint_row.conrelid
+JOIN pg_class target ON target.oid = constraint_row.confrelid
+JOIN LATERAL unnest(constraint_row.conkey) WITH ORDINALITY source_key(attnum, position) ON true
+JOIN LATERAL unnest(constraint_row.confkey) WITH ORDINALITY target_key(attnum, position)
+  ON target_key.position = source_key.position
+JOIN pg_attribute source_column ON source_column.attrelid = source.oid AND source_column.attnum = source_key.attnum
+JOIN pg_attribute target_column ON target_column.attrelid = target.oid AND target_column.attnum = target_key.attnum
+WHERE constraint_row.contype = 'f' AND source.relname = 'event_reminder_occurrences'
+SQL))->keyBy('source_column');
+        self::assertSame(['events', 'id', 'c'], [
+            $foreignKeys->get('event_id')->target_table,
+            $foreignKeys->get('event_id')->target_column,
+            $foreignKeys->get('event_id')->delete_action,
+        ]);
+        self::assertSame(['messages', 'id', 'n'], [
+            $foreignKeys->get('message_id')->target_table,
+            $foreignKeys->get('message_id')->target_column,
+            $foreignKeys->get('message_id')->delete_action,
+        ]);
+        self::assertSame(2, DB::table('migrations')->whereIn('migration', [
+            '2026_10_01_000000_create_event_reminder_occurrences_table',
+            '2026_10_01_000001_add_reminder_identity_to_messages_and_outgoing_messages',
         ])->count());
 
         [$eventId] = $this->seedScope('legacy');

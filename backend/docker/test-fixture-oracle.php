@@ -54,24 +54,60 @@ SELECT
         WHERE schemaname = 'public'
           AND indexname = 'event_reminder_occurrences_identity_unique'
           AND indexdef LIKE 'CREATE UNIQUE INDEX%'
+          AND indexdef LIKE '%(event_id, policy_version, offset_key)%'
     ) AS occurrence_identity_unique,
     EXISTS (
         SELECT 1 FROM pg_indexes
         WHERE schemaname = 'public'
           AND indexname = 'outgoing_messages_normalized_recipient_unique'
           AND indexdef LIKE 'CREATE UNIQUE INDEX%'
+          AND indexdef LIKE '%(message_id, recipient_normalized)%'
     ) AS recipient_identity_unique,
     EXISTS (
         SELECT 1 FROM information_schema.columns
         WHERE table_schema = 'public' AND table_name = 'messages'
-          AND column_name = 'sent_by_user_id' AND is_nullable = 'YES'
+          AND column_name = 'sent_by_user_id' AND data_type = 'bigint' AND is_nullable = 'YES'
     ) AS nullable_system_message,
     EXISTS (
-        SELECT 1 FROM information_schema.table_constraints
+        SELECT 1 FROM information_schema.columns
         WHERE table_schema = 'public' AND table_name = 'event_reminder_occurrences'
-          AND constraint_type = 'FOREIGN KEY'
-    ) AS occurrence_foreign_key,
-    (SELECT count(*) FROM migrations) > 0 AS migrations_recorded
+          AND column_name = 'payload_digest' AND data_type = 'character varying'
+          AND character_maximum_length = 64 AND is_nullable = 'YES'
+    ) AND EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'outgoing_messages'
+          AND column_name = 'attempt_count' AND data_type = 'integer'
+          AND is_nullable = 'NO' AND column_default LIKE '0%'
+    ) AS reminder_column_contract,
+    EXISTS (
+        SELECT 1
+        FROM pg_constraint constraint_row
+        JOIN pg_class source ON source.oid = constraint_row.conrelid
+        JOIN pg_class target ON target.oid = constraint_row.confrelid
+        JOIN pg_attribute source_column ON source_column.attrelid = source.oid
+          AND source_column.attnum = constraint_row.conkey[1]
+        JOIN pg_attribute target_column ON target_column.attrelid = target.oid
+          AND target_column.attnum = constraint_row.confkey[1]
+        WHERE constraint_row.contype = 'f' AND source.relname = 'event_reminder_occurrences'
+          AND source_column.attname = 'event_id' AND target.relname = 'events'
+          AND target_column.attname = 'id' AND constraint_row.confdeltype = 'c'
+    ) AND EXISTS (
+        SELECT 1
+        FROM pg_constraint constraint_row
+        JOIN pg_class source ON source.oid = constraint_row.conrelid
+        JOIN pg_class target ON target.oid = constraint_row.confrelid
+        JOIN pg_attribute source_column ON source_column.attrelid = source.oid
+          AND source_column.attnum = constraint_row.conkey[1]
+        JOIN pg_attribute target_column ON target_column.attrelid = target.oid
+          AND target_column.attnum = constraint_row.confkey[1]
+        WHERE constraint_row.contype = 'f' AND source.relname = 'event_reminder_occurrences'
+          AND source_column.attname = 'message_id' AND target.relname = 'messages'
+          AND target_column.attname = 'id' AND constraint_row.confdeltype = 'n'
+    ) AS occurrence_foreign_keys_exact,
+    (SELECT count(*) FROM migrations WHERE migration IN (
+        '2026_10_01_000000_create_event_reminder_occurrences_table',
+        '2026_10_01_000001_add_reminder_identity_to_messages_and_outgoing_messages'
+    )) = 2 AS reminder_migrations_recorded
 SQL);
 
 $schemaChecks = array_map(static fn (mixed $value): bool => filter_var($value, FILTER_VALIDATE_BOOL), (array) $schema);
