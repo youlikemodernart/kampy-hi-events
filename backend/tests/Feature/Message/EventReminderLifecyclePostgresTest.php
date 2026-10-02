@@ -4,25 +4,32 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Message;
 
+use HiEvents\DomainObjects\Enums\MessagingTierViolationEnum;
 use HiEvents\DomainObjects\Status\EventReminderOccurrenceStatus;
 use HiEvents\DomainObjects\Status\OutgoingMessageStatus;
+use HiEvents\Jobs\Message\SendEventReminderRecipientJob;
 use HiEvents\Models\EventReminderOccurrence;
 use HiEvents\Models\OutgoingMessage;
 use HiEvents\Repository\Interfaces\EventReminderOccurrenceRepositoryInterface;
+use HiEvents\Services\Domain\Email\DTO\UniversityEmailThemeDTO;
+use HiEvents\Services\Domain\Message\DTO\EventReminderContext;
+use HiEvents\Services\Domain\Message\DTO\MessagingTierViolationDTO;
 use HiEvents\Services\Domain\Message\EventReminderCancellationService;
+use HiEvents\Services\Domain\Message\EventReminderContextBuilder;
 use HiEvents\Services\Domain\Message\EventReminderDispatchService;
 use HiEvents\Services\Domain\Message\EventReminderRecipientClaimService;
 use HiEvents\Services\Domain\Message\EventReminderReconciliationService;
+use HiEvents\Services\Domain\Message\MessagingEligibilityService;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Mail\Mailer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
+use Mockery;
 use Tests\TestCase;
 
 class EventReminderLifecyclePostgresTest extends TestCase
 {
-    use DatabaseTransactions;
-
     private EventReminderRecipientClaimService $recipients;
 
     protected function setUp(): void
@@ -154,6 +161,221 @@ class EventReminderLifecyclePostgresTest extends TestCase
         self::assertSame(OutgoingMessageStatus::UNKNOWN->name, $claim?->fresh()->status);
         self::assertSame(EventReminderOccurrenceStatus::UNKNOWN->value, $occurrence->fresh()->status);
         self::assertSame(1, OutgoingMessage::query()->where('message_id', $messageId)->count());
+    }
+
+    public function test_forked_independent_connections_race_the_real_occurrence_cas_and_produce_one_winner(): void
+    {
+        [, , $occurrence] = $this->seedScope('fork-occurrence');
+        $barrier = sys_get_temp_dir().'/event-reminder-occurrence-fork-'.bin2hex(random_bytes(8));
+        mkdir($barrier);
+        $children = [];
+        for ($worker = 0; $worker < 2; $worker++) {
+            $pid = pcntl_fork();
+            self::assertNotSame(-1, $pid);
+            if ($pid === 0) {
+                DB::purge('pgsql');
+                file_put_contents("$barrier/ready-$worker", '1');
+                $deadline = microtime(true) + 5;
+                while (! file_exists("$barrier/release") && microtime(true) < $deadline) {
+                    usleep(1_000);
+                }
+                $won = app(EventReminderOccurrenceRepositoryInterface::class)->claimDue($occurrence->id, now());
+                file_put_contents("$barrier/result-$worker", $won ? 'winner' : 'loser');
+                exit(0);
+            }
+            $children[] = $pid;
+        }
+        $deadline = microtime(true) + 5;
+        while (count(glob("$barrier/ready-*")) !== 2 && microtime(true) < $deadline) {
+            usleep(1_000);
+        }
+        self::assertCount(2, glob("$barrier/ready-*"));
+        touch("$barrier/release");
+        foreach ($children as $pid) {
+            pcntl_waitpid($pid, $status);
+            self::assertSame(0, pcntl_wexitstatus($status));
+        }
+        self::assertSame(['loser', 'winner'], collect(glob("$barrier/result-*"))->map(fn (string $path): string => file_get_contents($path))->sort()->values()->all());
+        self::assertSame(EventReminderOccurrenceStatus::CLAIMING->value, $occurrence->fresh()->status);
+        array_map('unlink', glob("$barrier/*"));
+        rmdir($barrier);
+    }
+
+    public function test_forked_independent_connections_race_the_real_recipient_claim_and_retain_one_durable_row(): void
+    {
+        [$eventId, $messageId] = $this->seedScope('fork-cas');
+        $barrier = sys_get_temp_dir().'/event-reminder-fork-'.bin2hex(random_bytes(8));
+        mkdir($barrier);
+        $children = [];
+        for ($worker = 0; $worker < 2; $worker++) {
+            $pid = pcntl_fork();
+            self::assertNotSame(-1, $pid);
+            if ($pid === 0) {
+                DB::purge('pgsql');
+                file_put_contents("$barrier/ready-$worker", '1');
+                $deadline = microtime(true) + 5;
+                while (! file_exists("$barrier/release") && microtime(true) < $deadline) {
+                    usleep(1_000);
+                }
+                $claim = app(EventReminderRecipientClaimService::class)->claim($messageId, $eventId, null, 'Race@Example.test', 'Reminder', str_repeat('f', 64));
+                exit($claim === null ? 1 : 0);
+            }
+            $children[] = $pid;
+        }
+        $deadline = microtime(true) + 5;
+        while (count(glob("$barrier/ready-*")) !== 2 && microtime(true) < $deadline) {
+            usleep(1_000);
+        }
+        self::assertCount(2, glob("$barrier/ready-*"));
+        touch("$barrier/release");
+        foreach ($children as $pid) {
+            pcntl_waitpid($pid, $status);
+            self::assertSame(0, pcntl_wexitstatus($status));
+        }
+        self::assertSame(1, OutgoingMessage::query()->where('message_id', $messageId)->where('recipient_normalized', 'race@example.test')->count());
+        array_map('unlink', glob("$barrier/*"));
+        rmdir($barrier);
+    }
+
+    public function test_dispatch_claimed_resumes_real_partial_audience_with_real_attendees_invalid_count_and_queue_jobs(): void
+    {
+        [$eventId, , $occurrence] = $this->seedScope('dispatch-resume');
+        $this->configureDispatch($eventId, $occurrence, 'fixture-dispatch-resume');
+        $message = $this->claimingMessage($occurrence);
+        $this->seedAttendeeGraph($eventId, 'first@example.test', 'first');
+        $this->seedAttendeeGraph($eventId, ' SECOND@example.test ', 'second');
+        $this->seedAttendeeGraph($eventId, 'invalid-email', 'invalid');
+        $this->recipients->claim($message->id, $eventId, null, 'first@example.test', 'Reminder', str_repeat('1', 64));
+        $this->bindPermittedDispatch();
+        Queue::fake();
+
+        app(EventReminderDispatchService::class)->dispatchClaimed($occurrence->id);
+
+        $fresh = $occurrence->fresh();
+        self::assertSame(EventReminderOccurrenceStatus::DISPATCHING->value, $fresh->status);
+        self::assertNotNull($fresh->audience_claimed_at);
+        self::assertSame(2, $fresh->expected_recipient_count);
+        self::assertSame(1, $fresh->invalid_recipient_count);
+        self::assertSame(['first@example.test', 'second@example.test'], OutgoingMessage::query()->where('message_id', $message->id)->orderBy('recipient_normalized')->pluck('recipient_normalized')->all());
+        Queue::assertPushed(SendEventReminderRecipientJob::class, 2);
+    }
+
+    public function test_active_duplicate_email_allows_one_real_handoff_after_provenance_attendee_is_deactivated_and_replay_is_blocked(): void
+    {
+        [$eventId, $messageId, $occurrence] = $this->seedScope('recipient-handoff');
+        $this->configureDispatch($eventId, $occurrence, 'fixture-recipient-handoff');
+        $first = $this->seedAttendeeGraph($eventId, 'Duplicate@Example.test', 'provenance');
+        $this->seedAttendeeGraph($eventId, 'duplicate@example.test', 'still-active');
+        $claim = $this->recipients->claim($messageId, $eventId, $first, 'Duplicate@Example.test', 'Reminder', str_repeat('2', 64));
+        $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
+        DB::table('attendees')->where('id', $first)->update(['status' => AttendeeStatus::CANCELLED->name]);
+        $this->bindPermittedDispatch();
+        $pending = Mockery::mock();
+        $pending->shouldReceive('send')->once();
+        $mailer = Mockery::mock(Mailer::class);
+        $mailer->shouldReceive('to')->once()->with('Duplicate@Example.test')->andReturn($pending);
+        app()->instance(Mailer::class, $mailer);
+
+        app(EventReminderDispatchService::class)->sendRecipient($claim->id);
+        app(EventReminderDispatchService::class)->sendRecipient($claim->id);
+
+        self::assertSame(OutgoingMessageStatus::SENT->name, $claim->fresh()->status);
+        self::assertSame(1, OutgoingMessage::query()->where('message_id', $messageId)->count());
+    }
+
+    /** @dataProvider preHandoffSuppressionCases */
+    public function test_real_submitting_cas_then_final_recheck_suppresses_without_provider_intent(string $mutation): void
+    {
+        [$eventId, $messageId, $occurrence] = $this->seedScope('pre-handoff-'.$mutation);
+        $this->configureDispatch($eventId, $occurrence, 'fixture-pre-handoff-'.$mutation);
+        $attendeeId = $this->seedAttendeeGraph($eventId, "$mutation@example.test", $mutation);
+        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, "$mutation@example.test", 'Reminder', str_repeat('3', 64));
+        $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
+        $this->bindPermittedDispatch();
+        $realRecipients = app(EventReminderRecipientClaimService::class);
+        $raceRecipients = Mockery::mock(EventReminderRecipientClaimService::class)->makePartial();
+        $raceRecipients->shouldReceive('markSubmitting')->once()->andReturnUsing(function (OutgoingMessage $row) use ($realRecipients, $mutation, $occurrence): bool {
+            $claimed = $realRecipients->markSubmitting($row);
+            if ($mutation === 'kill-switch') {
+                config()->set('event-reminders.enabled', false);
+            } elseif ($mutation === 'archived') {
+                DB::table('events')->where('id', $occurrence->event_id)->update(['status' => 'DRAFT']);
+            } else {
+                $occurrence->update(['due_at_utc' => now()->subMinute()]);
+            }
+
+            return $claimed;
+        });
+        app()->instance(EventReminderRecipientClaimService::class, $raceRecipients);
+        $mailer = Mockery::mock(Mailer::class);
+        $mailer->shouldNotReceive('to');
+        app()->instance(Mailer::class, $mailer);
+
+        app(EventReminderDispatchService::class)->sendRecipient($claim->id);
+
+        self::assertSame(OutgoingMessageStatus::SUPPRESSED->name, $claim->fresh()->status);
+        self::assertSame('binding_changed_before_handoff', $claim->fresh()->last_error_class);
+    }
+
+    public static function preHandoffSuppressionCases(): array
+    {
+        return [['kill-switch'], ['archived'], ['due-drift']];
+    }
+
+    public function test_real_tier_violation_dto_stops_provider_intent_at_production_recheck(): void
+    {
+        [$eventId, $messageId, $occurrence] = $this->seedScope('tier-recheck');
+        $this->configureDispatch($eventId, $occurrence, 'fixture-tier-recheck');
+        $attendeeId = $this->seedAttendeeGraph($eventId, 'tier@example.test', 'tier');
+        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, 'tier@example.test', 'Reminder', str_repeat('4', 64));
+        $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
+        $this->bindPermittedDispatch(new MessagingTierViolationDTO($occurrence->event_id, 'Fixture', [MessagingTierViolationEnum::RECIPIENT_LIMIT_EXCEEDED]));
+        $mailer = Mockery::mock(Mailer::class);
+        $mailer->shouldNotReceive('to');
+        app()->instance(Mailer::class, $mailer);
+
+        app(EventReminderDispatchService::class)->sendRecipient($claim->id);
+
+        self::assertSame(OutgoingMessageStatus::SUPPRESSED->name, $claim->fresh()->status);
+    }
+
+    private function bindPermittedDispatch(?MessagingTierViolationDTO $tierViolation = null): void
+    {
+        $context = new EventReminderContext('Fixture', 'https://fixture.test/event', 'January 1, 2030 1:00 PM', 'UTC', null, 'support@fixture.test', 'sender@fixture.test', 'reply@fixture.test', '1 Fixture Way', 'https://fixture.test/preferences', 'Fixture', new UniversityEmailThemeDTO('#111111', '#222222', '#ffffff', '#ffffff', '#eeeeee'));
+        $contexts = Mockery::mock(EventReminderContextBuilder::class);
+        $contexts->shouldReceive('build')->andReturn($context);
+        app()->instance(EventReminderContextBuilder::class, $contexts);
+        $eligibility = Mockery::mock(MessagingEligibilityService::class);
+        $eligibility->shouldReceive('checkEligibility')->andReturn(null);
+        $eligibility->shouldReceive('checkTierLimits')->andReturn($tierViolation);
+        app()->instance(MessagingEligibilityService::class, $eligibility);
+    }
+
+    private function configureDispatch(int $eventId, EventReminderOccurrence $occurrence, string $offsetKey): void
+    {
+        $start = now()->addHours(2)->startOfSecond();
+        $due = $start->copy()->subMinutes(60);
+        DB::table('events')->where('id', $eventId)->update(['start_date' => $start, 'status' => 'LIVE']);
+        $occurrence->update(['offset_key' => $offsetKey, 'due_at_utc' => $due, 'source_event_start_at_utc' => $start]);
+        config()->set('event-reminders', array_merge(config('event-reminders'), ['enabled' => true, 'event_allowlist' => [$eventId], 'offsets' => [$offsetKey => -60], 'reply_to' => 'reply@fixture.test', 'physical_address' => '1 Fixture Way', 'preference_url' => 'https://fixture.test/preferences']));
+    }
+
+    private function claimingMessage(EventReminderOccurrence $occurrence): \HiEvents\Models\Message
+    {
+        $message = \HiEvents\Models\Message::query()->create(['event_id' => $occurrence->event_id, 'subject' => 'Reminder', 'message' => 'Fixture', 'type' => 'ALL_ATTENDEES', 'status' => 'PROCESSING', 'source' => 'EVENT_REMINDER', 'source_key' => 'event-reminder:'.$occurrence->id, 'sent_by_user_id' => null, 'send_data' => ['payload_digest' => str_repeat('1', 64), 'text' => 'Fixture']]);
+        $occurrence->update(['status' => EventReminderOccurrenceStatus::CLAIMING->value, 'claimed_at' => now(), 'message_id' => $message->id]);
+
+        return $message;
+    }
+
+    private function seedAttendeeGraph(int $eventId, string $email, string $suffix): int
+    {
+        $now = now();
+        $ticketId = DB::table('tickets')->insertGetId(['event_id' => $eventId, 'title' => 'Fixture '.$suffix, 'order' => 1, 'created_at' => $now, 'updated_at' => $now]);
+        $priceId = DB::table('ticket_prices')->insertGetId(['ticket_id' => $ticketId, 'price' => 10, 'created_at' => $now, 'updated_at' => $now]);
+        $orderId = DB::table('orders')->insertGetId(['short_id' => 'ord-'.$suffix, 'event_id' => $eventId, 'total_before_additions' => 10, 'total_refunded' => 0, 'total_gross' => 10, 'currency' => 'USD', 'first_name' => 'Fixture', 'last_name' => 'Recipient', 'email' => $email, 'status' => 'COMPLETED', 'public_id' => 'public-'.$suffix, 'created_at' => $now, 'updated_at' => $now]);
+
+        return DB::table('attendees')->insertGetId(['short_id' => 'att-'.$suffix, 'first_name' => 'Fixture', 'last_name' => 'Recipient', 'email' => $email, 'order_id' => $orderId, 'ticket_id' => $ticketId, 'event_id' => $eventId, 'public_id' => 'attendee-'.$suffix, 'status' => AttendeeStatus::ACTIVE->name, 'ticket_price_id' => $priceId, 'created_at' => $now, 'updated_at' => $now]);
     }
 
     private function independentConnection(string $name): ConnectionInterface
