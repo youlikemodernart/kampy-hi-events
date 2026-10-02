@@ -6,13 +6,12 @@ WORKDIR /work/backend
 # Deliberately enumerate the Laravel backend closure. The build context may contain
 # other project files, but no environment, auth, Git, frontend, or private file is copied.
 COPY backend/app app
-COPY backend/bootstrap bootstrap
+COPY backend/bootstrap/app.php bootstrap/app.php
 COPY backend/config config
 COPY backend/database database
 COPY backend/public public
 COPY backend/resources resources
 COPY backend/routes routes
-COPY backend/storage storage
 COPY backend/tests tests
 COPY backend/vendor vendor
 COPY backend/artisan backend/composer.json backend/composer.lock backend/phpunit.xml ./
