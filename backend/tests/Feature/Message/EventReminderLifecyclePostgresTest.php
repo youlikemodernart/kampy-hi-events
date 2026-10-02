@@ -430,10 +430,11 @@ SQL))->keyBy('source_column');
     private function seedScope(string $suffix): array
     {
         $now = now();
-        $accountId = DB::table('accounts')->insertGetId(['name' => "Reminder $suffix", 'email' => "$suffix-account@example.test", 'short_id' => "rem-$suffix", 'currency_code' => 'USD', 'timezone' => 'UTC', 'created_at' => $now, 'updated_at' => $now]);
+        $scopeId = substr(hash('sha256', $suffix), 0, 16);
+        $accountId = DB::table('accounts')->insertGetId(['name' => "Reminder $suffix", 'email' => "$suffix-account@example.test", 'short_id' => "rem-$scopeId", 'currency_code' => 'USD', 'timezone' => 'UTC', 'created_at' => $now, 'updated_at' => $now]);
         $userId = DB::table('users')->insertGetId(['email' => "$suffix-user@example.test", 'password' => 'fixture', 'first_name' => 'Fixture', 'timezone' => 'UTC', 'created_at' => $now, 'updated_at' => $now]);
         $organizerId = DB::table('organizers')->insertGetId(['account_id' => $accountId, 'name' => 'Fixture', 'email' => "$suffix-organizer@example.test", 'currency' => 'USD', 'timezone' => 'UTC', 'created_at' => $now, 'updated_at' => $now]);
-        $eventId = DB::table('events')->insertGetId(['account_id' => $accountId, 'organizer_id' => $organizerId, 'user_id' => $userId, 'title' => 'Fixture', 'short_id' => "event-$suffix", 'status' => 'LIVE', 'currency' => 'USD', 'timezone' => 'UTC', 'start_date' => now()->addDay(), 'end_date' => now()->addDays(2), 'created_at' => $now, 'updated_at' => $now]);
+        $eventId = DB::table('events')->insertGetId(['account_id' => $accountId, 'organizer_id' => $organizerId, 'user_id' => $userId, 'title' => 'Fixture', 'short_id' => "evt-$scopeId", 'status' => 'LIVE', 'currency' => 'USD', 'timezone' => 'UTC', 'start_date' => now()->addDay(), 'end_date' => now()->addDays(2), 'created_at' => $now, 'updated_at' => $now]);
         $messageId = DB::table('messages')->insertGetId(['event_id' => $eventId, 'subject' => 'Reminder', 'message' => 'Fixture', 'type' => 'ALL_ATTENDEES', 'status' => 'PROCESSING', 'source' => 'EVENT_REMINDER', 'source_key' => "fixture:$suffix", 'created_at' => $now, 'updated_at' => $now]);
         $id = DB::table('event_reminder_occurrences')->insertGetId(['event_id' => $eventId, 'policy_version' => 'fixture', 'offset_key' => "fixture-$suffix", 'due_at_utc' => $now, 'source_event_start_at_utc' => now()->addDay(), 'source_event_timezone' => 'UTC', 'content_version' => 'fixture', 'theme_projection_version' => 'fixture', 'status' => EventReminderOccurrenceStatus::PLANNED->value, 'message_id' => $messageId, 'created_at' => $now, 'updated_at' => $now]);
 
