@@ -245,7 +245,7 @@ class EventReminderLifecyclePostgresTest extends TestCase
         $this->seedAttendeeGraph($eventId, 'first@example.test', 'first');
         $this->seedAttendeeGraph($eventId, ' SECOND@example.test ', 'second');
         $this->seedAttendeeGraph($eventId, 'invalid-email', 'invalid');
-        $this->recipients->claim($message->id, $eventId, null, 'first@example.test', 'Reminder', str_repeat('1', 64));
+        $this->recipients->claim($message->id, $eventId, null, 'first@example.test', 'Reminder', $this->fixtureDigest());
         $this->bindPermittedDispatch();
         Queue::fake();
 
@@ -266,7 +266,7 @@ class EventReminderLifecyclePostgresTest extends TestCase
         $this->configureDispatch($eventId, $occurrence, 'fixture-recipient-handoff');
         $first = $this->seedAttendeeGraph($eventId, 'Duplicate@Example.test', 'provenance');
         $this->seedAttendeeGraph($eventId, 'duplicate@example.test', 'still-active');
-        $claim = $this->recipients->claim($messageId, $eventId, $first, 'Duplicate@Example.test', 'Reminder', str_repeat('2', 64));
+        $claim = $this->recipients->claim($messageId, $eventId, $first, 'Duplicate@Example.test', 'Reminder', $this->fixtureDigest());
         $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
         DB::table('attendees')->where('id', $first)->update(['status' => AttendeeStatus::CANCELLED->name]);
         $this->bindPermittedDispatch();
@@ -289,7 +289,7 @@ class EventReminderLifecyclePostgresTest extends TestCase
         [$eventId, $messageId, $occurrence] = $this->seedScope('pre-handoff-'.$mutation);
         $this->configureDispatch($eventId, $occurrence, 'fixture-pre-handoff-'.$mutation);
         $attendeeId = $this->seedAttendeeGraph($eventId, "$mutation@example.test", $mutation);
-        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, "$mutation@example.test", 'Reminder', str_repeat('3', 64));
+        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, "$mutation@example.test", 'Reminder', $this->fixtureDigest());
         $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
         $this->bindPermittedDispatch();
         $realRecipients = app(EventReminderRecipientClaimService::class);
@@ -327,7 +327,7 @@ class EventReminderLifecyclePostgresTest extends TestCase
         [$eventId, $messageId, $occurrence] = $this->seedScope('tier-recheck');
         $this->configureDispatch($eventId, $occurrence, 'fixture-tier-recheck');
         $attendeeId = $this->seedAttendeeGraph($eventId, 'tier@example.test', 'tier');
-        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, 'tier@example.test', 'Reminder', str_repeat('4', 64));
+        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, 'tier@example.test', 'Reminder', $this->fixtureDigest());
         $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
         $this->bindPermittedDispatch(new MessagingTierViolationDTO($occurrence->event_id, 'Fixture', [MessagingTierViolationEnum::RECIPIENT_LIMIT_EXCEEDED]));
         $mailer = Mockery::mock(Mailer::class);
@@ -341,7 +341,7 @@ class EventReminderLifecyclePostgresTest extends TestCase
 
     private function bindPermittedDispatch(?MessagingTierViolationDTO $tierViolation = null): void
     {
-        $context = new EventReminderContext('Fixture', 'https://fixture.test/event', 'January 1, 2030 1:00 PM', 'UTC', null, 'support@fixture.test', 'sender@fixture.test', 'reply@fixture.test', '1 Fixture Way', 'https://fixture.test/preferences', 'Fixture', new UniversityEmailThemeDTO('#111111', '#222222', '#ffffff', '#ffffff', '#eeeeee'));
+        $context = $this->fixtureContext();
         $contexts = Mockery::mock(EventReminderContextBuilder::class);
         $contexts->shouldReceive('build')->andReturn($context);
         app()->instance(EventReminderContextBuilder::class, $contexts);
@@ -349,6 +349,20 @@ class EventReminderLifecyclePostgresTest extends TestCase
         $eligibility->shouldReceive('checkEligibility')->andReturn(null);
         $eligibility->shouldReceive('checkTierLimits')->andReturn($tierViolation);
         app()->instance(MessagingEligibilityService::class, $eligibility);
+    }
+
+    private function fixtureContext(): EventReminderContext
+    {
+        return new EventReminderContext('Fixture', 'https://fixture.test/event', 'January 1, 2030 1:00 PM', 'UTC', null, 'support@fixture.test', 'sender@fixture.test', 'reply@fixture.test', '1 Fixture Way', 'https://fixture.test/preferences', 'Fixture', new UniversityEmailThemeDTO('#111111', '#222222', '#ffffff', '#ffffff', '#eeeeee'));
+    }
+
+    private function fixtureDigest(): string
+    {
+        $context = $this->fixtureContext();
+        $html = (new \HiEvents\Mail\Event\EventReminder($context))->render();
+        $text = view('emails.event.reminder-text', ['context' => $context->payload(), 'theme' => $context->theme])->render();
+
+        return hash('sha256', $html."\n".$text);
     }
 
     private function configureDispatch(int $eventId, EventReminderOccurrence $occurrence, string $offsetKey): void
@@ -362,7 +376,7 @@ class EventReminderLifecyclePostgresTest extends TestCase
 
     private function claimingMessage(EventReminderOccurrence $occurrence): \HiEvents\Models\Message
     {
-        $message = \HiEvents\Models\Message::query()->create(['event_id' => $occurrence->event_id, 'subject' => 'Reminder', 'message' => 'Fixture', 'type' => 'ALL_ATTENDEES', 'status' => 'PROCESSING', 'source' => 'EVENT_REMINDER', 'source_key' => 'event-reminder:'.$occurrence->id, 'sent_by_user_id' => null, 'send_data' => ['payload_digest' => str_repeat('1', 64), 'text' => 'Fixture']]);
+        $message = \HiEvents\Models\Message::query()->create(['event_id' => $occurrence->event_id, 'subject' => 'Reminder', 'message' => 'Fixture', 'type' => 'ALL_ATTENDEES', 'status' => 'PROCESSING', 'source' => 'EVENT_REMINDER', 'source_key' => 'event-reminder:'.$occurrence->id, 'sent_by_user_id' => null, 'send_data' => ['payload_digest' => $this->fixtureDigest(), 'text' => 'Fixture']]);
         $occurrence->update(['status' => EventReminderOccurrenceStatus::CLAIMING->value, 'claimed_at' => now(), 'message_id' => $message->id]);
 
         return $message;
