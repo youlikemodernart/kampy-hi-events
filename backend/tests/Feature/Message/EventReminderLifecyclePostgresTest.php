@@ -70,10 +70,10 @@ SQL))->keyBy('index_name');
         ] as $name => $expectedColumns) {
             $index = $indexes->get($name);
             self::assertNotNull($index);
-            self::assertTrue((bool) $index->indisunique);
-            self::assertTrue((bool) $index->indisvalid);
-            self::assertTrue((bool) $index->no_predicate);
-            self::assertTrue((bool) $index->no_expressions);
+            self::assertTrue(filter_var($index->indisunique, FILTER_VALIDATE_BOOL));
+            self::assertTrue(filter_var($index->indisvalid, FILTER_VALIDATE_BOOL));
+            self::assertTrue(filter_var($index->no_predicate, FILTER_VALIDATE_BOOL));
+            self::assertTrue(filter_var($index->no_expressions, FILTER_VALIDATE_BOOL));
             self::assertSame(count($expectedColumns), (int) $index->indnatts);
             self::assertSame(count($expectedColumns), (int) $index->indnkeyatts);
             self::assertSame($expectedColumns, json_decode($index->columns, true, flags: JSON_THROW_ON_ERROR));
@@ -94,7 +94,7 @@ SQL))->keyBy(static fn (object $column): string => "$column->table_name.$column-
         ]);
         self::assertSame(['character varying', 64, 'YES'], [
             $columns->get('event_reminder_occurrences.payload_digest')->data_type,
-            $columns->get('event_reminder_occurrences.payload_digest')->character_maximum_length,
+            (int) $columns->get('event_reminder_occurrences.payload_digest')->character_maximum_length,
             $columns->get('event_reminder_occurrences.payload_digest')->is_nullable,
         ]);
         self::assertSame(['integer', 'NO', '0'], [
