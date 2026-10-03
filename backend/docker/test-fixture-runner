@@ -1,21 +1,76 @@
 #!/bin/sh
-set -eu
+set -u
 
 readonly BYTE_LIMIT=1000000
 readonly JUNIT=/tmp/event-reminder-junit.xml
-readonly MIGRATION_LOG=/tmp/event-reminder-migration.log
-readonly TEST_LOG=/tmp/event-reminder-test.log
-
-cd /work/backend
-[ "${EVENT_REMINDER_POSTGRES_FIXTURE:-}" = "1" ]
-php -r 'exit(PHP_VERSION === "8.4.21" && extension_loaded("pdo_pgsql") ? 0 : 1);'
-
-# POSIX file-size limit units are 512-byte blocks. The resulting files are also
-# measured before the oracle reads them.
-ulimit -f 1953
-php artisan migrate:fresh --force >"$MIGRATION_LOG" 2>&1
-[ "$(wc -c <"$MIGRATION_LOG")" -le "$BYTE_LIMIT" ]
-php artisan test --log-junit="$JUNIT" tests/Feature/Message/EventReminderLifecyclePostgresTest.php >"$TEST_LOG" 2>&1
-[ "$(wc -c <"$TEST_LOG")" -le "$BYTE_LIMIT" ]
-[ "$(wc -c <"$JUNIT")" -le "$BYTE_LIMIT" ]
-exec php /usr/local/lib/kampy-test-fixture-oracle.php "$JUNIT"
+readonly ORACLE=/usr/local/lib/kampy-test-fixture-oracle.php
+# Only the closed protocol may reach Docker stdout. Application output is discarded.
+exec 3>&1 >/dev/null 2>&1
+export LOG_CHANNEL='"null"' LOG_DEPRECATIONS_CHANNEL='"null"' APP_DEBUG=false
+stage=preflight
+primary=0
+reported=0
+mark() { printf 'KAMPY_STAGE_V1\t%s\t%s\t%s\t%s\n' "$stage" "$1" "$2" "$3" >&3; }
+fail() {
+    mark failed "$1" "$2"
+    reported=1
+    [ "$primary" -ne 0 ] || primary=$2
+    exit "$primary"
+}
+finish() {
+    code=$?
+    trap - EXIT
+    rm -f "$JUNIT"
+    if [ "$code" -ne 0 ] && [ "$reported" -eq 0 ]; then
+        mark failed shell-exit "$code"
+    fi
+    exit "$code"
+}
+trap finish EXIT
+mark attempted none 0
+cd /work/backend || fail workdir-unavailable 10
+[ "${EVENT_REMINDER_POSTGRES_FIXTURE:-}" = "1" ] || fail fixture-flag-refused 10
+[ -r "$ORACLE" ] || fail oracle-unavailable 10
+[ -r vendor/autoload.php ] && [ -r bootstrap/app.php ] && [ -r vendor/bin/phpunit ] || fail closure-unavailable 10
+mark complete none 0
+stage=runtime
+mark attempted none 0
+php -d display_errors=0 -d log_errors=0 -r 'exit(PHP_VERSION === "8.4.21" ? 0 : 11);' || fail php-runtime-refused $?
+php -d display_errors=0 -d log_errors=0 -r 'foreach (["pdo_pgsql", "pcntl", "intl", "ctype", "curl", "date", "dom", "fileinfo", "filter", "gd", "hash", "iconv", "json", "libxml", "mbstring", "openssl", "pcre", "phar", "session", "simplexml", "sodium", "spl", "tokenizer", "xml", "xmlreader", "xmlwriter", "zip", "zlib"] as $extension) { if (!extension_loaded($extension)) { exit(12); } }' || fail php-extension-unavailable $?
+mark complete none 0
+stage=limits
+mark attempted none 0
+# POSIX file-size units are 512-byte blocks; also measure JUnit before parsing.
+ulimit -f 1953 || fail limit-setup-failed $?
+rm -f "$JUNIT" || fail artifact-unavailable 13
+mark complete none 0
+stage=migration
+mark attempted none 0
+# Laravel 12.34 FreshCommand discards nested command return codes. Run the same
+# fresh-fixture operations explicitly so a wipe or migration failure cannot pass.
+php -d display_errors=0 -d log_errors=0 artisan db:wipe --force --no-interaction
+code=$?
+[ "$code" -eq 0 ] || fail wipe-nonzero "$code"
+php -d display_errors=0 -d log_errors=0 artisan migrate --force --no-interaction
+code=$?
+[ "$code" -eq 0 ] || fail migration-nonzero "$code"
+mark complete none 0
+stage=tests
+mark attempted none 0
+php -d display_errors=0 -d log_errors=0 artisan test --without-tty --log-junit="$JUNIT" tests/Feature/Message/EventReminderLifecyclePostgresTest.php
+primary=$?
+if [ "$primary" -eq 0 ]; then mark complete none 0; else mark failed tests-nonzero "$primary"; fi
+stage=artifact
+mark attempted none 0
+[ -f "$JUNIT" ] && [ -r "$JUNIT" ] || fail artifact-unavailable 20
+size=$(wc -c <"$JUNIT") || fail artifact-unavailable 20
+[ "$size" -le "$BYTE_LIMIT" ] || fail artifact-oversize 20
+mark complete none 0
+stage=oracle
+mark attempted none 0
+php -d display_errors=0 -d log_errors=0 "$ORACLE" "$JUNIT" "$primary" >&3
+code=$?
+[ "$code" -eq 0 ] || fail oracle-nonzero "$code"
+mark complete none 0
+reported=1
+exit "$primary"

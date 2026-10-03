@@ -8,43 +8,94 @@ use Illuminate\Support\Facades\DB;
 const JUNIT_LIMIT = 1_000_000;
 const EXPECTED_SUITE = 'Tests\\Feature\\Message\\EventReminderLifecyclePostgresTest';
 
-$junit = $argv[1] ?? '';
-if ($junit === '' || ! is_file($junit) || filesize($junit) === false || filesize($junit) > JUNIT_LIMIT) {
-    exit(20);
+// Bootstrap may install its own handlers; never forward its output or exception text.
+ini_set('display_errors', '0');
+ini_set('log_errors', '0');
+ob_start(static fn (string $output): string => '');
+$stage = 'junit';
+$finished = false;
+function fixtureMark(string $stage, string $state, string $category = 'none', int $code = 0): void
+{
+    fwrite(STDOUT, "KAMPY_STAGE_V1\t$stage\t$state\t$category\t$code\n");
 }
-
-require '/work/backend/vendor/autoload.php';
-$app = require '/work/backend/bootstrap/app.php';
-$app->make(Kernel::class)->bootstrap();
-
-$reader = new XMLReader;
-if (! $reader->open($junit, null, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_COMPACT)) {
-    exit(21);
+function fixtureFail(string $stage, string $category, int $code): never
+{
+    global $finished;
+    $finished = true;
+    fixtureMark($stage, 'failed', $category, $code);
+    exit($code);
 }
-
-$suite = null;
-while ($reader->read()) {
-    if ($reader->nodeType === XMLReader::ELEMENT && $reader->localName === 'testsuite'
-        && $reader->getAttribute('name') === EXPECTED_SUITE) {
-        $suite = [
-            'name' => $reader->getAttribute('name'),
-            'tests' => (int) $reader->getAttribute('tests'),
-            'assertions' => (int) $reader->getAttribute('assertions'),
-            'failures' => (int) $reader->getAttribute('failures'),
-            'errors' => (int) $reader->getAttribute('errors'),
-            'skipped' => (int) $reader->getAttribute('skipped'),
-        ];
-        break;
+register_shutdown_function(static function () use (&$finished, &$stage): void {
+    if (! $finished) {
+        fixtureMark($stage, 'failed', 'oracle-aborted', 24);
+        exit(24);
     }
-}
-$reader->close();
-if ($suite === null || $suite['tests'] < 1 || $suite['assertions'] < 1
-    || $suite['failures'] !== 0 || $suite['errors'] !== 0 || $suite['skipped'] !== 0) {
-    exit(22);
-}
+});
 
-$serverVersion = (string) DB::selectOne('SHOW server_version')->server_version;
-$schema = DB::selectOne(<<<'SQL'
+try {
+    fixtureMark($stage, 'attempted');
+    $junit = $argv[1] ?? '';
+    if ($junit === '' || ! is_file($junit) || filesize($junit) === false || filesize($junit) > JUNIT_LIMIT) {
+        fixtureFail($stage, 'artifact-unavailable', 20);
+    }
+    libxml_use_internal_errors(true);
+    $reader = new XMLReader;
+    if (! $reader->open($junit, null, LIBXML_NONET | LIBXML_NOBLANKS | LIBXML_COMPACT)) {
+        fixtureFail($stage, 'junit-invalid', 21);
+    }
+    $suite = null;
+    while ($reader->read()) {
+        if ($reader->nodeType === XMLReader::DOC_TYPE) {
+            fixtureFail($stage, 'junit-invalid', 21);
+        }
+        if ($reader->nodeType === XMLReader::ELEMENT && $reader->localName === 'testsuite'
+            && $reader->getAttribute('name') === EXPECTED_SUITE) {
+            if ($suite !== null) {
+                fixtureFail($stage, 'junit-invalid', 21);
+            }
+            $suite = ['name' => EXPECTED_SUITE];
+            foreach (['tests', 'assertions', 'failures', 'errors', 'skipped'] as $key) {
+                $value = $reader->getAttribute($key);
+                if ($value === null || ! preg_match('/^[0-9]{1,7}$/D', $value)) {
+                    fixtureFail($stage, 'junit-invalid', 21);
+                }
+                $suite[$key] = (int) $value;
+            }
+        }
+    }
+    $reader->close();
+    if (libxml_get_errors() !== [] || $suite === null) {
+        fixtureFail($stage, 'junit-invalid', 21);
+    }
+    fwrite(STDOUT, "KAMPY_COUNTS_V1\t".implode("\t", array_slice($suite, 1))."\n");
+    fixtureMark($stage, 'complete');
+    // Failed tests still yield safe counts, but must not bootstrap or claim acceptance.
+    if (($argv[2] ?? '0') !== '0') {
+        $finished = true;
+        exit(0);
+    }
+    if ($suite['tests'] < 1 || $suite['assertions'] < 1 || $suite['failures'] !== 0
+        || $suite['errors'] !== 0 || $suite['skipped'] !== 0) {
+        fixtureFail($stage, 'junit-rejected', 22);
+    }
+
+    $stage = 'bootstrap';
+    fixtureMark($stage, 'attempted');
+    require '/work/backend/vendor/autoload.php';
+    $app = require '/work/backend/bootstrap/app.php';
+    $app->make(Kernel::class)->bootstrap();
+    fixtureMark($stage, 'complete');
+
+    $stage = 'database';
+    fixtureMark($stage, 'attempted');
+    $serverVersion = (string) DB::selectOne('SHOW server_version')->server_version;
+    if (! preg_match('/^17(?:\.[0-9]+)+$/D', $serverVersion)) {
+        fixtureFail($stage, 'database-version-refused', 23);
+    }
+    fixtureMark($stage, 'complete');
+    $stage = 'schema';
+    fixtureMark($stage, 'attempted');
+    $schema = DB::selectOne(<<<'SQL'
 SELECT
     to_regclass('public.event_reminder_occurrences') IS NOT NULL AS occurrence_table,
     to_regclass('public.messages') IS NOT NULL AS messages_table,
@@ -145,17 +196,25 @@ SELECT
      )) AS reminder_migrations_recorded
 SQL);
 
-$schemaChecks = array_map(static fn (mixed $value): bool => filter_var($value, FILTER_VALIDATE_BOOL), (array) $schema);
-if (! str_starts_with($serverVersion, '17.') || in_array(false, $schemaChecks, true)) {
-    exit(23);
+    $schemaChecks = array_map(static fn (mixed $value): bool => filter_var($value, FILTER_VALIDATE_BOOL), (array) $schema);
+    if (in_array(false, $schemaChecks, true)) {
+        fixtureFail($stage, 'schema-rejected', 23);
+    }
+    fixtureMark($stage, 'complete');
+    $stage = 'serialization';
+    fixtureMark($stage, 'attempted');
+    $result = [
+        'oracle' => 'kampy-event-reminder-postgres-v1',
+        'php' => PHP_VERSION,
+        'pdo_pgsql' => extension_loaded('pdo_pgsql'),
+        'postgres' => $serverVersion,
+        'suite' => $suite,
+        'schema' => $schemaChecks,
+    ];
+    $encoded = json_encode($result, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+    fwrite(STDOUT, $encoded."\n");
+    fixtureMark($stage, 'complete');
+    $finished = true;
+} catch (Throwable $error) {
+    fixtureFail($stage, 'oracle-exception', 24);
 }
-
-$result = [
-    'oracle' => 'kampy-event-reminder-postgres-v1',
-    'php' => PHP_VERSION,
-    'pdo_pgsql' => extension_loaded('pdo_pgsql'),
-    'postgres' => $serverVersion,
-    'suite' => $suite,
-    'schema' => $schemaChecks,
-];
-echo json_encode($result, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES), "\n";
