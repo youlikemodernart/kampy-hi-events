@@ -466,11 +466,11 @@ SQL))->keyBy('source_column');
     private function seedAttendeeGraph(int $eventId, string $email, string $suffix): int
     {
         $now = now();
-        $ticketId = DB::table('tickets')->insertGetId(['event_id' => $eventId, 'title' => 'Fixture '.$suffix, 'order' => 1, 'created_at' => $now, 'updated_at' => $now]);
-        $priceId = DB::table('ticket_prices')->insertGetId(['ticket_id' => $ticketId, 'price' => 10, 'created_at' => $now, 'updated_at' => $now]);
+        $productId = DB::table('products')->insertGetId(['event_id' => $eventId, 'title' => 'Fixture '.$suffix, 'order' => 1, 'created_at' => $now, 'updated_at' => $now]);
+        $priceId = DB::table('product_prices')->insertGetId(['product_id' => $productId, 'price' => 10, 'created_at' => $now, 'updated_at' => $now]);
         $orderId = DB::table('orders')->insertGetId(['short_id' => 'ord-'.$suffix, 'event_id' => $eventId, 'total_before_additions' => 10, 'total_refunded' => 0, 'total_gross' => 10, 'currency' => 'USD', 'first_name' => 'Fixture', 'last_name' => 'Recipient', 'email' => $email, 'status' => 'COMPLETED', 'public_id' => 'public-'.$suffix, 'created_at' => $now, 'updated_at' => $now]);
 
-        return DB::table('attendees')->insertGetId(['short_id' => 'att-'.$suffix, 'first_name' => 'Fixture', 'last_name' => 'Recipient', 'email' => $email, 'order_id' => $orderId, 'ticket_id' => $ticketId, 'event_id' => $eventId, 'public_id' => 'attendee-'.$suffix, 'status' => AttendeeStatus::ACTIVE->name, 'ticket_price_id' => $priceId, 'created_at' => $now, 'updated_at' => $now]);
+        return DB::table('attendees')->insertGetId(['short_id' => 'att-'.$suffix, 'first_name' => 'Fixture', 'last_name' => 'Recipient', 'email' => $email, 'order_id' => $orderId, 'product_id' => $productId, 'event_id' => $eventId, 'public_id' => 'attendee-'.$suffix, 'status' => AttendeeStatus::ACTIVE->name, 'product_price_id' => $priceId, 'created_at' => $now, 'updated_at' => $now]);
     }
 
     private function independentConnection(string $name): ConnectionInterface
