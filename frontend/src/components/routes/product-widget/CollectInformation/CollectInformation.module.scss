@@ -75,6 +75,10 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--checkout-text-primary, #111827);
 }
 
+.copyDetailsHint {
+  color: var(--checkout-text-secondary, var(--kamp-muted));
+}
+
 .ticketSection {
   margin-bottom: 24px;
 }

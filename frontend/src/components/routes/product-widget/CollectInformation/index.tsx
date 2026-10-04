@@ -9,7 +9,6 @@ import {
     Skeleton,
     Text,
     TextInput,
-    Tooltip
 } from "@mantine/core";
 import {IconArrowRight, IconCheck, IconCircleCheck, IconClock} from "@tabler/icons-react";
 import {t, Trans} from "@lingui/macro";
@@ -20,7 +19,7 @@ import {useGetEventPublic} from "../../../../queries/useGetEventPublic.ts";
 import {useGetEventQuestionsPublic} from "../../../../queries/useGetEventQuestionsPublic.ts";
 import {CheckoutOrderQuestions, CheckoutProductQuestions} from "../../../common/CheckoutQuestion";
 import {Event, IdParam, Question} from "../../../../types.ts";
-import {useEffect, useState} from "react";
+import {useEffect, useId, useState} from "react";
 import {InputGroup} from "../../../common/InputGroup";
 import {Card} from "../../../common/Card";
 import {CheckoutContent} from "../../../layouts/Checkout/CheckoutContent";
@@ -73,6 +72,7 @@ export const CollectInformation = () => {
     const requireBillingAddress = event?.settings?.require_billing_address;
     const isPerOrderCollection = event?.settings?.attendee_details_collection_method === 'PER_ORDER';
     const [copyOption, setCopyOption] = useState<'none' | 'first' | 'all'>('none');
+    const copyDetailsHintId = useId();
 
     const isEmailValid = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -469,44 +469,42 @@ export const CollectInformation = () => {
                     {orderRequiresAttendeeDetails && !isPerOrderCollection && totalTicketAttendees > 0 && (
                         <div className={classes.copyDetailsSection}>
                             {totalTicketAttendees === 1 ? (
-                                <Tooltip
-                                    label={t`Fill in your details above first`}
-                                    disabled={areOrderDetailsComplete()}
-                                    position="right"
-                                    withArrow
-                                >
-                                    <div style={{display: 'inline-block'}}>
-                                        <Checkbox
-                                            size="sm"
-                                            label={t`Copy details to first attendee`}
-                                            checked={copyOption === 'first'}
-                                            disabled={!areOrderDetailsComplete()}
-                                            onChange={(e) => handleCopyOptionChange(e.currentTarget.checked ? 'first' : 'none')}
-                                        />
-                                    </div>
-                                </Tooltip>
+                                <Checkbox
+                                    size="sm"
+                                    label={t`Copy details to first attendee`}
+                                    description={areOrderDetailsComplete() ? undefined : (
+                                        <span id={copyDetailsHintId}>{t`Fill in your details above first`}</span>
+                                    )}
+                                    aria-describedby={areOrderDetailsComplete() ? undefined : copyDetailsHintId}
+                                    classNames={{description: classes.copyDetailsHint}}
+                                    checked={copyOption === 'first'}
+                                    disabled={!areOrderDetailsComplete()}
+                                    onChange={(e) => handleCopyOptionChange(e.currentTarget.checked ? 'first' : 'none')}
+                                />
                             ) : (
-                                <div className={classes.copyDetailsMultiple}>
-                                    <Text size="sm" c="dimmed"
-                                          className={classes.copyLabel}>{t`Copy my details to:`}</Text>
-                                    <Tooltip
-                                        label={t`Fill in your details above first`}
-                                        disabled={areOrderDetailsComplete()}
-                                        withArrow
-                                    >
+                                <>
+                                    <div className={classes.copyDetailsMultiple}>
+                                        <Text size="sm"
+                                              className={classes.copyLabel}>{t`Copy my details to:`}</Text>
                                         <SegmentedControl
                                             size="xs"
                                             value={copyOption}
                                             onChange={handleCopyOptionChange}
                                             disabled={!areOrderDetailsComplete()}
+                                            aria-describedby={areOrderDetailsComplete() ? undefined : copyDetailsHintId}
                                             data={[
                                                 {label: t`None`, value: 'none'},
                                                 {label: t`First attendee`, value: 'first'},
                                                 {label: t`All attendees`, value: 'all'},
                                             ]}
                                         />
-                                    </Tooltip>
-                                </div>
+                                    </div>
+                                    {!areOrderDetailsComplete() && (
+                                        <Text id={copyDetailsHintId} size="xs" mt="xs" className={classes.copyDetailsHint}>
+                                            {t`Fill in your details above first`}
+                                        </Text>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}

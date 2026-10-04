@@ -26,16 +26,23 @@
     :global(.mantine-Textarea-input) {
       min-height: 44px;
     }
+  }
 
-    :global(.mantine-Checkbox-input) {
-      width: 28px;
-      height: 28px;
-      min-width: 28px;
-    }
+  :global(.mantine-Radio-radio),
+  :global(.mantine-Checkbox-input) {
+    min-height: 0;
+  }
 
-    :global(.mantine-Checkbox-body) {
-      align-items: center;
-    }
+  // Compact radio and checkbox indicators with a 44px label target: padding grows the
+  // clickable label, and the indicator keeps its size, aligned with the first label line.
+  :global(.mantine-Radio-label),
+  :global(.mantine-Checkbox-label) {
+    padding-block: calc((44px - var(--label-lh, 20px)) / 2);
+  }
+
+  :global(.mantine-Radio-inner),
+  :global(.mantine-Checkbox-inner) {
+    margin-top: calc((44px - var(--label-lh, 20px)) / 2);
   }
 
   .innerContainer {
