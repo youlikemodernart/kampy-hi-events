@@ -21,7 +21,7 @@ class EventReminderTest extends TestCase
 
     private const ADDRESS = '1 Fixture Way, Allendale, MI';
 
-    public function testHtmlAndTextContainTheSameRequiredFacts(): void
+    public function test_html_and_text_contain_the_same_required_facts(): void
     {
         $context = new EventReminderContext(
             'Kamp Love GVSU', 'https://tickets.kamplove.org/event/7/grand-valley-state-university',
@@ -42,7 +42,7 @@ class EventReminderTest extends TestCase
         $this->assertStringContainsString('#13155c', $html);
     }
 
-    public function testHtmlAndTextPresentTheSameFactsInTheSameOrder(): void
+    public function test_html_and_text_present_the_same_facts_in_the_same_order(): void
     {
         $context = $this->reminderContext();
         $html = $this->renderHtml($context);
@@ -70,7 +70,7 @@ class EventReminderTest extends TestCase
         $this->assertStringContainsString('Email preferences: '.self::PREFERENCE_URL, $text);
     }
 
-    public function testHtmlDeclaresLocaleBoundLanguageAndLightColorScheme(): void
+    public function test_html_declares_locale_bound_language_and_light_color_scheme(): void
     {
         app()->setLocale('fr_CA');
         $html = $this->renderHtml($this->reminderContext());
@@ -86,7 +86,7 @@ class EventReminderTest extends TestCase
         $this->assertStringContainsString('<html lang="en">', $this->renderHtml($this->reminderContext()));
     }
 
-    public function testHtmlUsesTheCanonicalShellWithEachThemeRoleInItsPlace(): void
+    public function test_html_uses_the_canonical_shell_with_each_theme_role_in_its_place(): void
     {
         $html = $this->renderHtml($this->reminderContext(theme: new UniversityEmailThemeDTO('#101820', '#203040', '#f0f0f1', '#f0f0f2', '#e0e0e3')));
         $xpath = $this->xpath($html);
@@ -115,7 +115,7 @@ class EventReminderTest extends TestCase
         }
     }
 
-    public function testCallToActionIsAFullWidthBulletproofButtonWithAWrappedFallbackUrl(): void
+    public function test_call_to_action_is_a_full_width_bulletproof_button_with_a_wrapped_fallback_url(): void
     {
         $html = $this->renderHtml($this->reminderContext());
         $xpath = $this->xpath($html);
@@ -144,7 +144,7 @@ class EventReminderTest extends TestCase
         $this->assertStringContainsString('word-break:break-all;overflow-wrap:anywhere;', $fallback->parentNode->getAttribute('style'));
     }
 
-    public function testPreheaderIsHiddenInHtmlAndNotDuplicatedInText(): void
+    public function test_preheader_is_hidden_in_html_and_not_duplicated_in_text(): void
     {
         $context = $this->reminderContext();
         $html = $this->renderHtml($context);
@@ -158,7 +158,7 @@ class EventReminderTest extends TestCase
         $this->assertStringNotContainsString($context->preheader, $this->renderText($context));
     }
 
-    public function testSupportAddressAppearsOnceAsAMailtoLinkWithoutAReplyClaim(): void
+    public function test_support_address_appears_once_as_a_mailto_link_without_a_reply_claim(): void
     {
         $context = $this->reminderContext();
         $html = $this->renderHtml($context);
@@ -178,7 +178,7 @@ class EventReminderTest extends TestCase
         $this->assertStringNotContainsStringIgnoringCase('reply', $text);
     }
 
-    public function testLocationRendersWhenPresentAndIsAbsentWhenNull(): void
+    public function test_location_renders_when_present_and_is_absent_when_null(): void
     {
         $present = $this->reminderContext();
         $absent = $this->reminderContext(location: null);
@@ -197,7 +197,7 @@ class EventReminderTest extends TestCase
         $this->assertSame(2, substr_count($absentHtml, '<br>'));
     }
 
-    public function testPhysicalAddressAndPreferenceLinkRenderOnlyWhenNonEmpty(): void
+    public function test_physical_address_and_preference_link_render_only_when_non_empty(): void
     {
         $preferenceHref = 'href="'.self::PREFERENCE_URL.'"';
         $preferenceLine = 'Email preferences: '.self::PREFERENCE_URL;
@@ -235,7 +235,7 @@ class EventReminderTest extends TestCase
         $this->assertSame(3, substr_count($html, '<p '));
     }
 
-    public function testTitleWithAmpersandAndApostropheIsEscapedInHtmlAndLiteralInText(): void
+    public function test_title_with_ampersand_and_apostrophe_is_escaped_in_html_and_literal_in_text(): void
     {
         $title = "St. Mary's & Grand Valley Kamp";
         $context = $this->reminderContext(title: $title);
@@ -253,7 +253,7 @@ class EventReminderTest extends TestCase
         }
     }
 
-    public function testReminderIntroducesNoTicketLanguageOrTicketUrl(): void
+    public function test_reminder_introduces_no_ticket_language_or_ticket_url(): void
     {
         $context = $this->reminderContext();
         $html = $this->renderHtml($context);
@@ -309,7 +309,7 @@ class EventReminderTest extends TestCase
 
     private function xpath(string $html): DOMXPath
     {
-        $document = new DOMDocument();
+        $document = new DOMDocument;
         $previous = libxml_use_internal_errors(true);
         $document->loadHTML($html);
         libxml_clear_errors();

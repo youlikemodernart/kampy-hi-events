@@ -8,13 +8,13 @@ use Tests\TestCase;
 
 class EventReminderDispatchGateTest extends TestCase
 {
-    public function testDefaultConfigurationFailsClosed(): void
+    public function test_default_configuration_fails_closed(): void
     {
         config()->set('event-reminders.enabled', false);
         $this->assertFalse(app(EventReminderDispatchGate::class)->mayClaimRecipients());
     }
 
-    public function testMissingActivationBindingFailsClosed(): void
+    public function test_missing_activation_binding_fails_closed(): void
     {
         config()->set('event-reminders.enabled', true);
         config()->set('event-reminders.reply_to', null);
@@ -25,7 +25,7 @@ class EventReminderDispatchGateTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('lateGraceBoundaryCases')]
-    public function testSixHourLateGraceUsesTheReviewedInclusiveBoundary(int $lateMinutes, bool $expected): void
+    public function test_six_hour_late_grace_uses_the_reviewed_inclusive_boundary(int $lateMinutes, bool $expected): void
     {
         CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-04 12:00:00', 'UTC'));
         config()->set('event-reminders.late_grace_minutes', 360);

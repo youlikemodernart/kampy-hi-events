@@ -114,7 +114,7 @@ class PostmarkTransportMessageIdTest extends TestCase
 
     private function emailWithMimeId(string $messageId): Email
     {
-        $email = (new Email())
+        $email = (new Email)
             ->from('sender@example.test')
             ->to('recipient@example.test')
             ->subject('Fixture')

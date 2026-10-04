@@ -403,7 +403,7 @@ SQL))->keyBy('source_column');
         $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
         $this->bindPermittedDispatch();
         $mailer = Mockery::mock(Mailer::class);
-        $mailer->shouldReceive('getSymfonyTransport')->once()->andReturn(new \Symfony\Component\Mailer\Transport\NullTransport());
+        $mailer->shouldReceive('getSymfonyTransport')->once()->andReturn(new \Symfony\Component\Mailer\Transport\NullTransport);
         $mailer->shouldNotReceive('to');
         app()->instance(Mailer::class, $mailer);
 
