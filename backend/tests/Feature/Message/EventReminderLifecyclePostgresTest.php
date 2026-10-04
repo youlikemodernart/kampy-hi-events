@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Message;
 
+use Carbon\CarbonImmutable;
 use HiEvents\DomainObjects\Enums\MessagingTierViolationEnum;
 use HiEvents\DomainObjects\Status\AttendeeStatus;
 use HiEvents\DomainObjects\Status\EventReminderOccurrenceStatus;
@@ -351,9 +352,12 @@ SQL))->keyBy('source_column');
         $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
         DB::table('attendees')->where('id', $first)->update(['status' => AttendeeStatus::CANCELLED->name]);
         $this->bindPermittedDispatch();
+        $sentMessage = Mockery::mock(\Illuminate\Mail\SentMessage::class);
+        $sentMessage->shouldReceive('getMessageId')->once()->andReturn('provider-message-id');
         $pending = Mockery::mock();
-        $pending->shouldReceive('send')->once();
+        $pending->shouldReceive('sendNow')->once()->andReturn($sentMessage);
         $mailer = Mockery::mock(Mailer::class);
+        $mailer->shouldReceive('getSymfonyTransport')->once()->andReturn(Mockery::mock(\Symfony\Component\Mailer\Bridge\Postmark\Transport\PostmarkApiTransport::class));
         $mailer->shouldReceive('to')->once()->with('Duplicate@Example.test')->andReturn($pending);
         app()->instance(Mailer::class, $mailer);
 
@@ -361,7 +365,56 @@ SQL))->keyBy('source_column');
         app(EventReminderDispatchService::class)->sendRecipient($claim->id);
 
         self::assertSame(OutgoingMessageStatus::SENT->name, $claim->fresh()->status);
+        self::assertSame('provider-message-id', $claim->fresh()->provider_message_id);
+        self::assertNotNull($claim->fresh()->provider_accepted_at);
         self::assertSame(1, OutgoingMessage::query()->where('message_id', $messageId)->count());
+    }
+
+    public function test_missing_transport_message_id_is_unknown_and_never_claimed_as_provider_accepted(): void
+    {
+        [$eventId, $messageId, $occurrence] = $this->seedScope('missing-id');
+        $this->configureDispatch($eventId, $occurrence, 'fixture-missing-id');
+        $attendeeId = $this->seedAttendeeGraph($eventId, 'missing-provider-id@example.test', 'missing-id');
+        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, 'missing-provider-id@example.test', 'Reminder', $this->fixtureDigest());
+        $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
+        $this->bindPermittedDispatch();
+        $pending = Mockery::mock();
+        $pending->shouldReceive('sendNow')->once()->andReturnNull();
+        $mailer = Mockery::mock(Mailer::class);
+        $mailer->shouldReceive('getSymfonyTransport')->once()->andReturn(Mockery::mock(\Symfony\Component\Mailer\Bridge\Postmark\Transport\PostmarkApiTransport::class));
+        $mailer->shouldReceive('to')->once()->with('missing-provider-id@example.test')->andReturn($pending);
+        app()->instance(Mailer::class, $mailer);
+
+        app(EventReminderDispatchService::class)->sendRecipient($claim->id);
+
+        self::assertSame(OutgoingMessageStatus::UNKNOWN->name, $claim->fresh()->status);
+        self::assertSame('provider_message_id_missing', $claim->fresh()->last_error_class);
+        self::assertNull($claim->fresh()->provider_message_id);
+        self::assertNull($claim->fresh()->provider_accepted_at);
+        self::assertSame(EventReminderOccurrenceStatus::UNKNOWN->value, $occurrence->fresh()->status);
+    }
+
+    public function test_non_postmark_transport_is_suppressed_before_handoff_and_generated_id_cannot_claim_acceptance(): void
+    {
+        [$eventId, $messageId, $occurrence] = $this->seedScope('wrong-mailer');
+        $this->configureDispatch($eventId, $occurrence, 'fixture-wrong-mailer');
+        $attendeeId = $this->seedAttendeeGraph($eventId, 'wrong-mailer@example.test', 'wrong-mailer');
+        $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, 'wrong-mailer@example.test', 'Reminder', $this->fixtureDigest());
+        $occurrence->update(['status' => EventReminderOccurrenceStatus::DISPATCHING->value, 'audience_claimed_at' => now(), 'expected_recipient_count' => 1]);
+        $this->bindPermittedDispatch();
+        $mailer = Mockery::mock(Mailer::class);
+        $mailer->shouldReceive('getSymfonyTransport')->once()->andReturn(new \Symfony\Component\Mailer\Transport\NullTransport());
+        $mailer->shouldNotReceive('to');
+        app()->instance(Mailer::class, $mailer);
+
+        app(EventReminderDispatchService::class)->sendRecipient($claim->id);
+
+        self::assertSame(OutgoingMessageStatus::SUPPRESSED->name, $claim->fresh()->status);
+        self::assertSame('postmark_api_transport_required', $claim->fresh()->last_error_class);
+        self::assertNull($claim->fresh()->provider_message_id);
+        self::assertNull($claim->fresh()->provider_accepted_at);
+        self::assertSame(0, $claim->fresh()->attempt_count);
+        self::assertSame(EventReminderOccurrenceStatus::COMPLETED->value, $occurrence->fresh()->status);
     }
 
     /** @dataProvider preHandoffSuppressionCases */
@@ -389,6 +442,7 @@ SQL))->keyBy('source_column');
         });
         app()->instance(EventReminderRecipientClaimService::class, $raceRecipients);
         $mailer = Mockery::mock(Mailer::class);
+        $mailer->shouldReceive('getSymfonyTransport')->once()->andReturn(Mockery::mock(\Symfony\Component\Mailer\Bridge\Postmark\Transport\PostmarkApiTransport::class));
         $mailer->shouldNotReceive('to');
         app()->instance(Mailer::class, $mailer);
 
@@ -418,6 +472,126 @@ SQL))->keyBy('source_column');
         app(EventReminderDispatchService::class)->sendRecipient($claim->id);
 
         self::assertSame(OutgoingMessageStatus::SUPPRESSED->name, $claim->fresh()->status);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('lateGraceReconciliationCases')]
+    public function test_reconciliation_applies_the_reviewed_six_hour_boundary(int $lateMinutes, string $expectedStatus): void
+    {
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-04 12:00:00', 'UTC'));
+
+        try {
+            [$eventId, , $occurrence] = $this->seedScope('late-boundary-'.$lateMinutes);
+            $now = CarbonImmutable::now('UTC');
+            $dueAt = $now->subMinutes($lateMinutes);
+            $eventStart = $dueAt->addMinutes(10080);
+            DB::table('events')->where('id', $eventId)->update(['start_date' => $eventStart, 'timezone' => 'America/Detroit']);
+            $occurrence->update([
+                'policy_version' => 'kamp-attendee-reminders-v1',
+                'offset_key' => '7-days',
+                'due_at_utc' => $dueAt,
+                'source_event_start_at_utc' => $eventStart,
+                'source_event_timezone' => 'America/Detroit',
+                'status' => EventReminderOccurrenceStatus::PLANNED->value,
+            ]);
+            config()->set('event-reminders', array_merge(config('event-reminders'), [
+                'enabled' => true,
+                'event_allowlist' => [$eventId],
+                'policy_version' => 'kamp-attendee-reminders-v1',
+                'offsets' => ['7-days' => -10080, '24-hours' => -1440],
+                'late_grace_minutes' => 360,
+            ]));
+
+            app(EventReminderReconciliationService::class)->reconcile();
+
+            self::assertSame($expectedStatus, $occurrence->fresh()->status);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+    }
+
+    public static function lateGraceReconciliationCases(): array
+    {
+        return [
+            'five-hours-fifty-nine-minutes' => [359, EventReminderOccurrenceStatus::PLANNED->value],
+            'exactly-six-hours' => [360, EventReminderOccurrenceStatus::PLANNED->value],
+            'six-hours-one-minute' => [361, EventReminderOccurrenceStatus::SKIPPED_LATE->value],
+        ];
+    }
+
+    public function test_reconciliation_skips_an_occurrence_after_the_event_has_started_even_inside_grace(): void
+    {
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-04 12:00:00', 'UTC'));
+
+        try {
+            [$eventId, , $occurrence] = $this->seedScope('post-start');
+            $eventStart = CarbonImmutable::now('UTC')->subMinute();
+            DB::table('events')->where('id', $eventId)->update(['start_date' => $eventStart]);
+            $occurrence->update([
+                'policy_version' => 'fixture-post-start',
+                'offset_key' => 'event-start',
+                'due_at_utc' => $eventStart,
+                'source_event_start_at_utc' => $eventStart,
+                'status' => EventReminderOccurrenceStatus::PLANNED->value,
+            ]);
+            config()->set('event-reminders', array_merge(config('event-reminders'), [
+                'enabled' => true,
+                'event_allowlist' => [$eventId],
+                'policy_version' => 'fixture-post-start',
+                'offsets' => ['event-start' => 0],
+                'late_grace_minutes' => 360,
+            ]));
+
+            app(EventReminderReconciliationService::class)->reconcile();
+
+            self::assertSame(EventReminderOccurrenceStatus::SKIPPED_LATE->value, $occurrence->fresh()->status);
+            self::assertSame('outside_late_grace_or_event_started', $occurrence->fresh()->reason_code);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+    }
+
+    public function test_recipient_claimed_inside_grace_is_suppressed_when_the_job_starts_outside_grace(): void
+    {
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-04 12:00:00', 'UTC'));
+
+        try {
+            [$eventId, $messageId, $occurrence] = $this->seedScope('queued-past-grace');
+            $dueAt = CarbonImmutable::now('UTC')->subMinutes(359);
+            $eventStart = $dueAt->addMinutes(10080);
+            DB::table('events')->where('id', $eventId)->update(['start_date' => $eventStart, 'status' => 'LIVE']);
+            $attendeeId = $this->seedAttendeeGraph($eventId, 'late-queue@example.test', 'late-queue');
+            $claim = $this->recipients->claim($messageId, $eventId, $attendeeId, 'late-queue@example.test', 'Reminder', $this->fixtureDigest());
+            $occurrence->update([
+                'policy_version' => 'kamp-attendee-reminders-v1',
+                'offset_key' => '7-days',
+                'due_at_utc' => $dueAt,
+                'source_event_start_at_utc' => $eventStart,
+                'status' => EventReminderOccurrenceStatus::DISPATCHING->value,
+                'audience_claimed_at' => now(),
+                'expected_recipient_count' => 1,
+            ]);
+            config()->set('event-reminders', array_merge(config('event-reminders'), [
+                'enabled' => true,
+                'event_allowlist' => [$eventId],
+                'offsets' => ['7-days' => -10080, '24-hours' => -1440],
+                'late_grace_minutes' => 360,
+            ]));
+            $this->bindPermittedDispatch();
+            $mailer = Mockery::mock(Mailer::class);
+            $mailer->shouldNotReceive('to');
+            app()->instance(Mailer::class, $mailer);
+            CarbonImmutable::setTestNow($dueAt->addMinutes(361));
+
+            app(EventReminderDispatchService::class)->sendRecipient($claim->id);
+
+            self::assertSame(OutgoingMessageStatus::SUPPRESSED->name, $claim->fresh()->status);
+            self::assertSame('late_grace_elapsed_before_handoff', $claim->fresh()->last_error_class);
+            self::assertNull($claim->fresh()->provider_accepted_at);
+            self::assertSame(0, $claim->fresh()->attempt_count);
+            self::assertSame(EventReminderOccurrenceStatus::COMPLETED->value, $occurrence->fresh()->status);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 
     private function bindPermittedDispatch(?MessagingTierViolationDTO $tierViolation = null): void

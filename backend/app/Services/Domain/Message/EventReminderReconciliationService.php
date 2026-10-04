@@ -18,6 +18,7 @@ class EventReminderReconciliationService
         private readonly EventReminderOccurrenceRepositoryInterface $occurrences,
         private readonly EventReminderDispatchService $dispatch,
         private readonly EventReminderRecipientClaimService $recipients,
+        private readonly EventReminderDispatchGate $dispatchGate,
     ) {}
 
     public function reconcile(): void
@@ -43,7 +44,7 @@ class EventReminderReconciliationService
                         'theme_projection_version' => $policy['theme_projection_version'],
                     ]);
                     if ($occurrence->status === EventReminderOccurrenceStatus::PLANNED->value && $dueAt->lt($now)
-                        && ($now->diffInMinutes($dueAt) > $policy['late_grace_minutes'] || CarbonImmutable::instance($event->start_date)->utc()->lte($now))) {
+                        && (! $this->dispatchGate->isWithinLateGrace($dueAt, $now) || CarbonImmutable::instance($event->start_date)->utc()->lte($now))) {
                         $occurrence->update(['status' => EventReminderOccurrenceStatus::SKIPPED_LATE->value, 'reason_code' => 'outside_late_grace_or_event_started']);
                     }
                 }

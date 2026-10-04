@@ -19,6 +19,7 @@ use HiEvents\Models\OutgoingMessage;
 use HiEvents\Repository\Interfaces\EventReminderOccurrenceRepositoryInterface;
 use Illuminate\Mail\Mailer;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\Mailer\Bridge\Postmark\Transport\PostmarkApiTransport;
 
 class EventReminderDispatchService
 {
@@ -28,6 +29,7 @@ class EventReminderDispatchService
         private readonly EventReminderRecipientClaimService $recipients,
         private readonly MessagingEligibilityService $messagingEligibility,
         private readonly Mailer $mailer,
+        private readonly EventReminderDispatchGate $dispatchGate,
     ) {}
 
     public function dispatchDue(): void
@@ -148,8 +150,30 @@ class EventReminderDispatchService
         $occurrence = EventReminderOccurrence::query()->where('message_id', $claim->message_id)->first();
         $event = $occurrence === null ? null : Event::query()->with('event_settings')->find($claim->event_id);
         $context = $event === null ? null : $this->contexts->build($event);
+        if ($this->lateGraceElapsed($occurrence)) {
+            $claim->update([
+                'status' => OutgoingMessageStatus::SUPPRESSED->name,
+                'last_error_class' => 'late_grace_elapsed_before_handoff',
+                'updated_at' => now(),
+            ]);
+            $this->aggregate($occurrence->id, $claim->message_id);
+
+            return;
+        }
         if (! $this->recipientMayReceive($claim, $occurrence, $event, $context)) {
             $claim->update(['status' => OutgoingMessageStatus::SUPPRESSED->name]);
+            if ($occurrence !== null) {
+                $this->aggregate($occurrence->id, $claim->message_id);
+            }
+
+            return;
+        }
+        if (! $this->usesPostmarkApiTransport()) {
+            $claim->update([
+                'status' => OutgoingMessageStatus::SUPPRESSED->name,
+                'last_error_class' => 'postmark_api_transport_required',
+                'updated_at' => now(),
+            ]);
             if ($occurrence !== null) {
                 $this->aggregate($occurrence->id, $claim->message_id);
             }
@@ -164,6 +188,14 @@ class EventReminderDispatchService
         $occurrence = EventReminderOccurrence::query()->where('message_id', $claim->message_id)->first();
         $event = $occurrence === null ? null : Event::query()->with('event_settings')->find($claim->event_id);
         $context = $event === null ? null : $this->contexts->build($event);
+        if ($this->lateGraceElapsed($occurrence)) {
+            $this->recipients->markSuppressedBeforeHandoff($claim, 'late_grace_elapsed_before_handoff');
+            if ($occurrence !== null) {
+                $this->aggregate($occurrence->id, $claim->message_id);
+            }
+
+            return;
+        }
         if (! $this->recipientMayReceive($claim, $occurrence, $event, $context)) {
             $this->recipients->markSuppressedBeforeHandoff($claim, 'binding_changed_before_handoff');
             if ($occurrence !== null) {
@@ -173,8 +205,17 @@ class EventReminderDispatchService
             return;
         }
         try {
-            $this->mailer->to($claim->recipient)->send(new EventReminder($context));
-            $claim->update(['status' => OutgoingMessageStatus::SENT->name, 'provider_accepted_at' => now()]);
+            $sentMessage = $this->mailer->to($claim->recipient)->sendNow(new EventReminder($context));
+            $providerMessageId = $sentMessage?->getMessageId();
+            if (! is_string($providerMessageId) || trim($providerMessageId) === '') {
+                $this->recipients->markUnknownAfterUncertainHandoff($claim, 'provider_message_id_missing');
+            } else {
+                $claim->update([
+                    'status' => OutgoingMessageStatus::SENT->name,
+                    'provider_message_id' => trim($providerMessageId),
+                    'provider_accepted_at' => now(),
+                ]);
+            }
         } catch (\Throwable $exception) {
             $this->recipients->markUnknownAfterUncertainHandoff($claim, $exception::class);
         }
@@ -237,14 +278,33 @@ class EventReminderDispatchService
     private function isStillDispatchable(?EventReminderOccurrence $occurrence, ?Event $event): bool
     {
         $policy = config('event-reminders');
+        $now = CarbonImmutable::now('UTC');
         if ($occurrence === null || $event === null || ($policy['enabled'] ?? false) !== true || ! in_array($event->id, $policy['event_allowlist'] ?? [], true)
             || $event->status !== EventStatus::LIVE->name || $event->trashed() || $event->start_date === null || $event->timezone === null
-            || CarbonImmutable::instance($event->start_date)->utc()->lte(now())) {
+            || CarbonImmutable::instance($event->start_date)->utc()->lte($now)) {
             return false;
         }
         $offset = $policy['offsets'][$occurrence->offset_key] ?? null;
+        if (! is_int($offset)) {
+            return false;
+        }
+        $dueAt = CarbonImmutable::instance($event->start_date)->utc()->addMinutes($offset);
 
-        return is_int($offset) && CarbonImmutable::instance($event->start_date)->utc()->addMinutes($offset)->equalTo($occurrence->due_at_utc);
+        return $dueAt->equalTo($occurrence->due_at_utc)
+            && $this->dispatchGate->isWithinLateGrace($dueAt, $now);
+    }
+
+    private function lateGraceElapsed(?EventReminderOccurrence $occurrence): bool
+    {
+        return $occurrence !== null && ! $this->dispatchGate->isWithinLateGrace(
+            CarbonImmutable::instance($occurrence->due_at_utc),
+            CarbonImmutable::now('UTC'),
+        );
+    }
+
+    private function usesPostmarkApiTransport(): bool
+    {
+        return $this->mailer->getSymfonyTransport() instanceof PostmarkApiTransport;
     }
 
     private function returnToPlanned(EventReminderOccurrence $occurrence, string $reason): void
