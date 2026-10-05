@@ -24,6 +24,19 @@ class EventReminderDispatchGateTest extends TestCase
         $this->assertFalse(app(EventReminderDispatchGate::class)->mayClaimRecipients());
     }
 
+    public function test_operational_reminder_does_not_require_marketing_footer_bindings(): void
+    {
+        config()->set('event-reminders.enabled', true);
+        config()->set('event-reminders.reply_to', 'tickets@example.test');
+        config()->set('event-reminders.physical_address', null);
+        config()->set('event-reminders.preference_url', null);
+
+        $this->assertTrue(app(EventReminderDispatchGate::class)->mayClaimRecipients());
+
+        config()->set('event-reminders.enabled', false);
+        $this->assertFalse(app(EventReminderDispatchGate::class)->mayClaimRecipients());
+    }
+
     #[\PHPUnit\Framework\Attributes\DataProvider('lateGraceBoundaryCases')]
     public function test_six_hour_late_grace_uses_the_reviewed_inclusive_boundary(int $lateMinutes, bool $expected): void
     {

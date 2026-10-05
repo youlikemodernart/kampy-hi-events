@@ -11,9 +11,7 @@ class EventReminderDispatchGate
         $policy = config('event-reminders');
 
         return ($policy['enabled'] ?? false) === true
-            && filled($policy['reply_to'] ?? null)
-            && filled($policy['physical_address'] ?? null)
-            && filled($policy['preference_url'] ?? null);
+            && filled($policy['reply_to'] ?? null);
     }
 
     public function isWithinLateGrace(\DateTimeInterface $dueAt, \DateTimeInterface $now): bool

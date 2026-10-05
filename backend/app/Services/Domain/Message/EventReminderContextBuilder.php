@@ -10,9 +10,7 @@ use Illuminate\Support\Str;
 
 class EventReminderContextBuilder
 {
-    public function __construct(private readonly UniversityThemeResolver $themes)
-    {
-    }
+    public function __construct(private readonly UniversityThemeResolver $themes) {}
 
     public function build(Event $event): ?EventReminderContext
     {
@@ -25,11 +23,9 @@ class EventReminderContextBuilder
             $settings?->support_email,
             $policy['sender'] ?? null,
             $policy['reply_to'] ?? null,
-            $policy['physical_address'] ?? null,
-            $policy['preference_url'] ?? null,
         ];
         foreach ($required as $value) {
-            if (!is_string($value) && !$value instanceof \DateTimeInterface || blank($value)) {
+            if (! is_string($value) && ! $value instanceof \DateTimeInterface || blank($value)) {
                 return null;
             }
         }
@@ -39,8 +35,8 @@ class EventReminderContextBuilder
         } catch (\Throwable) {
             return null;
         }
-        $eventUrl = rtrim((string) config('app.frontend_url'), '/') . '/event/' . $event->id . '/' . Str::slug($event->title);
-        if (!filter_var($eventUrl, FILTER_VALIDATE_URL)) {
+        $eventUrl = rtrim((string) config('app.frontend_url'), '/').'/event/'.$event->id.'/'.Str::slug($event->title);
+        if (! filter_var($eventUrl, FILTER_VALIDATE_URL)) {
             return null;
         }
         $theme = $this->themes->resolveForSlug(Str::slug($event->title)) ?? $this->themes->resolveFallback();
@@ -57,11 +53,10 @@ class EventReminderContextBuilder
             $settings->support_email,
             $policy['sender'],
             $policy['reply_to'],
-            $policy['physical_address'],
-            $policy['preference_url'],
-            $event->title . ' — ' . $start->isoFormat('MMMM D, YYYY h:mm A') . ' ' . $event->timezone,
+            $policy['physical_address'] ?? null,
+            $policy['preference_url'] ?? null,
+            $event->title.' — '.$start->isoFormat('MMMM D, YYYY h:mm A').' '.$event->timezone,
             $theme,
         );
     }
-
 }

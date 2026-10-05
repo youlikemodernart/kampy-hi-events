@@ -15,12 +15,11 @@ final readonly class EventReminderContext
         public string $supportEmail,
         public string $sender,
         public string $replyTo,
-        public string $physicalAddress,
-        public string $preferenceUrl,
+        public ?string $physicalAddress,
+        public ?string $preferenceUrl,
         public string $preheader,
         public UniversityEmailThemeDTO $theme,
-    ) {
-    }
+    ) {}
 
     public function payload(): array
     {
