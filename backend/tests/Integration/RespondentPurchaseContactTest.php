@@ -52,6 +52,61 @@ class RespondentPurchaseContactTest extends TestCase
         $this->withHeaders(['Origin' => 'https://tickets.kamplove.org', 'X-Kamp-Respondent-Intent' => 'confirm'])->postJson('/public/registration/orders/'.$shortId.'/confirm-respondents', ['verification_code' => $code, 'acknowledged' => true, 'respondents' => Fixture::respondents(11)])->assertStatus($status);
     }
 
+    public function test_default_off_checkout_does_not_depend_on_anchor_schema_or_backfill_after_activation(): void
+    {
+        $defaults = require config_path('respondent-confirmation.php');
+        self::assertFalse($defaults['capture_enabled']);
+        config()->set('respondent-confirmation.capture_enabled', $defaults['capture_enabled']);
+        config()->set('respondent-confirmation.enabled', false);
+        DB::statement('ALTER TABLE order_purchase_contacts RENAME TO disabled_purchase_contacts_fixture');
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        try {
+            $this->putJson('/public/events/7/order/order_11?session_identifier=synthetic-session-11', Fixture::contactPayload())->assertOk();
+            $queries = array_column(DB::getQueryLog(), 'query');
+        } finally {
+            DB::disableQueryLog();
+            DB::statement('ALTER TABLE disabled_purchase_contacts_fixture RENAME TO order_purchase_contacts');
+        }
+        self::assertSame(2, DB::table('attendees')->where('order_id', 11)->count());
+        self::assertSame('Buyer@Example.test', DB::table('orders')->where('id', 11)->value('email'));
+        self::assertSame(0, DB::table('order_purchase_contacts')->count());
+        foreach ($queries as $query) {
+            self::assertStringNotContainsString('order_purchase_contacts', $query);
+            self::assertDoesNotMatchRegularExpression('/select "id" from "orders".*for update/i', $query);
+        }
+        Fixture::paid(11);
+        config()->set('respondent-confirmation.enabled', true);
+        config()->set('respondent-confirmation.capture_enabled', true);
+        $this->requestCode('order_11');
+        Mail::assertNotSent(RespondentConfirmationChallenge::class);
+        $this->confirm('order_11', str_repeat('0', 64), 409);
+        self::assertSame(0, DB::table('order_purchase_contacts')->count());
+        self::assertSame(0, DB::table('gvsu_registration_assignments')->count());
+        self::assertSame(0, DB::table('order_effect_outbox')->count());
+    }
+
+    public function test_capture_can_run_without_intake_and_can_stop_without_removing_existing_authority(): void
+    {
+        config()->set('respondent-confirmation.enabled', false);
+        config()->set('respondent-confirmation.capture_enabled', true);
+        $this->checkout();
+        config()->set('respondent-confirmation.capture_enabled', false);
+        foreach ($this->app['router']->getRoutes() as $route) {
+            $route->flushController();
+        }
+        $this->putJson('/public/events/7/order/order_12?session_identifier=synthetic-session-12', Fixture::contactPayload())->assertOk();
+        self::assertSame(1, DB::table('order_purchase_contacts')->count());
+        self::assertNull(app(OrderPurchaseContactRepository::class)->email(12));
+        self::assertSame('buyer@example.test', app(OrderPurchaseContactRepository::class)->email(11));
+        config()->set('respondent-confirmation.enabled', true);
+        $this->requestCode('order_11');
+        Mail::assertSent(RespondentConfirmationChallenge::class, 1);
+        $this->confirm('order_11', Mail::sent(RespondentConfirmationChallenge::class)->first()->confirmationCode, 200);
+        self::assertSame(2, DB::table('gvsu_registration_assignments')->count());
+        self::assertSame(1, DB::table('order_effect_outbox')->count());
+    }
+
     public function test_receipt_email_takeover_cannot_redirect_purchase_challenge_or_read_anchor(): void
     {
         $this->checkout();

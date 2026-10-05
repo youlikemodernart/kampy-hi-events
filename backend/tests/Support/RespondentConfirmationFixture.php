@@ -21,6 +21,7 @@ final class RespondentConfirmationFixture
         config()->set('services.gvsu_registration_bridge.mode', 'live');
         config()->set('services.gvsu_registration_bridge.email_hmac_current_key', str_repeat('h', 43));
         config()->set('respondent-confirmation.enabled', true);
+        config()->set('respondent-confirmation.capture_enabled', true);
         config()->set('mail.default', 'array');
         config()->set('mail.mailers.array', ['transport' => 'array']);
         config()->set('cache.default', 'array');

@@ -24,6 +24,7 @@ class RespondentConfirmationTest extends TestCase
     {
         parent::setUp();
         config()->set('jwt.secret', str_repeat('j', 32));
+        config()->set('respondent-confirmation.capture_enabled', true);
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
