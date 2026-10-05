@@ -11092,3 +11092,39 @@ msgstr "Aumenta"
 #: src/components/layouts/EventHomepage/index.tsx:417
 msgid "To be announced"
 msgstr "Da annunciare"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Waiver contacts"
+msgstr "Contatti per la liberatoria"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Every active attendee needs a contact. Email verification does not prove guardianship or sign a waiver."
+msgstr "Ogni partecipante attivo deve avere un contatto. La verifica email non dimostra la tutela e non firma una liberatoria."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Verify purchase email"
+msgstr "Verifica email di acquisto"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Adult attendee"
+msgstr "Partecipante adulto"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Parent or guardian"
+msgstr "Genitore o tutore"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "I confirm the appropriate contact for every attendee."
+msgstr "Confermo il contatto appropriato per ogni partecipante."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Confirm all contacts"
+msgstr "Conferma tutti i contatti"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Contacts confirmed"
+msgstr "Contatti confermati"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Unable to confirm contacts"
+msgstr "Impossibile confermare i contatti"

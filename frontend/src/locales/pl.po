@@ -11088,3 +11088,39 @@ msgstr "Zwiększ"
 #: src/components/layouts/EventHomepage/index.tsx:417
 msgid "To be announced"
 msgstr "Zostanie ogłoszone"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Waiver contacts"
+msgstr "Kontakty do oświadczenia"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Every active attendee needs a contact. Email verification does not prove guardianship or sign a waiver."
+msgstr "Każdy aktywny uczestnik potrzebuje osoby kontaktowej. Weryfikacja adresu e-mail nie potwierdza opieki prawnej ani nie podpisuje oświadczenia."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Verify purchase email"
+msgstr "Zweryfikuj e-mail zakupu"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Adult attendee"
+msgstr "Dorosły uczestnik"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Parent or guardian"
+msgstr "Rodzic lub opiekun"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "I confirm the appropriate contact for every attendee."
+msgstr "Potwierdzam właściwą osobę kontaktową dla każdego uczestnika."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Confirm all contacts"
+msgstr "Potwierdź wszystkie kontakty"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Contacts confirmed"
+msgstr "Kontakty potwierdzone"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Unable to confirm contacts"
+msgstr "Nie można potwierdzić kontaktów"

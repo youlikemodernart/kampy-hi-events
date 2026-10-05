@@ -11088,3 +11088,39 @@ msgstr "增加"
 #: src/components/layouts/EventHomepage/index.tsx:417
 msgid "To be announced"
 msgstr "待公布"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Waiver contacts"
+msgstr "免責表聯絡人"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Every active attendee needs a contact. Email verification does not prove guardianship or sign a waiver."
+msgstr "每位有效參加者都需要一位聯絡人。驗證電郵不能證明監護關係，也不會簽署免責表。"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Verify purchase email"
+msgstr "驗證購票電郵"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Adult attendee"
+msgstr "成年參加者"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Parent or guardian"
+msgstr "家長或監護人"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "I confirm the appropriate contact for every attendee."
+msgstr "我確認每位參加者的適當聯絡人。"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Confirm all contacts"
+msgstr "確認所有聯絡人"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Contacts confirmed"
+msgstr "聯絡人已確認"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Unable to confirm contacts"
+msgstr "無法確認聯絡人"

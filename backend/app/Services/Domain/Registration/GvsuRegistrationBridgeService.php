@@ -8,6 +8,7 @@ use HiEvents\Exceptions\CannotCheckInException;
 use HiEvents\Exceptions\GvsuRegistrationBridgeUnknownException;
 use HiEvents\Exceptions\ResourceConflictException;
 use HiEvents\Models\Attendee;
+use HiEvents\Models\Event;
 use HiEvents\Models\GvsuRegistrationAssignment;
 use HiEvents\Models\Order;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,7 @@ class GvsuRegistrationBridgeService
         string $respondentRoute,
         string $deliveryDestination,
         ?string $guardianRelationshipReference,
+        bool $deferProvision = false,
     ): array {
         $attendeeName = $this->normalizedAttendeeDisplayName($attendeeDisplayName);
         $name = $this->normalizedRespondentDisplayName($respondentDisplayName);
@@ -121,7 +123,9 @@ class GvsuRegistrationBridgeService
         });
 
         // This is a trigger only; the normal exact-order path still refuses any unassigned attendee.
-        $this->provisionCompletedOrder($orderId);
+        if (! $deferProvision) {
+            $this->provisionCompletedOrder($orderId);
+        }
 
         return $result;
     }
@@ -316,6 +320,10 @@ class GvsuRegistrationBridgeService
         if ($candidate['event_id'] !== (string) GvsuRegistrationBridgeConfig::EVENT_ID) {
             return $this->state('blocked', []);
         }
+        $event = Event::withTrashed()->find(GvsuRegistrationBridgeConfig::EVENT_ID);
+        if (! $this->isCurrentEvent($event)) {
+            return $this->state('blocked', []);
+        }
         $assignment = GvsuRegistrationAssignment::query()->where('assignment_id', $candidate['assignment_id'])->first();
         $order = Order::withTrashed()->find($candidate['order_id']);
         $attendee = Attendee::withTrashed()->find($candidate['attendee_id']);
@@ -333,6 +341,8 @@ class GvsuRegistrationBridgeService
         }
 
         return $this->state('current', [
+            'event_start_utc' => \Carbon\CarbonImmutable::parse($event->start_date, 'UTC')->utc()->toIso8601ZuluString(),
+            'event_timezone' => $event->timezone,
             'event_id' => $candidate['event_id'],
             'order_id' => $candidate['order_id'],
             'attendee_id' => $candidate['attendee_id'],
@@ -344,6 +354,13 @@ class GvsuRegistrationBridgeService
             'order_status' => $order->status,
             'attendee_status' => $attendee->status,
         ]);
+    }
+
+    private function isCurrentEvent(?Event $event): bool
+    {
+        return $event !== null && $event->deleted_at === null && $event->status === 'LIVE'
+            && $event->start_date !== null && $event->end_date !== null
+            && \Carbon\CarbonImmutable::parse($event->end_date, 'UTC')->isFuture();
     }
 
     private function isCurrentPaidOrder(Order $order): bool
@@ -460,6 +477,8 @@ class GvsuRegistrationBridgeService
             'status' => $status,
             'observed_at' => now()->utc()->toIso8601String(),
             'respondent_identity_digest_sha256' => $snapshot['respondent_identity_digest_sha256'] ?? null,
+            'event_start_utc' => $snapshot['event_start_utc'] ?? null,
+            'event_timezone' => $snapshot['event_timezone'] ?? null,
             'snapshot_digest_sha256' => hash('sha256', $this->canonicalJson($snapshot)),
         ];
     }

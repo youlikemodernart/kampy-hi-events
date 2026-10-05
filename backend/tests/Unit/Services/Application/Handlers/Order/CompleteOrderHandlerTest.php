@@ -80,6 +80,9 @@ class CompleteOrderHandlerTest extends TestCase
         $this->sessionManagementService = Mockery::mock(CheckoutSessionManagementService::class);
         $this->sessionManagementService->shouldReceive('verifySession')->andReturn(true)->byDefault();
 
+        $purchaseContacts = Mockery::mock(\HiEvents\Repository\Eloquent\OrderPurchaseContactRepository::class);
+        $purchaseContacts->shouldReceive('lockCheckout');
+        $purchaseContacts->shouldReceive('capture');
         $this->completeOrderHandler = new CompleteOrderHandler(
             $this->orderRepository,
             $this->affiliateRepository,
@@ -90,6 +93,7 @@ class CompleteOrderHandlerTest extends TestCase
             $this->eventSettingsRepository,
             $this->sessionManagementService,
             $this->orderEffectOutboxService,
+            $purchaseContacts,
         );
     }
 
@@ -218,6 +222,7 @@ class CompleteOrderHandlerTest extends TestCase
         $this->orderEffectOutboxService->shouldReceive('enqueueCompletedOrder')
             ->with(
                 $updatedOrder->getId(),
+                $updatedOrder->getEventId(),
                 OrderEffectOutboxService::TRANSITION_FREE_COMPLETED,
                 DomainEventType::ORDER_CREATED,
             )

@@ -40,6 +40,7 @@ import {InlineOrderSummary} from "../../../common/InlineOrderSummary";
 import {CheckoutContent} from "../../../layouts/Checkout/CheckoutContent";
 import {EditAttendeeModal} from "./EditAttendeeModal";
 import {EditOrderModal} from "./EditOrderModal";
+import {RespondentConfirmationPanel} from "./RespondentConfirmationPanel";
 
 import {useEditAttendeePublic} from "../../../../mutations/useEditAttendeePublic";
 import {useEditOrderPublic} from "../../../../mutations/useEditOrderPublic";
@@ -593,6 +594,7 @@ export const OrderSummaryAndProducts = () => {
             <CheckoutContent>
                 <CheckoutDocumentHead title={t`Your order`} eventTitle={event.title}/>
                 <WelcomeHeader order={order} event={event} allowSelfEdit={allowSelfEdit}/>
+                {order.respondent_confirmation_enabled && <RespondentConfirmationPanel order={order}/>}
 
                 {emailUpdated && (
                     <Alert

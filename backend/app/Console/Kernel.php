@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
+        if (config('respondent-confirmation.purge_schedule_enabled') === true) {
+            $schedule->command('respondent-confirmation:purge')->hourly()->withoutOverlapping();
+        }
         $schedule->job(new SendScheduledMessagesJob)->everyMinute()->withoutOverlapping();
         $schedule->job(new ReconcileEventRemindersJob)->everyMinute()->withoutOverlapping();
         $schedule->job(new ProcessExpiredWaitlistOffersJob)->everyMinute()->withoutOverlapping();

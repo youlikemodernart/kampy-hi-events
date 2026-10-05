@@ -24,6 +24,7 @@ use HiEvents\Events\OrderStatusChangedEvent;
 use HiEvents\Exceptions\ResourceConflictException;
 use HiEvents\Exceptions\UnauthorizedException;
 use HiEvents\Helper\IdHelper;
+use HiEvents\Repository\Eloquent\OrderPurchaseContactRepository;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\AffiliateRepositoryInterface;
 use HiEvents\Repository\Interfaces\AttendeeRepositoryInterface;
@@ -61,6 +62,7 @@ class CompleteOrderHandler
         private readonly EventSettingsRepositoryInterface $eventSettingsRepository,
         private readonly CheckoutSessionManagementService $sessionManagementService,
         private readonly OrderEffectOutboxService $orderEffectOutboxService,
+        private readonly OrderPurchaseContactRepository $purchaseContacts,
     ) {}
 
     /**
@@ -73,6 +75,7 @@ class CompleteOrderHandler
         $updatedOrder = DB::transaction(function () use ($orderData, $orderShortId, &$eventSettings) {
             $orderDTO = $orderData->order;
 
+            $this->purchaseContacts->lockCheckout($orderShortId);
             $order = $this->getOrder($orderShortId, $orderData->event_id);
 
             /** @var EventSettingDomainObject $eventSettings */
@@ -81,6 +84,7 @@ class CompleteOrderHandler
             ]);
 
             $updatedOrder = $this->updateOrder($order, $orderDTO);
+            $this->purchaseContacts->capture($order->getId(), $order->getEventId(), $orderDTO->email);
 
             $this->createAttendees($orderData->products, $order, $orderDTO, $eventSettings);
 

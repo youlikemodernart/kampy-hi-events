@@ -25,6 +25,7 @@ class OrderResourcePublic extends BaseResource
             'total_gross' => $this->getTotalGross(),
             'total_fee' => $this->getTotalFee(),
             'status' => $this->getStatus(),
+            'respondent_confirmation_enabled' => config('respondent-confirmation.enabled') === true && (int) $this->getEventId() === 7 && $this->getStatus() === 'COMPLETED' && $this->getPaymentStatus() === 'PAYMENT_RECEIVED' && $this->getRefundStatus() === null,
             'refund_status' => $this->getRefundStatus(),
             'payment_status' => $this->getPaymentStatus(),
             'currency' => $this->getCurrency(),

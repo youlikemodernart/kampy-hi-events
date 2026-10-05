@@ -29,6 +29,8 @@ class Handler extends ExceptionHandler
     protected $dontFlash = [
         'password',
         'password_confirmation',
+        'verification_code',
+        'respondents',
     ];
 
     /**
@@ -40,6 +42,10 @@ class Handler extends ExceptionHandler
      */
     public function report(Throwable $e)
     {
+        if (app()->bound('request') && str_contains(request()->path(), '/registration/orders/')) {
+            logger()->error('respondent_confirmation_request_failed', ['exception_class' => get_class($e)]);
+            return;
+        }
         if ($this->shouldReport($e) && app()->bound('sentry')) {
             try {
                 $user = auth()->user();

@@ -57,6 +57,14 @@ class OrderEffectOutboxService
         }
     }
 
+    public function enqueueRespondentConfirmation(int $orderId): void
+    {
+        $this->requireTransaction();
+        if (GvsuRegistrationBridgeConfig::mayEnqueueOrder(7, $orderId)) {
+            $this->repository->enqueue($orderId, 'GVSU_RESPONDENTS_CONFIRMED', new OrderEffectRequestDTO(OrderEffectType::GVSU_REGISTRATION_BRIDGE));
+        }
+    }
+
     public function enqueueOfflineSubmission(int $orderId): void
     {
         $this->requireTransaction();

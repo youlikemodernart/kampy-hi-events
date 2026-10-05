@@ -551,6 +551,9 @@ $router->prefix('/public')->group(
         // Color themes
         $router->get('/color-themes', GetColorThemesAction::class);
 
+        $router->post('/registration/orders/{order_short_id}/request-verification', \HiEvents\Http\Actions\Registration\RequestRespondentVerificationAction::class)->middleware('throttle:10,1');
+        $router->post('/registration/orders/{order_short_id}/confirm-respondents', \HiEvents\Http\Actions\Registration\ConfirmRespondentsAction::class)->middleware('throttle:10,1');
+
         // Ticket Lookup
         $router->post('/ticket-lookup', SendTicketLookupEmailAction::class);
         $router->get('/ticket-lookup/{token}', GetOrdersByLookupTokenAction::class);

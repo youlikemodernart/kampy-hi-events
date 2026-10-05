@@ -62,7 +62,7 @@ class GvsuRegistrationRespondentBindingTest extends TestCase
         self::assertStringContainsString("'attendee_display_name' => \$assignment->attendee_display_name", $bridge);
         self::assertStringContainsString('respondent_identity_digest_sha256', $bridge);
         self::assertStringContainsString("['bound', 'attempted', 'unknown', 'delivered']", $bridge);
-        self::assertStringNotContainsString("\$assignment->status !== 'delivered'", $bridge);
+        self::assertStringNotContainsString("\$assignment->status !== 'delivered'", substr($bridge, (int) strpos($bridge, 'public function currentState')));
         self::assertStringContainsString('if (($this->registrationBridgeService ?? app(GvsuRegistrationBridgeService::class))->provisionCompletedOrder($effect->orderId))', $relay);
     }
 

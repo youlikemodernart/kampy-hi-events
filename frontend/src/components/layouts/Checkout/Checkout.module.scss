@@ -43,6 +43,7 @@ $font-body: var(--checkout-font-serif, var(--kamp-font-serif));
 
   .mainContent {
     flex: 1;
+    min-width: 0;
   }
 
   .header {

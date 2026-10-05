@@ -670,6 +670,7 @@ interface TaxesAndFeesRollup {
 }
 
 export interface Order {
+    respondent_confirmation_enabled?: boolean;
     id: IdParam;
     short_id: string;
     event_id: IdParam;
