@@ -15,11 +15,11 @@ final class CompletionInvitationAction extends BaseAction
 {
     public function __invoke(Request $request, string $orderShortId)
     {
-        if (config('respondent-confirmation.enabled') !== true || config('respondent-confirmation.invitation_enabled') !== true) {
-            return $this->jsonResponse([], 404);
-        }
         $headers = ['Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer', 'X-Content-Type-Options' => 'nosniff',
             'Content-Security-Policy' => "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"];
+        if (config('respondent-confirmation.enabled') !== true || config('respondent-confirmation.invitation_enabled') !== true) {
+            return $this->jsonResponse([], 404)->withHeaders($headers);
+        }
         if ($request->isMethod('GET')) {
             return response()->view('registration.completion-invitation')->withHeaders($headers);
         }

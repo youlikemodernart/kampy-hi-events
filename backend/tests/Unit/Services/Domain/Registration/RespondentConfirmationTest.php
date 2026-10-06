@@ -89,6 +89,34 @@ class RespondentConfirmationTest extends TestCase
         Mail::fake();
     }
 
+    public function test_disabled_invitation_keeps_private_headers_without_cookies_queries_or_mail(): void
+    {
+        $action = app(\HiEvents\Http\Actions\Registration\CompletionInvitationAction::class);
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        foreach ([[false, false], [false, true], [true, false]] as [$intake, $invitation]) {
+            config()->set('respondent-confirmation.enabled', $intake);
+            config()->set('respondent-confirmation.invitation_enabled', $invitation);
+            foreach (['GET', 'POST'] as $method) {
+                $request = Request::create('/registration/invitation/order_11', $method, [], [], [], [
+                    'HTTP_ORIGIN' => 'https://tickets.kamplove.org',
+                    'HTTP_X_KAMP_RESPONDENT_INTENT' => 'confirm',
+                    'CONTENT_TYPE' => 'application/json',
+                ], json_encode(['action' => 'open', 'token' => 'invalid']));
+                $response = $action($request, 'order_11');
+                self::assertSame(404, $response->getStatusCode());
+                self::assertTrue($response->headers->hasCacheControlDirective('no-store'));
+                self::assertSame('no-referrer', $response->headers->get('Referrer-Policy'));
+                self::assertSame('nosniff', $response->headers->get('X-Content-Type-Options'));
+                self::assertSame("default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'", $response->headers->get('Content-Security-Policy'));
+                self::assertCount(0, $response->headers->getCookies());
+            }
+        }
+        self::assertSame([], DB::getQueryLog());
+        DB::disableQueryLog();
+        Mail::assertNothingSent();
+    }
+
     public function test_invitation_is_read_only_frozen_single_use_and_resumable(): void
     {
         config()->set('respondent-confirmation.invitation_enabled', true);
