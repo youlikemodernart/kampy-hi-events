@@ -56,7 +56,7 @@ final class HistoricalReceiptFixture
             'search' => ['recipient' => $order['email'], 'server' => 999, 'stream' => 'outbound', 'complete' => true, 'offset' => 0, 'cap' => 20, 'total' => 1, 'message_ids' => [$message], 'from' => '2026-10-01T07:59:30-04:00', 'to' => '2026-10-01T08:10:00-04:00'],
             'messages' => [['server' => 999, 'MessageStream' => 'outbound', 'MessageID' => $message, 'From' => 'tickets@example.test', 'To' => [['Email' => $order['email']]], 'Cc' => [], 'Bcc' => [], 'ReceivedAt' => '2026-10-01T12:00:30Z', 'MessageEvents' => [['Type' => 'Delivered', 'ReceivedAt' => '2026-10-01T12:00:31Z']],
                 'TextBody' => "Order Summary\nOrder Number: PUBLIC-SYNTHETIC-11\nTotal Amount: $36.00\nView Order Summary & Tickets:\nhttps://tickets.example.test/event/7/order/order_11\n",
-                'HtmlBody' => '<a href="https://tickets.example.test/event/7/order/order_11">View Order Summary &amp; Tickets</a>']],
+                'HtmlBody' => '<div><strong>Order Summary</strong><br>Order Number: PUBLIC-SYNTHETIC-11<br>Total Amount: $36.00</div><a href="https://tickets.example.test/event/7/order/order_11">View Order Summary &amp; Tickets</a>']],
         ]];
         $quarantine = ['order_id' => 12, 'pi' => 'pi_synthetic12', 'charge' => 'ch_synthetic12', 'message_id' => '22222222-2222-4222-8222-222222222222'];
         $manifest = ['scope' => $scope, 'order_ids' => [11], 'reconstructed_order_ids' => [11],
