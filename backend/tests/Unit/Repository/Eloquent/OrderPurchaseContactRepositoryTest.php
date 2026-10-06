@@ -37,6 +37,18 @@ class OrderPurchaseContactRepositoryTest extends TestCase
         }
     }
 
+    public function test_canary_capture_empty_or_nonmatching_allowlist_has_no_database_or_encryption_effect(): void
+    {
+        config()->set('respondent-confirmation.capture_enabled', true);
+        config()->set('services.gvsu_registration_bridge.mode', 'canary');
+        DB::shouldReceive('table')->never();
+        $this->app->bind('encrypter', fn () => self::fail('Non-canary capture must not encrypt'));
+        foreach ([[], [12], ['11']] as $ids) {
+            config()->set('services.gvsu_registration_bridge.canary_order_ids', $ids);
+            (new OrderPurchaseContactRepository)->capture(11, 7, 'buyer@example.test');
+        }
+    }
+
     public function test_enabled_capture_does_not_insert_for_other_events(): void
     {
         config()->set('respondent-confirmation.capture_enabled', true);

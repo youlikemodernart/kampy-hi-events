@@ -14,11 +14,17 @@ use HiEvents\Services\Infrastructure\CurrencyConversion\NoOpCurrencyConversionCl
 use HiEvents\Services\Infrastructure\CurrencyConversion\OpenExchangeRatesCurrencyConversionClient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use HiEvents\Services\Infrastructure\Mail\CompletionInvitationPostmarkClient;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Stripe\StripeClient;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\Mailer\Bridge\Postmark\Transport\PostmarkTransportFactory;
+use Symfony\Component\Mailer\Transport\Dsn;
 use HiEvents\Services\Infrastructure\Stripe\StripeConfigurationService;
 use HiEvents\Services\Infrastructure\Stripe\StripeClientFactory;
 
@@ -43,6 +49,20 @@ class AppServiceProvider extends ServiceProvider
         $this->disableLazyLoading();
 
         $this->registerMorphMaps();
+
+        Mail::extend('postmark', function (array $config) {
+            $options = $config['client'] ?? [];
+            $maxHostConnections = Arr::pull($options, 'max_host_connections', 6);
+            $maxPendingPushes = Arr::pull($options, 'max_pending_pushes', 50);
+            $client = new CompletionInvitationPostmarkClient(
+                HttpClient::create($options, $maxHostConnections, $maxPendingPushes),
+            );
+            $factory = new PostmarkTransportFactory(null, $client);
+
+            return $factory->create(new Dsn('postmark+api', 'default',
+                $config['token'] ?? config('services.postmark.token'), null, null,
+                isset($config['message_stream_id']) ? ['message_stream' => $config['message_stream_id']] : []));
+        });
     }
 
     private function bindDoctrineConnection(): void

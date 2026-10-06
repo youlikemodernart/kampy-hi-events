@@ -341,7 +341,8 @@ class GvsuRegistrationBridgeService
                 return $this->state('blocked', []);
             }
         }
-        if ($candidate['event_id'] !== (string) GvsuRegistrationBridgeConfig::EVENT_ID) {
+        if ($candidate['event_id'] !== (string) GvsuRegistrationBridgeConfig::EVENT_ID
+            || ! GvsuRegistrationBridgeConfig::allowsCohort((int) $candidate['event_id'], (int) $candidate['order_id'])) {
             return $this->state('blocked', []);
         }
         $event = Event::withTrashed()->find(GvsuRegistrationBridgeConfig::EVENT_ID);

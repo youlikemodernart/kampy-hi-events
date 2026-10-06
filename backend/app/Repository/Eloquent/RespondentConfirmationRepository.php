@@ -34,7 +34,7 @@ final class RespondentConfirmationRepository
     private function preflight(string $shortId): ?array
     {
         $order = Order::query()->where('short_id', $shortId)->where('event_id', 7)->first();
-        if (! $order) {
+        if (! $order || ! GvsuRegistrationBridgeConfig::allowsCohort(7, (int) $order->id)) {
             return null;
         }
         $authority = (new RespondentContactAuthorityRepository)->resolve((int) $order->id);
@@ -94,6 +94,12 @@ final class RespondentConfirmationRepository
             if (! $order || ! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)
                 || ! Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->exists()
                 || GvsuRegistrationAssignment::query()->where('order_id', $order->id)->exists()) {
+                return null;
+            }
+            // The committed challenge reserves the canary's only synchronous attempt, even if delivery is unknown.
+            if (GvsuRegistrationBridgeConfig::mode() === 'canary'
+                && (! $invitation || CarbonImmutable::parse(config('respondent-confirmation.invitation_deadline'))->lte(now())
+                    || DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->exists())) {
                 return null;
             }
             // Email invitations last through the existing event window, not the interactive code TTL.

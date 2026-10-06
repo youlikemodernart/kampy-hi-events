@@ -18,8 +18,10 @@ class RespondentPurchaseContactTest extends TestCase
         if (getenv('KAMP_RESPONDENT_DISPOSABLE') !== '1') {
             $this->markTestSkipped('Disposable runner required');
         }
+        $this->travelTo(\Carbon\Carbon::parse('2026-10-06T02:00:00Z'));
         Fixture::migrate();
         Fixture::seed();
+        config()->set('respondent-confirmation.invitation_enabled', true);
         Event::fake([\HiEvents\Events\OrderStatusChangedEvent::class]);
         $this->app->instance(\HiEvents\Services\Domain\Mail\SendOrderDetailsService::class, app(\HiEvents\Services\Domain\Mail\SendOrderDetailsService::class));
         Mail::fake();
@@ -84,6 +86,80 @@ class RespondentPurchaseContactTest extends TestCase
         self::assertSame(0, DB::table('order_purchase_contacts')->count());
         self::assertSame(0, DB::table('gvsu_registration_assignments')->count());
         self::assertSame(0, DB::table('order_effect_outbox')->count());
+    }
+
+    public function test_canary_capture_requires_exact_order_in_original_validated_checkout(): void
+    {
+        config()->set('services.gvsu_registration_bridge.mode', 'canary');
+        config()->set('services.gvsu_registration_bridge.canary_order_ids', [11]);
+        $this->putJson('/public/events/7/order/order_11', Fixture::contactPayload())->assertStatus(403);
+        self::assertSame(0, DB::table('order_purchase_contacts')->count());
+        foreach ([12, 11] as $id) {
+            foreach ($this->app['router']->getRoutes() as $route) {
+                $route->flushController();
+            }
+            $this->putJson('/public/events/7/order/order_'.$id.'?session_identifier=synthetic-session-'.$id, Fixture::contactPayload())->assertOk();
+        }
+        self::assertNull(app(OrderPurchaseContactRepository::class)->email(12));
+        self::assertSame('buyer@example.test', app(OrderPurchaseContactRepository::class)->email(11));
+        config()->set('services.gvsu_registration_bridge.canary_order_ids', [12]);
+        foreach ($this->app['router']->getRoutes() as $route) {
+            $route->flushController();
+        }
+        $changed = Fixture::contactPayload();
+        $changed['order']['email_confirmation'] = $changed['order']['email'] = 'changed@example.test';
+        $this->putJson('/public/events/7/order/order_12?session_identifier=synthetic-session-12', $changed)->assertStatus(409);
+        self::assertNull(app(OrderPurchaseContactRepository::class)->email(12));
+        self::assertSame(1, DB::table('order_purchase_contacts')->count());
+    }
+
+    public function test_concurrent_canary_issuance_reserves_only_one_challenge(): void
+    {
+        $this->checkout();
+        config()->set('services.gvsu_registration_bridge.mode', 'canary');
+        config()->set('services.gvsu_registration_bridge.canary_order_ids', [11]);
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $this->travelTo(\Carbon\Carbon::parse('2026-10-06T02:00:00Z'));
+        $dir = sys_get_temp_dir().'/canary-attempt-'.bin2hex(random_bytes(8));
+        mkdir($dir, 0700);
+        DB::disconnect('pgsql');
+        try {
+            $pids = [];
+            foreach ([0, 1] as $i) {
+                $pid = pcntl_fork();
+                if ($pid === -1) {
+                    throw new \RuntimeException('fork failed');
+                }
+                if ($pid === 0) {
+                    DB::purge('pgsql');
+                    while (! file_exists($dir.'/start')) {
+                        usleep(1000);
+                    }
+                    $issued = app(\HiEvents\Repository\Eloquent\RespondentConfirmationRepository::class)->issue('order_11', true);
+                    file_put_contents($dir.'/'.$i, $issued === null ? 'denied' : 'reserved');
+                    exit(0);
+                }
+                $pids[] = $pid;
+            }
+            touch($dir.'/start');
+            foreach ($pids as $pid) {
+                pcntl_waitpid($pid, $status);
+                self::assertSame(0, pcntl_wexitstatus($status));
+            }
+            DB::purge('pgsql');
+            $results = [file_get_contents($dir.'/0'), file_get_contents($dir.'/1')];
+            sort($results);
+            self::assertSame(['denied', 'reserved'], $results);
+            self::assertSame(1, DB::table('respondent_confirmation_challenges')->count());
+            Mail::assertNotSent(RespondentConfirmationChallenge::class);
+        } finally {
+            DB::purge('pgsql');
+            foreach (glob($dir.'/*') as $file) {
+                unlink($file);
+            }
+            rmdir($dir);
+            $this->travelBack();
+        }
     }
 
     public function test_capture_can_run_without_intake_and_can_stop_without_removing_existing_authority(): void
@@ -169,6 +245,7 @@ class RespondentPurchaseContactTest extends TestCase
             GRANT USAGE ON SCHEMA public TO respondent_intake_test;
             GRANT SELECT, UPDATE ON orders, events, attendees TO respondent_intake_test;
             GRANT SELECT, INSERT ON order_purchase_contacts TO respondent_intake_test;
+            GRANT SELECT ON order_receipt_recovery_evidence TO respondent_intake_test;
             GRANT SELECT, INSERT, UPDATE ON respondent_confirmation_destinations, respondent_confirmation_challenges, gvsu_registration_assignments, order_effect_outbox TO respondent_intake_test;
             GRANT USAGE ON SEQUENCE order_purchase_contacts_id_seq, respondent_confirmation_destinations_id_seq, respondent_confirmation_challenges_id_seq, gvsu_registration_assignments_id_seq, order_effect_outbox_id_seq TO respondent_intake_test;");
         DB::statement('SET ROLE respondent_intake_test');
@@ -186,6 +263,7 @@ class RespondentPurchaseContactTest extends TestCase
             $repo = app(\HiEvents\Repository\Eloquent\RespondentConfirmationRepository::class);
             $issued = $repo->issue('order_11');
             self::assertSame('buyer@example.test', $issued->email);
+            self::assertCount(2, $repo->verify('order_11', $issued->token));
             self::assertTrue(app(\HiEvents\Services\Domain\Registration\RespondentConfirmationService::class)->confirm('order_11', $issued->token, Fixture::respondents(11)));
             foreach (['UPDATE order_purchase_contacts SET email_encrypted = email_encrypted', 'DELETE FROM order_purchase_contacts', 'SELECT * FROM question_answers', 'ALTER TABLE order_purchase_contacts ADD COLUMN takeover text'] as $sql) {
                 try {

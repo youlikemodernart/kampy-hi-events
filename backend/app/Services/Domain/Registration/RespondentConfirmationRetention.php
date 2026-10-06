@@ -14,8 +14,13 @@ final class RespondentConfirmationRetention
         $cutoff = now()->subHours(max(1, (int) config('respondent-confirmation.retention_hours', 24)));
         $lock = DB::getDriverName() === 'pgsql' ? 'FOR UPDATE SKIP LOCKED' : true;
         $challenges = DB::transaction(function () use ($batch, $cutoff, $lock) {
-            $ids = DB::table('respondent_confirmation_challenges')->where('expires_at', '<', $cutoff)
-                ->orderBy('id')->limit($batch)->lock($lock)->pluck('id');
+            $eligible = DB::table('respondent_confirmation_challenges')->where('expires_at', '<', $cutoff);
+            // Keep the existing attempt reservation through the fixed canary window plus purge grace.
+            if (GvsuRegistrationBridgeConfig::mode() === 'canary'
+                && \Carbon\CarbonImmutable::parse(config('respondent-confirmation.invitation_deadline'))->gte($cutoff)) {
+                $eligible->whereNotIn('order_id', config('services.gvsu_registration_bridge.canary_order_ids', []));
+            }
+            $ids = $eligible->orderBy('id')->limit($batch)->lock($lock)->pluck('id');
 
             return DB::table('respondent_confirmation_challenges')->whereIn('id', $ids)->delete();
         });

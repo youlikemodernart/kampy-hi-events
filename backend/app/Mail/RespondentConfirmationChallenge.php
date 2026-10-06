@@ -2,7 +2,9 @@
 
 namespace HiEvents\Mail;
 
+use HiEvents\Services\Infrastructure\Mail\CompletionInvitationPostmarkClient;
 use Illuminate\Mail\Mailable;
+use Symfony\Component\Mime\Email;
 
 final class RespondentConfirmationChallenge extends Mailable
 {
@@ -11,6 +13,12 @@ final class RespondentConfirmationChallenge extends Mailable
     public function build(): self
     {
         if ($this->completionUrl !== null) {
+            $this->withSymfonyMessage(function (Email $message): void {
+                $message->getHeaders()->addTextHeader(CompletionInvitationPostmarkClient::HEADER, '1');
+                $message->getHeaders()->addTextHeader('X-PM-TrackOpens', 'false');
+                $message->getHeaders()->addTextHeader('X-PM-TrackLinks', 'None');
+            });
+
             return $this->subject(__('Complete your Kamp Love waiver'))->view('emails.registration.completion-invitation')->text('emails.registration.completion-invitation-text');
         }
 

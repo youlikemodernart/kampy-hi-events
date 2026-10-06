@@ -36,6 +36,8 @@ class RespondentConfirmationTest extends TestCase
             $t->id();
             $t->string('status');
             $t->timestamp('end_date');
+            $t->timestamp('start_date')->nullable();
+            $t->string('timezone')->default('America/Detroit');
             $t->softDeletes();
         });
         Schema::create('orders', function (Blueprint $t) {
@@ -217,6 +219,97 @@ class RespondentConfirmationTest extends TestCase
 
             return true;
         });
+    }
+
+    public function test_prior_capability_is_blocked_by_canary_for_invitation_and_reverse_state_without_disclosure(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        DB::table('events')->where('id', 7)->update(['start_date' => '2099-10-17 20:00:00']);
+        $repo = new RespondentConfirmationRepository;
+        $issued = $repo->issue('order_11', true);
+        $outbox = Mockery::mock(OrderEffectOutboxService::class);
+        $outbox->shouldReceive('enqueueRespondentConfirmation')->once()->with(11);
+        $this->app->instance(OrderEffectOutboxService::class, $outbox);
+        self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $issued->token, $this->payload()));
+        $assignment = DB::table('gvsu_registration_assignments')->orderBy('attendee_id')->first();
+        $candidate = ['operation' => 'gvsu-registration-current-state-v1', 'event_id' => '7', 'order_id' => '11', 'attendee_id' => '21',
+            'assignment_id' => $assignment->assignment_id, 'respondent_id' => $assignment->respondent_id, 'public_ticket_id' => 'ticket_21',
+            'attendee_display_name' => $assignment->attendee_display_name, 'respondent_identity_digest_sha256' => $assignment->respondent_identity_digest_sha256,
+            'designated_delivery_email' => 'adult@example.test'];
+        config()->set('services.gvsu_registration_bridge.incoming_current_digest', hash('sha256', str_repeat('b', 43)));
+        foreach ([['live', [], true], ['canary', [11], true], ['canary', [12], false], ['canary', [], false], ['live', [12], true]] as [$mode, $ids, $allowed]) {
+            config()->set('services.gvsu_registration_bridge.mode', $mode);
+            config()->set('services.gvsu_registration_bridge.canary_order_ids', $ids);
+            self::assertSame($allowed, $repo->invitationContext('order_11', $issued->token) !== null);
+            $state = app(GvsuRegistrationBridgeService::class)->currentState($candidate);
+            self::assertSame($allowed ? 'current' : 'blocked', $state['status']);
+            $response = $this->withHeader('Authorization', 'Bearer '.str_repeat('b', 43))->postJson('/internal/gvsu-registration/current-state', $candidate)->assertOk();
+            self::assertSame($state['status'], $response->json('status'));
+            self::assertStringNotContainsString('adult@example.test', $response->getContent());
+            self::assertStringNotContainsString('Invented', $response->getContent());
+            if (! $allowed) {
+                self::assertArrayNotHasKey('order_id', $state);
+                self::assertArrayNotHasKey('assignment_id', $state);
+            }
+        }
+    }
+
+    public function test_canary_reserves_one_attempt_before_mail_and_never_replaces_prior_link_even_after_unknown_send(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        config()->set('services.gvsu_registration_bridge.mode', 'canary');
+        config()->set('services.gvsu_registration_bridge.canary_order_ids', [11]);
+        $this->travelTo(\Carbon\Carbon::parse('2026-10-06T02:00:00Z'));
+        try {
+            $calls = 0;
+            Mail::shouldReceive('to')->once()->andReturnSelf();
+            Mail::shouldReceive('send')->once()->andReturnUsing(function () use (&$calls) {
+                $calls++;
+                self::assertSame(1, DB::table('respondent_confirmation_challenges')->count());
+                throw new \RuntimeException('synthetic unknown send');
+            });
+            try {
+                app(RespondentConfirmationService::class)->request('order_11');
+                self::fail('expected unknown transport result');
+            } catch (\RuntimeException $error) {
+                self::assertSame('synthetic unknown send', $error->getMessage());
+            }
+            $before = DB::table('respondent_confirmation_challenges')->first();
+            $this->travel(2)->hours();
+            app(RespondentConfirmationService::class)->request('order_11');
+            self::assertNull((new RespondentConfirmationRepository)->issue('order_11', false));
+            self::assertEquals($before, DB::table('respondent_confirmation_challenges')->first());
+            self::assertSame(1, $calls);
+            DB::table('respondent_confirmation_challenges')->update(['expires_at' => now()->subDays(2)]);
+            $retention = new \HiEvents\Services\Domain\Registration\RespondentConfirmationRetention;
+            self::assertSame(0, $retention->purge()['challenges_deleted']);
+            $this->travelTo(\Carbon\Carbon::parse('2026-10-18T20:00:01Z'));
+            self::assertSame(1, $retention->purge()['challenges_deleted']);
+            self::assertNull((new RespondentConfirmationRepository)->issue('order_11', true));
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public function test_canary_public_request_denies_neighbor_and_prior_legacy_attempt_after_cooldown(): void
+    {
+        $repo = new RespondentConfirmationRepository;
+        $prior = $repo->issue('order_11');
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        config()->set('services.gvsu_registration_bridge.mode', 'canary');
+        config()->set('services.gvsu_registration_bridge.canary_order_ids', [11]);
+        $this->travel(61)->minutes();
+        try {
+            $headers = ['Origin' => 'https://tickets.kamplove.org', 'X-Kamp-Respondent-Intent' => 'confirm'];
+            $this->withHeaders($headers)->postJson('/public/registration/orders/order_11/request-verification')->assertStatus(202);
+            config()->set('services.gvsu_registration_bridge.canary_order_ids', [12]);
+            $this->withHeaders($headers)->postJson('/public/registration/orders/order_11/request-verification')->assertStatus(202);
+            self::assertSame(hash('sha256', $prior->token), DB::table('respondent_confirmation_challenges')->value('token_digest'));
+            self::assertSame(1, DB::table('respondent_confirmation_challenges')->count());
+            Mail::assertNothingSent();
+        } finally {
+            $this->travelBack();
+        }
     }
 
     private function payload(): array
