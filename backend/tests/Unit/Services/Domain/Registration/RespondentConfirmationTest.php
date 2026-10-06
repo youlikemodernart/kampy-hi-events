@@ -25,6 +25,7 @@ class RespondentConfirmationTest extends TestCase
         parent::setUp();
         config()->set('jwt.secret', str_repeat('j', 32));
         config()->set('respondent-confirmation.capture_enabled', true);
+        config()->set('respondent-confirmation.enabled', true);
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
@@ -61,6 +62,16 @@ class RespondentConfirmationTest extends TestCase
         (require database_path('migrations/2026_09_22_000001_create_gvsu_registration_assignments_table.php'))->up();
         (require database_path('migrations/2026_10_05_000001_create_respondent_confirmation_challenges.php'))->up();
         (require database_path('migrations/2026_10_05_000002_create_order_purchase_contacts.php'))->up();
+        // PostgreSQL migration constraints are exercised by the dedicated disposable suite.
+        Schema::create('order_receipt_recovery_evidence', fn (Blueprint $t) => $t->integer('order_id'));
+        Schema::table('gvsu_registration_assignments', fn (Blueprint $t) => $t->integer('recovery_evidence_id')->nullable());
+        Schema::table('respondent_confirmation_challenges', function (Blueprint $t) {
+            $t->string('authority_type')->nullable();
+            $t->integer('authority_id')->nullable();
+            $t->string('authority_commitment')->nullable();
+            $t->timestamp('verified_at')->nullable();
+            $t->string('verified_context_digest')->nullable();
+        });
         DB::table('events')->insert(['id' => 7, 'status' => 'LIVE', 'end_date' => '2099-10-18 16:00:00']);
         foreach ([11, 12] as $id) {
             DB::table('orders')->insert(['id' => $id, 'event_id' => 7, 'short_id' => 'order_'.$id, 'status' => 'COMPLETED', 'payment_status' => 'PAYMENT_RECEIVED', 'email' => 'buyer@example.test']);
@@ -87,6 +98,7 @@ class RespondentConfirmationTest extends TestCase
         $repo = new RespondentConfirmationRepository;
         self::assertNull($repo->issue('missing'));
         $issued = $repo->issue('order_11');
+        self::assertNotNull($repo->verify('order_11', $issued->token));
         self::assertSame('buyer@example.test', $issued->email);
         self::assertSame(64, strlen($issued->token));
         $row = DB::table('respondent_confirmation_challenges')->first();
@@ -103,6 +115,7 @@ class RespondentConfirmationTest extends TestCase
     {
         $repo = new RespondentConfirmationRepository;
         $issued = $repo->issue('order_11');
+        self::assertNotNull($repo->verify('order_11', $issued->token));
         $portal = Mockery::mock(GvsuRegistrationBridgePortalClient::class);
         $portal->shouldNotReceive('provision');
         $outbox = Mockery::mock(OrderEffectOutboxService::class);
@@ -125,6 +138,7 @@ class RespondentConfirmationTest extends TestCase
     {
         $repo = new RespondentConfirmationRepository;
         $issued = $repo->issue('order_11');
+        self::assertNotNull($repo->verify('order_11', $issued->token));
         $noBind = fn () => self::fail('unauthorized bind');
         for ($i = 0; $i < 5; $i++) {
             self::assertFalse($repo->confirm('order_11', str_repeat('0', 64), $this->payload(), $noBind));
@@ -156,6 +170,7 @@ class RespondentConfirmationTest extends TestCase
         self::assertSame(5, DB::table('respondent_confirmation_challenges')->count());
         $this->travel(61)->minutes();
         $fresh = $repo->issue('order_11');
+        self::assertNotNull($repo->verify('order_11', $fresh->token));
         try {
             $repo->confirm('order_11', $fresh->token, $this->payload(), function () {
                 DB::table('attendees')->where('id', 21)->update(['first_name' => 'Changed']);
@@ -187,12 +202,14 @@ class RespondentConfirmationTest extends TestCase
         $outbox->shouldReceive('enqueueRespondentConfirmation')->once()->with(11);
         $this->app->instance(OrderEffectOutboxService::class, $outbox);
         $code = Mail::sent(RespondentConfirmationChallenge::class)->first()->confirmationCode;
+        $this->withHeaders($headers)->postJson('/public/registration/orders/order_11/verify-mailbox', ['verification_code' => $code])->assertOk()->assertJson(['status' => 'verified']);
         $this->withHeaders($headers)->postJson('/public/registration/orders/order_11/confirm-respondents', ['verification_code' => $code, 'acknowledged' => true, 'respondents' => $this->payload()])->assertOk()->assertJson(['status' => 'confirmed']);
         Mail::assertSent(RespondentConfirmationChallenge::class, 1);
     }
 
     public function test_origin_method_content_type_and_explicit_intent_gate(): void
     {
+        config()->set('respondent-confirmation.enabled', false);
         $request = Request::create('/public/registration/orders/order_11/confirm-respondents', 'POST', [], [], [], ['HTTP_ORIGIN' => 'https://tickets.kamplove.org', 'HTTP_X_KAMP_RESPONDENT_INTENT' => 'confirm', 'CONTENT_TYPE' => 'application/json'], '{}');
         self::assertFalse(RespondentConfirmationRequestGate::allows($request));
         config()->set('respondent-confirmation.enabled', true);

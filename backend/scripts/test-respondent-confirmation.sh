@@ -87,6 +87,8 @@ if [[ "${1:-}" == browser ]]; then
   node tests/browser/respondent-confirmation-journey.mjs
 elif [[ "${1:-}" == checkout-browser ]]; then
   RESPONDENT_FULL_CHECKOUT=1 node tests/browser/respondent-checkout-journey.mjs
+elif [[ "${1:-}" == historical ]]; then
+  vendor/bin/phpunit tests/Integration/HistoricalReceiptRecoveryPostgresTest.php
 elif [[ "${1:-}" == checkout ]]; then
   vendor/bin/phpunit tests/Integration/RespondentPurchaseContactTest.php
 else

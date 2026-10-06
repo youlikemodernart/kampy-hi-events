@@ -27,6 +27,15 @@ final class RespondentConfirmationService
         }
     }
 
+    public function verify(string $shortId, string $token): ?array
+    {
+        if (! preg_match('/\A[0-9a-f]{64}\z/', $token)) {
+            return null;
+        }
+
+        return $this->repository->verify($shortId, $token);
+    }
+
     public function confirm(string $shortId, string $token, array $input): bool
     {
         if (! preg_match('/\A[0-9a-f]{64}\z/', $token) || count($input) < 1 || count($input) > 250) {
@@ -52,7 +61,7 @@ final class RespondentConfirmationService
         }
         ksort($respondents, SORT_NUMERIC);
 
-        return $this->repository->confirm($shortId, $token, array_values($respondents), function ($orderId, $attendees, $rows): void {
+        return $this->repository->confirm($shortId, $token, array_values($respondents), function ($orderId, $attendees, $rows, $authority): void {
             foreach ($attendees as $index => $attendee) {
                 $row = $rows[$index];
                 $attendeeName = trim($attendee->first_name.' '.$attendee->last_name);
@@ -60,7 +69,7 @@ final class RespondentConfirmationService
                     throw new ResourceConflictException(__('Attendee context is unavailable.'));
                 }
                 $this->bridge->bindRespondent($orderId, (int) $attendee->id, $attendeeName,
-                    $row['route'] === 'adult' ? $attendeeName : $row['respondent_name'], $row['route'], $row['email'], null, true);
+                    $row['route'] === 'adult' ? $attendeeName : $row['respondent_name'], $row['route'], $row['email'], null, true, true, $authority['type'] === 'historical_receipt_v1' ? $authority['id'] : null);
             }
             $this->outbox->enqueueRespondentConfirmation($orderId);
         });

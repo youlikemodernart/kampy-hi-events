@@ -32,6 +32,8 @@ class GvsuRegistrationBridgeService
         string $deliveryDestination,
         ?string $guardianRelationshipReference,
         bool $deferProvision = false,
+        bool $createOnly = false,
+        ?int $recoveryEvidenceId = null,
     ): array {
         $attendeeName = $this->normalizedAttendeeDisplayName($attendeeDisplayName);
         $name = $this->normalizedRespondentDisplayName($respondentDisplayName);
@@ -40,7 +42,7 @@ class GvsuRegistrationBridgeService
         $relationship = $this->normalizedGuardianRelationshipReference($guardianRelationshipReference, $route);
         $identityDigest = $this->identityDigest($attendeeName, $name, $route, $relationship, $destination);
 
-        $result = DB::transaction(function () use ($orderId, $attendeeId, $attendeeName, $name, $route, $destination, $relationship, $identityDigest): array {
+        $result = DB::transaction(function () use ($orderId, $attendeeId, $attendeeName, $name, $route, $destination, $relationship, $identityDigest, $createOnly, $recoveryEvidenceId): array {
             $order = Order::withTrashed()->select(['id', 'event_id'])->lockForUpdate()->find($orderId);
             $attendee = Attendee::withTrashed()
                 ->select(['id', 'event_id', 'order_id', 'public_id', 'status', 'deleted_at'])
@@ -59,6 +61,9 @@ class GvsuRegistrationBridgeService
                 ->where('attendee_id', $attendeeId)
                 ->lockForUpdate()
                 ->first();
+            if ($existing !== null && $createOnly) {
+                throw new ResourceConflictException(__('Existing respondent assignment cannot be replaced.'));
+            }
             if ($existing !== null && $this->matchesIdentityDigest($existing->respondent_identity_digest_sha256, $attendeeName, $name, $route, $relationship, $destination)) {
                 return ['status' => 'unchanged', 'assignment_id' => $existing->assignment_id];
             }
@@ -77,6 +82,7 @@ class GvsuRegistrationBridgeService
                 $identityDigest,
             ]);
             $attributes = [
+                'recovery_evidence_id' => $recoveryEvidenceId,
                 'provision_batch_id' => null,
                 'event_id' => GvsuRegistrationBridgeConfig::EVENT_ID,
                 'order_id' => $orderId,
@@ -180,7 +186,12 @@ class GvsuRegistrationBridgeService
                     || ! $this->matchesEmailHmac($assignment->delivery_email_hmac_sha256, $destination)) {
                     throw new ResourceConflictException(__('GVSU registration bridge respondent assignment conflict.'));
                 }
+                $historicalAuthority = $this->historicalAuthority($assignment);
+                if ($assignment->recovery_evidence_id !== null && $historicalAuthority === null) {
+                    return ['terminal' => true];
+                }
                 $records[] = [
+                    ...($historicalAuthority ? ['historical_authority' => $historicalAuthority] : []),
                     'assignment_id' => $assignment->assignment_id,
                     'respondent_id' => $assignment->respondent_id,
                     'attendee_id' => (string) $attendee->id,
@@ -340,7 +351,16 @@ class GvsuRegistrationBridgeService
             return $this->state('blocked', []);
         }
 
+        $historicalAuthority = $this->historicalAuthority($assignment);
+        if ($assignment->recovery_evidence_id !== null && $historicalAuthority === null) {
+            return $this->state('blocked', []);
+        }
+        if (isset($candidate['historical_authority']) && ($historicalAuthority === null || $this->canonicalJson($candidate['historical_authority']) !== $this->canonicalJson($historicalAuthority))) {
+            return $this->state('blocked', []);
+        }
+
         return $this->state('current', [
+            'historical_authority' => $historicalAuthority,
             'event_start_utc' => \Carbon\CarbonImmutable::parse($event->start_date, 'UTC')->utc()->toIso8601ZuluString(),
             'event_timezone' => $event->timezone,
             'event_id' => $candidate['event_id'],
@@ -354,6 +374,19 @@ class GvsuRegistrationBridgeService
             'order_status' => $order->status,
             'attendee_status' => $attendee->status,
         ]);
+    }
+
+    private function historicalAuthority(GvsuRegistrationAssignment $assignment): ?array
+    {
+        if ($assignment->recovery_evidence_id === null) {
+            return null;
+        }
+        $authority = (new \HiEvents\Repository\Eloquent\HistoricalReceiptRecoveryRepository)->authority((int) $assignment->order_id);
+        if (! $authority || $authority['id'] !== (int) $assignment->recovery_evidence_id || $assignment->replaced_assignment_id !== null || $assignment->link_replacement_requested_at !== null) {
+            return null;
+        }
+
+        return ['type' => 'historical_receipt_v1', 'id' => (string) $authority['id'], 'cohortId' => (string) $authority['cohort_id'], 'commitment' => $authority['commitment']];
     }
 
     private function isCurrentEvent(?Event $event): bool
@@ -474,6 +507,7 @@ class GvsuRegistrationBridgeService
     private function state(string $status, array $snapshot): array
     {
         return [
+            'historical_authority' => $snapshot['historical_authority'] ?? null,
             'status' => $status,
             'observed_at' => now()->utc()->toIso8601String(),
             'respondent_identity_digest_sha256' => $snapshot['respondent_identity_digest_sha256'] ?? null,

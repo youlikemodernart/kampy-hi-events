@@ -20,6 +20,17 @@ class GvsuRegistrationBridgePortalClient
         }
     }
 
+    public function historicalAbsence(array $identity): bool
+    {
+        if (! GvsuRegistrationBridgeConfig::enabled()) {
+            return false;
+        }
+        $response = $this->request('/api/internal/gvsu-registration/historical-preflight', $identity);
+
+        return $response->successful() && $response->json('classification') === 'absent'
+            && $response->json('identity_digest') === hash('sha256', \HiEvents\Services\Domain\Registration\HistoricalReceiptValidator::canonical($identity));
+    }
+
     public function clearance(array $candidate): bool
     {
         $response = $this->request(GvsuRegistrationBridgeConfig::CLEARANCE_PATH, $candidate);

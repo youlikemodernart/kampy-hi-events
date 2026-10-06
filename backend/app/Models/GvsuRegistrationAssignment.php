@@ -11,6 +11,7 @@ class GvsuRegistrationAssignment extends BaseModel
     protected function getFillableFields(): array
     {
         return [
+            'recovery_evidence_id',
             'provision_batch_id',
             'event_id',
             'order_id',

@@ -91,6 +91,7 @@ class RespondentConfirmationPostgresTest extends TestCase
     public function test_parallel_consumption_commits_exactly_one_bridge_outbox_and_complete_assignments(): void
     {
         $code = (new RespondentConfirmationRepository)->issue('order_11')->token;
+        self::assertNotNull((new RespondentConfirmationRepository)->verify('order_11', $code));
         $confirm = fn () => app(RespondentConfirmationService::class)->confirm('order_11', $code, Fixture::payload());
         self::assertSame([true, true], $this->parallel([$confirm, $confirm]));
         self::assertSame(2, DB::table('gvsu_registration_assignments')->count());
@@ -104,6 +105,7 @@ class RespondentConfirmationPostgresTest extends TestCase
         foreach (['refund', 'attendee', 'event'] as $case) {
             Fixture::reset();
             $code = (new RespondentConfirmationRepository)->issue('order_11')->token;
+            self::assertNotNull((new RespondentConfirmationRepository)->verify('order_11', $code));
             $results = $this->parallel([
                 function ($dir) use ($case) {
                     return DB::transaction(function () use ($dir, $case) {
@@ -142,6 +144,7 @@ class RespondentConfirmationPostgresTest extends TestCase
     public function test_confirmation_wins_lock_then_later_refund_suppresses_provision(): void
     {
         $code = (new RespondentConfirmationRepository)->issue('order_11')->token;
+        self::assertNotNull((new RespondentConfirmationRepository)->verify('order_11', $code));
         $results = $this->parallel([
             function ($dir) use ($code) {
                 return DB::transaction(function () use ($dir, $code) {
@@ -176,6 +179,7 @@ class RespondentConfirmationPostgresTest extends TestCase
     public function test_outbox_database_failure_rolls_back_all_bindings_and_consumption(): void
     {
         $code = (new RespondentConfirmationRepository)->issue('order_11')->token;
+        self::assertNotNull((new RespondentConfirmationRepository)->verify('order_11', $code));
         DB::unprepared("CREATE OR REPLACE FUNCTION reject_fixture_outbox() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic failure'; END $$; CREATE TRIGGER reject_fixture_outbox BEFORE INSERT ON order_effect_outbox FOR EACH ROW EXECUTE FUNCTION reject_fixture_outbox();");
         try {
             app(RespondentConfirmationService::class)->confirm('order_11', $code, Fixture::payload());
@@ -192,6 +196,7 @@ class RespondentConfirmationPostgresTest extends TestCase
     public function test_constraints_reject_duplicate_tokens_orphan_orders_assignments_and_outbox(): void
     {
         $code = (new RespondentConfirmationRepository)->issue('order_11')->token;
+        self::assertNotNull((new RespondentConfirmationRepository)->verify('order_11', $code));
         self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $code, Fixture::payload()));
         foreach (['respondent_confirmation_challenges', 'gvsu_registration_assignments', 'order_effect_outbox', 'respondent_confirmation_destinations'] as $table) {
             $row = (array) DB::table($table)->first();
@@ -218,6 +223,7 @@ class RespondentConfirmationPostgresTest extends TestCase
     public function test_retention_preserves_live_budgets_and_assignments(): void
     {
         $code = (new RespondentConfirmationRepository)->issue('order_11')->token;
+        self::assertNotNull((new RespondentConfirmationRepository)->verify('order_11', $code));
         self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $code, Fixture::payload()));
         self::assertSame(['challenges_deleted' => 0, 'destinations_deleted' => 0], app(RespondentConfirmationRetention::class)->purge());
         DB::table('respondent_confirmation_challenges')->update(['expires_at' => now()->subHours(25)]);

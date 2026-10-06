@@ -53,18 +53,13 @@ try {
         const counts = async () => (await context.request.get(origin+'/_fixture/counts')).json();
         assert.deepEqual(await counts(), {challenges: 0, assignments: 0, outbox: 0, consumed: 0});
         const requested = page.waitForResponse(response => response.url().endsWith('/request-verification'));
-        await page.getByRole('button', {name: 'Verify purchase email'}).click();
+        await page.getByRole('button', {name: 'Verify Email'}).click();
         const requestResponse = await requested; assert.equal(requestResponse.status(), 202, await requestResponse.text());
         await page.getByText('If this order is eligible, a verification code will be sent to the purchase email address.').waitFor();
         assert.deepEqual(await counts(), {challenges: 1, assignments: 0, outbox: 0, consumed: 0}); // Forwarded receipt alone only initiates a challenge.
-        await page.getByRole('textbox', {name: 'Invented Attendee 1'}).click(); await page.getByRole('option', {name: 'Adult attendee', exact: true}).click();
-        await page.getByRole('textbox', {name: 'Invented Attendee 2'}).click(); await page.getByRole('option', {name: 'Parent or guardian', exact: true}).click();
-        await page.getByLabel(/^Email/).nth(0).fill('adult@example.test');
-        await page.getByLabel(/^Name/).fill('Invented Guardian');
-        await page.getByLabel(/^Email/).nth(1).fill('guardian@example.test');
-        await page.getByRole('checkbox').check();
+        assert.equal(await page.getByRole('textbox', {name: 'Invented Attendee 1'}).count(), 0);
         await page.getByLabel('Verification code', {exact: true}).fill('0'.repeat(64));
-        await page.getByRole('button', {name: 'Confirm all contacts'}).click();
+        await page.getByRole('button', {name: 'Continue', exact: true}).click();
         await page.getByText('Unable to confirm contacts', {exact: true}).waitFor();
         assert.equal((await counts()).assignments, 0);
         const mailbox = await context.newPage(); await mailbox.goto(origin+'/_fixture/mailbox');
@@ -78,6 +73,14 @@ try {
         await page.bringToFront(); await page.getByLabel('Verification code', {exact: true}).click();
         await page.keyboard.press(process.platform === 'darwin' ? 'Meta+V' : 'Control+V');
         assert.equal(await page.getByLabel('Verification code', {exact: true}).inputValue(), code);
+        await page.getByRole('button', {name: 'Continue', exact: true}).click();
+        await page.getByRole('textbox', {name: 'Invented Attendee 1'}).click(); await page.getByRole('option', {name: 'Adult attendee', exact: true}).click();
+        await page.getByRole('textbox', {name: 'Invented Attendee 2'}).click(); await page.getByRole('option', {name: 'Parent or guardian', exact: true}).click();
+        await page.getByLabel(/^Email/).nth(0).fill('adult@example.test');
+        await page.getByLabel(/^Name/).fill('Invented Guardian');
+        await page.getByLabel(/^Email/).nth(1).fill('guardian@example.test');
+        await page.getByRole('checkbox').check();
+
         const geometry = await page.evaluate(() => ({scroll: document.documentElement.scrollWidth, width: innerWidth}));
         assert.ok(geometry.scroll <= width, 'contact panel horizontal overflow');
         const button = await page.getByRole('button', {name: 'Confirm all contacts'}).boundingBox(); assert.ok(button.width > 200 && button.height >= 36);

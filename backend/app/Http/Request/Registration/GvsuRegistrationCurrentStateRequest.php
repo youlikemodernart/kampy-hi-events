@@ -11,6 +11,11 @@ class GvsuRegistrationCurrentStateRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'historical_authority' => 'sometimes|nullable|array:type,id,cohortId,commitment',
+            'historical_authority.type' => 'required_with:historical_authority|in:historical_receipt_v1',
+            'historical_authority.id' => 'required_with:historical_authority|string|regex:/\A[1-9][0-9]*\z/',
+            'historical_authority.cohortId' => 'required_with:historical_authority|string|regex:/\A[1-9][0-9]*\z/',
+            'historical_authority.commitment' => 'required_with:historical_authority|string|regex:/\A[0-9a-f]{64}\z/',
             'operation' => 'required|string|in:gvsu-registration-current-state-v1',
             'event_id' => 'required|string|in:7',
             'order_id' => 'required|string|max:32',

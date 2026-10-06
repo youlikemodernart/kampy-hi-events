@@ -30,11 +30,67 @@ final class RespondentConfirmationRepository
         return hash_hmac('sha256', strtolower(trim($email)), (string) config('app.key'));
     }
 
+    /** External absence read occurs before acquiring native locks. The exact sibling snapshot is rechecked under lock. */
+    private function preflight(string $shortId): ?array
+    {
+        $order = Order::query()->where('short_id', $shortId)->where('event_id', 7)->first();
+        if (! $order) {
+            return null;
+        }
+        $authority = (new RespondentContactAuthorityRepository)->resolve((int) $order->id);
+        if (! $authority) {
+            return null;
+        }
+        if ($authority['type'] !== 'historical_receipt_v1') {
+            return [];
+        }
+        $identity = $this->siblingIdentity((int) $order->id);
+        try {
+            if (count($identity['siblings']) === 0 || ! app(\HiEvents\Services\Domain\Registration\GvsuRegistrationBridgePortalClient::class)->historicalAbsence($identity)) {
+                return null;
+            }
+        } catch (\HiEvents\Exceptions\GvsuRegistrationBridgeUnknownException) {
+            return null;
+        }
+
+        return $identity;
+    }
+
+    private function siblingIdentity(int $orderId): array
+    {
+        return ['operation' => 'historical-receipt-preflight-v1', 'event_id' => '7', 'order_id' => (string) $orderId,
+            'siblings' => Attendee::query()->where('order_id', $orderId)->where('event_id', 7)->where('status', 'ACTIVE')->orderBy('id')->get()->map(fn ($a) => ['attendee_id' => (string) $a->id, 'public_ticket_id' => $a->public_id])->all()];
+    }
+
+    private function contextDigest($siblings): string
+    {
+        return hash('sha256', json_encode($siblings->map(fn ($a) => [(int) $a->id, $a->public_id, $a->first_name, $a->last_name])->all(), JSON_THROW_ON_ERROR));
+    }
+
+    private function matchesAuthority(object $challenge, array $authority): bool
+    {
+        return $challenge->authority_type === $authority['type'] && (int) $challenge->authority_id === $authority['id']
+            && hash_equals((string) $challenge->authority_commitment, $authority['commitment'])
+            && hash_equals($challenge->destination_digest, $this->destinationDigest($authority['email']));
+    }
+
     public function issue(string $shortId): ?RespondentChallengeDelivery
     {
-        return DB::transaction(function () use ($shortId) {
+        if (config('respondent-confirmation.enabled') !== true) {
+            return null;
+        }
+        $preflight = $this->preflight($shortId);
+        if ($preflight === null) {
+            return null;
+        }
+
+        return DB::transaction(function () use ($shortId, $preflight) {
             $order = $this->paidOrder($shortId);
-            $email = $order ? (new OrderPurchaseContactRepository)->email((int) $order->id) : null;
+            $authority = $order ? (new RespondentContactAuthorityRepository)->resolve((int) $order->id) : null;
+            $email = $authority['email'] ?? null;
+            if ($authority && $authority['type'] === 'historical_receipt_v1' && $preflight !== $this->siblingIdentity((int) $order->id)) {
+                return null;
+            }
             if (! $order || ! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)
                 || ! Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->exists()
                 || GvsuRegistrationAssignment::query()->where('order_id', $order->id)->exists()) {
@@ -57,6 +113,7 @@ final class RespondentConfirmationRepository
             DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->whereNull('consumed_at')->update(['expires_at' => now()]);
             $token = bin2hex(random_bytes(32));
             DB::table('respondent_confirmation_challenges')->insert([
+                'authority_type' => $authority['type'], 'authority_id' => $authority['id'], 'authority_commitment' => $authority['commitment'],
                 'order_id' => $order->id, 'destination_digest' => $digest, 'token_digest' => hash('sha256', $token),
                 'created_at' => now(), 'expires_at' => now()->addMinutes(config('respondent-confirmation.ttl_minutes')),
             ]);
@@ -65,19 +122,70 @@ final class RespondentConfirmationRepository
         });
     }
 
+    public function verify(string $shortId, string $token): ?array
+    {
+        if (config('respondent-confirmation.enabled') !== true) {
+            return null;
+        }
+        $preflight = $this->preflight($shortId);
+        if ($preflight === null) {
+            return null;
+        }
+
+        return DB::transaction(function () use ($shortId, $token, $preflight) {
+            $order = $this->paidOrder($shortId);
+            $authority = $order ? (new RespondentContactAuthorityRepository)->resolve((int) $order->id) : null;
+            if (! $authority || GvsuRegistrationAssignment::query()->where('order_id', $order->id)->exists()) {
+                return null;
+            }
+            $challenge = DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->orderByDesc('id')->lockForUpdate()->first();
+            if (! $challenge || $challenge->consumed_at !== null || CarbonImmutable::parse($challenge->expires_at)->lte(now()) || $challenge->attempts >= config('respondent-confirmation.attempts') || ! $this->matchesAuthority($challenge, $authority)) {
+                return null;
+            }
+            if (! hash_equals($challenge->token_digest, hash('sha256', $token))) {
+                DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->increment('attempts');
+
+                return null;
+            }
+            if ($authority['type'] === 'historical_receipt_v1' && $preflight !== $this->siblingIdentity((int) $order->id)) {
+                return null;
+            }
+            $siblings = Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->orderBy('id')->lockForUpdate()->get(['id', 'first_name', 'last_name', 'public_id']);
+            if ($siblings->isEmpty()) {
+                return null;
+            }
+            $context = $this->contextDigest($siblings);
+            if ($challenge->verified_at !== null && ! hash_equals($challenge->verified_context_digest, $context)) {
+                return null;
+            }
+            if ($challenge->verified_at === null) {
+                DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->update(['verified_at' => now(), 'verified_context_digest' => $context]);
+            }
+
+            return $siblings->map(fn ($a) => ['id' => (int) $a->id, 'first_name' => $a->first_name, 'last_name' => $a->last_name])->all();
+        });
+    }
+
     /** Callback binds every sibling and records only a bridge outbox effect in this transaction. */
     public function confirm(string $shortId, string $token, array $respondents, callable $bind): bool
     {
-        return DB::transaction(function () use ($shortId, $token, $respondents, $bind) {
+        if (config('respondent-confirmation.enabled') !== true) {
+            return false;
+        }
+        $preflight = $this->preflight($shortId);
+
+        // Consumed exact replays need no fresh Portal absence, which is no longer true after handoff.
+        return DB::transaction(function () use ($shortId, $token, $respondents, $bind, $preflight) {
             $order = $this->paidOrder($shortId);
-            $email = $order ? (new OrderPurchaseContactRepository)->email((int) $order->id) : null;
+            $authority = $order ? (new RespondentContactAuthorityRepository)->resolve((int) $order->id) : null;
+            $email = $authority['email'] ?? null;
             if (! $order || ! $email) {
                 return false;
             }
             $challenge = DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->orderByDesc('id')->lockForUpdate()->first();
             if (! $challenge || CarbonImmutable::parse($challenge->expires_at)->lte(now())
                 || $challenge->attempts >= config('respondent-confirmation.attempts')
-                || ! hash_equals($challenge->destination_digest, $this->destinationDigest($email))) {
+                || ! $this->matchesAuthority($challenge, $authority)) {
                 return false;
             }
             if (! hash_equals($challenge->token_digest, hash('sha256', $token))) {
@@ -85,8 +193,14 @@ final class RespondentConfirmationRepository
 
                 return false;
             }
+            if ($challenge->verified_at === null) {
+                return false;
+            }
             $attendees = Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->orderBy('id')->lockForUpdate()->get();
             if ($attendees->isEmpty() || $attendees->pluck('id')->map(fn ($id) => (int) $id)->all() !== array_column($respondents, 'attendee_id')) {
+                return false;
+            }
+            if (! hash_equals((string) $challenge->verified_context_digest, $this->contextDigest($attendees))) {
                 return false;
             }
             $payloadDigest = hash('sha256', json_encode($respondents, JSON_THROW_ON_ERROR));
@@ -96,7 +210,10 @@ final class RespondentConfirmationRepository
             if (GvsuRegistrationAssignment::query()->where('order_id', $order->id)->exists()) {
                 return false;
             }
-            $bind((int) $order->id, $attendees, $respondents);
+            if ($authority['type'] === 'historical_receipt_v1' && ($preflight === null || $preflight !== $this->siblingIdentity((int) $order->id))) {
+                return false;
+            }
+            $bind((int) $order->id, $attendees, $respondents, $authority);
             DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->update(['consumed_at' => now(), 'confirmation_digest' => $payloadDigest]);
 
             return true;
