@@ -124,7 +124,7 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
     {
         // PostgreSQL's independent wall clock must also be past the purge deadline.
         $this->manifest['scope']['selected_at'] = '2026-10-05T23:00:00Z';
-        $this->manifest['scope']['valid_until'] = '2026-10-06T00:30:00Z';
+        $this->manifest['scope']['valid_until'] = '2026-10-06T01:00:00Z';
         $this->manifest['scope']['purge_after'] = '2026-10-06T01:00:00Z';
         config()->set('historical-receipt-recovery.approved_manifest_digest', hash('sha256', V::canonical($this->manifest)));
         Carbon::setTestNow('2026-10-06T00:00:00Z');
@@ -160,6 +160,83 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
         } catch (\Illuminate\Database\QueryException) {
             self::assertTrue(true);
         }
+    }
+
+    public function test_finite_metadata_retention_preserves_records_and_blocks_replay_without_tombstones(): void
+    {
+        $recovery = $this->admit();
+        $challenges = new Challenges;
+        $code = $challenges->issue('order_11')->token;
+        self::assertNotNull($challenges->verify('order_11', $code));
+        self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $code, Fixture::payload()));
+        $orders = DB::table('orders')->orderBy('id')->get()->toJson();
+        $assignments = DB::table('gvsu_registration_assignments')->orderBy('id')->get()->map(fn ($a) => (array) $a)->all();
+        $cohort = (array) DB::table('historical_receipt_recovery_cohorts')->first();
+        unset($cohort['id']);
+        $cohort['sealed_at'] = null;
+        $outbox = DB::table('order_effect_outbox')->orderBy('id')->get()->toJson();
+        $definition = DB::selectOne("SELECT pg_get_functiondef('guard_historical_receipt_records()'::regprocedure) AS ddl")->ddl;
+        // Disposable database only: substitute the trigger's clock, never disable guards.
+        // Production has no configurable clock or expiry-bypass setting.
+        $clock = function (string $time) use ($definition) {
+            Carbon::setTestNow($time);
+            DB::unprepared(str_replace('CURRENT_TIMESTAMP', "TIMESTAMPTZ '$time'", $definition));
+        };
+        $reject = function (callable $operation) {
+            try {
+                DB::transaction($operation);
+                self::fail('Retention guard must reject');
+            } catch (\Illuminate\Database\QueryException) {
+                self::assertTrue(true);
+            }
+        };
+        try {
+            $clock('2027-01-15T20:00:00Z');
+            $reject(function () {
+                DB::table('respondent_confirmation_challenges')->update(['authority_id' => null, 'authority_commitment' => null]);
+                DB::table('order_receipt_recovery_evidence')->delete();
+            });
+            self::assertNotNull(DB::table('order_receipt_recovery_evidence')->value('evidence_encrypted'));
+            self::assertNotNull(DB::table('respondent_confirmation_challenges')->value('authority_id'));
+            $clock('2026-10-17T20:00:00Z');
+            self::assertSame(1, $recovery->purge());
+            self::assertNull($recovery->authority(11));
+            $reject(fn () => DB::table('historical_receipt_recovery_cohorts')->insert($cohort));
+            $clock('2027-01-15T19:59:59Z');
+            self::assertSame(['evidence_deleted' => 0, 'cohorts_deleted' => 0], $recovery->purgeMetadata());
+            $reject(fn () => DB::table('order_receipt_recovery_evidence')->delete());
+            $reject(fn () => DB::table('historical_receipt_recovery_cohorts')->delete());
+            $clock('2027-01-15T20:00:00Z');
+            // Existing references cannot be silently orphaned by direct SQL.
+            $reject(fn () => DB::table('order_receipt_recovery_evidence')->delete());
+            DB::table('respondent_confirmation_challenges')->update(['expires_at' => now()->addMinute()]);
+            $reject(fn () => $recovery->purgeMetadata());
+            self::assertNotNull(DB::table('respondent_confirmation_challenges')->value('authority_id'));
+            DB::table('respondent_confirmation_challenges')->update(['expires_at' => now()]);
+            self::assertSame(['evidence_deleted' => 1, 'cohorts_deleted' => 1], $recovery->purgeMetadata());
+            self::assertSame(['evidence_deleted' => 0, 'cohorts_deleted' => 0], $recovery->purgeMetadata());
+            self::assertSame(1, DB::table('respondent_confirmation_challenges')->count());
+            self::assertNull(DB::table('respondent_confirmation_challenges')->value('authority_id'));
+            self::assertNull(DB::table('respondent_confirmation_challenges')->value('authority_commitment'));
+            foreach ($assignments as &$assignment) {
+                $assignment['recovery_evidence_id'] = null;
+            }
+            unset($assignment);
+            self::assertSame($assignments, DB::table('gvsu_registration_assignments')->orderBy('id')->get()->map(fn ($a) => (array) $a)->all());
+            self::assertSame($orders, DB::table('orders')->orderBy('id')->get()->toJson());
+            self::assertSame($outbox, DB::table('order_effect_outbox')->orderBy('id')->get()->toJson());
+            $reject(fn () => DB::table('historical_receipt_recovery_cohorts')->insert($cohort));
+            try {
+                $this->admit();
+                self::fail('Import must remain closed without tombstones');
+            } catch (\HiEvents\Exceptions\ResourceConflictException) {
+                self::assertSame(0, DB::table('historical_receipt_recovery_cohorts')->count());
+            }
+        } finally {
+            DB::unprepared($definition);
+        }
+        Mail::assertNothingSent();
+        Http::assertNothingSent();
     }
 
     public function test_changed_sibling_context_wrong_authority_and_key_loss_block_without_replacement(): void

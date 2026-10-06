@@ -37,7 +37,7 @@ final class HistoricalReceiptRecoveryRepository
         $sorted = $ids;
         sort($sorted, SORT_NUMERIC);
         V::require($ids === $sorted);
-        V::require(V::time($scope['selected_at']) <= now()->timestamp && V::time($scope['selected_at']) < V::time($scope['valid_until']) && V::time($scope['valid_until']) <= V::time($scope['purge_after']) && V::time($scope['valid_until']) > now()->timestamp && V::time($scope['valid_until']) <= V::time('2026-10-17T20:00:00Z'));
+        V::require(V::time($scope['selected_at']) <= now()->timestamp && V::time($scope['selected_at']) < V::time($scope['valid_until']) && V::time($scope['valid_until']) === V::time($scope['purge_after']) && V::time($scope['valid_until']) > now()->timestamp && V::time($scope['valid_until']) <= V::time('2026-10-17T20:00:00Z'));
         V::require(is_string($scope['approved_effect_reference']) && $scope['approved_effect_reference'] !== '' && $scope['source_revision'] !== '');
         $quarantine = $manifest['quarantined_association'];
         V::require($manifest['quarantined_order_ids'] === [$quarantine['order_id']] && hash_equals($manifest['quarantine_commitment'], hash('sha256', implode('|', [$quarantine['order_id'], $quarantine['pi'], $quarantine['charge'], $quarantine['message_id']]))));
@@ -163,6 +163,27 @@ final class HistoricalReceiptRecoveryRepository
         }
 
         return ['type' => V::VERSION, 'id' => (int) $row->id, 'commitment' => $row->evidence_commitment, 'email' => $value['recipient'], 'cohort_id' => (int) $row->cohort_id, 'valid_until' => $row->valid_until];
+    }
+
+    /** Owner-invoked only; no scheduler. Preserve challenges and assignments, detach expired provenance. */
+    public function purgeMetadata(): array
+    {
+        if (now()->timestamp < V::time('2027-01-15T20:00:00Z')) {
+            return ['evidence_deleted' => 0, 'cohorts_deleted' => 0];
+        }
+
+        return DB::transaction(function () {
+            $cohorts = DB::table('historical_receipt_recovery_cohorts')->orderBy('id')->lockForUpdate()->pluck('id');
+            $ids = DB::table('order_receipt_recovery_evidence')->whereIn('cohort_id', $cohorts)->pluck('id');
+            // A still-active challenge or unpurged ciphertext makes the DELETE guard
+            // reject the entire transaction, including these provenance detachments.
+            DB::table('respondent_confirmation_challenges')->where('authority_type', V::VERSION)->whereIn('authority_id', $ids)
+                ->where('expires_at', '<=', now())->update(['authority_id' => null, 'authority_commitment' => null]);
+            $deleted = DB::table('order_receipt_recovery_evidence')->whereIn('id', $ids)->delete();
+            $cohortsDeleted = DB::table('historical_receipt_recovery_cohorts')->whereIn('id', $cohorts)->delete();
+
+            return ['evidence_deleted' => $deleted, 'cohorts_deleted' => $cohortsDeleted];
+        });
     }
 
     public function purge(): int

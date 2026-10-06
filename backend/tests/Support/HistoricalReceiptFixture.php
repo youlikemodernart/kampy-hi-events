@@ -42,7 +42,7 @@ final class HistoricalReceiptFixture
     {
         $scope = ['event_id' => 7, 'account_id' => 1, 'organizer_id' => 2, 'stripe_platform' => null, 'stripe_platform_account' => 'acct_syntheticPlatform', 'stripe_account' => 'acct_syntheticConnected', 'postmark_server' => 999,
             'sender' => 'tickets@example.test', 'summary_origin' => 'https://tickets.example.test', 'summary_url_template' => 'https://tickets.example.test/event/{event}/order/{order}', 'source_revision' => 'synthetic-5610429',
-            'created_from' => '2026-09-15T19:38:44Z', 'created_until' => '2026-10-05T21:19:13Z', 'selected_at' => '2026-10-06T01:00:00Z', 'valid_until' => '2026-10-17T19:00:00Z', 'purge_after' => '2026-10-18T20:00:00Z', 'approved_effect_reference' => 'synthetic-local-only'];
+            'created_from' => '2026-09-15T19:38:44Z', 'created_until' => '2026-10-05T21:19:13Z', 'selected_at' => '2026-10-06T01:00:00Z', 'valid_until' => '2026-10-17T20:00:00Z', 'purge_after' => '2026-10-17T20:00:00Z', 'approved_effect_reference' => 'synthetic-local-only'];
         $order = ['id' => 11, 'event_id' => 7, 'account_id' => 1, 'organizer_id' => 2, 'short_id' => 'order_11', 'public_id' => 'PUBLIC-SYNTHETIC-11', 'email' => 'buyer@example.test', 'formatted_total' => '$36.00', 'created_at' => '2026-10-01T12:00:00Z'];
         $time = V::time($order['created_at']);
         $message = '11111111-1111-4111-8111-111111111111';
