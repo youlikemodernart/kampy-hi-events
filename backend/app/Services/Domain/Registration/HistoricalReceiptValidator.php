@@ -36,7 +36,7 @@ final class HistoricalReceiptValidator
 
     public static function time(mixed $value): int
     {
-        self::require(is_string($value) && preg_match('/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})\z/', $value) === 1);
+        self::require(is_string($value) && preg_match('/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?(?:Z|[+-]\d{2}:\d{2})\z/', $value) === 1);
         $date = new DateTimeImmutable($value);
         self::require(! DateTimeImmutable::getLastErrors());
 

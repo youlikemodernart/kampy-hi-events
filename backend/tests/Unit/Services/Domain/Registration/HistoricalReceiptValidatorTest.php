@@ -110,6 +110,21 @@ class HistoricalReceiptValidatorTest extends TestCase
         }
     }
 
+    public function test_postmark_seven_digit_timestamp_precision_keeps_time_bounds(): void
+    {
+        [$scope, $row] = $this->nativePair();
+        foreach ($row['evidence']['messages'] as &$message) {
+            $message['ReceivedAt'] = '2026-10-01T08:00:30.1234567-04:00';
+            $message['MessageEvents'][0]['ReceivedAt'] = '2026-10-01T12:00:31.1234567Z';
+        }
+        unset($message);
+        self::assertSame(2, (new V)->validate($scope, $row['order'], $row['evidence'])['search_count']);
+        foreach (['2026-10-01T12:00:30.12345678Z', '2026-02-30T12:00:30.1234567Z', '2026-10-01T12:10:01.1234567Z', '2026-10-01T12:00:30.1234567', '2026-10-01T12:00:30.1234567Z trailing'] as $invalid) {
+            $row['evidence']['messages'][0]['ReceivedAt'] = $invalid;
+            $this->assertRejected($scope, $row, 'invalid shape, calendar or purchase window');
+        }
+    }
+
     public function test_display_name_never_changes_the_single_allowlisted_sender(): void
     {
         [$scope, $row] = $this->nativePair();
