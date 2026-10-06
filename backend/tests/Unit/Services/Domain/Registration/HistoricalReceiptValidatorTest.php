@@ -12,6 +12,7 @@ use HiEvents\Mail\Attendee\AttendeeTicketMail;
 use HiEvents\Mail\Order\OrderSummary;
 use HiEvents\Services\Domain\Email\DTO\UniversityEmailThemeDTO;
 use HiEvents\Services\Domain\Registration\HistoricalReceiptValidator as V;
+use Illuminate\Mail\Markdown;
 use Mockery;
 use Tests\Support\HistoricalReceiptFixture;
 use Tests\TestCase;
@@ -89,6 +90,50 @@ class HistoricalReceiptValidatorTest extends TestCase
             self::assertSame('11111111-1111-4111-8111-111111111111', $accepted['message_id']);
             self::assertSame(2, $accepted['search_count']);
         }
+    }
+
+    public function test_native_markdown_pair_and_display_name_envelope_preserve_exact_authority(): void
+    {
+        [$scope, $row] = $this->nativePair();
+        foreach ([false, true] as $ticket) {
+            $row['evidence']['messages'][(int) $ticket] = array_replace($row['evidence']['messages'][(int) $ticket], $this->nativeBodies($row['order'], $ticket, true), ['From' => 'Kamp Love - Synthetic University <tickets@example.test>']);
+        }
+        foreach ([false, true] as $reverse) {
+            if ($reverse) {
+                $row['evidence']['messages'] = array_reverse($row['evidence']['messages']);
+                $row['evidence']['search']['message_ids'] = array_reverse($row['evidence']['search']['message_ids']);
+            }
+            $accepted = (new V)->validate($scope, $row['order'], $row['evidence']);
+            self::assertSame('11111111-1111-4111-8111-111111111111', $accepted['message_id']);
+            self::assertSame('tickets@example.test', $accepted['sender']);
+            self::assertSame(2, $accepted['search_count']);
+        }
+    }
+
+    public function test_display_name_never_changes_the_single_allowlisted_sender(): void
+    {
+        [$scope, $row] = $this->nativePair();
+        foreach (['tickets@example.test <attacker@example.test>', 'Native <tickets@example.test>, Other <attacker@example.test>', 'Native <tickets@example.test> trailing', "Native\r\nBcc: other@example.test <tickets@example.test>"] as $from) {
+            $row['evidence']['messages'][0]['From'] = $from;
+            $this->assertRejected($scope, $row, 'sender mailbox or header conflict');
+        }
+        $row['evidence']['messages'][0]['From'] = '"Kamp Love, Synthetic" <tickets@example.test>';
+        self::assertSame('tickets@example.test', (new V)->validate($scope, $row['order'], $row['evidence'])['sender']);
+    }
+
+    public function test_native_markdown_duplicate_or_mixed_receipt_fields_still_reject(): void
+    {
+        [$scope, $row] = $this->nativePair();
+        $row['evidence']['messages'][0] = array_replace($row['evidence']['messages'][0], $this->nativeBodies($row['order'], false, true));
+        $duplicate = $row['evidence']['messages'][0];
+        $duplicate['MessageID'] = '33333333-3333-4333-8333-333333333333';
+        $this->appendMessage($row, $duplicate);
+        $this->assertRejected($scope, $row, 'distinct native Markdown receipt');
+        array_pop($row['evidence']['messages']);
+        array_pop($row['evidence']['search']['message_ids']);
+        $row['evidence']['search']['total']--;
+        $row['evidence']['messages'][0]['TextBody'] .= "\nOrder Number: PUBLIC-OTHER-13\n";
+        $this->assertRejected($scope, $row, 'mixed native Markdown and plain identities');
     }
 
     public function test_attendee_ticket_alone_never_supplies_receipt_authority(): void
@@ -211,7 +256,7 @@ class HistoricalReceiptValidatorTest extends TestCase
         return [$scope, $row];
     }
 
-    private function nativeBodies(array $identity, bool $ticket): array
+    private function nativeBodies(array $identity, bool $ticket, bool $markdown = false): array
     {
         config(['app.frontend_url' => 'https://tickets.example.test']);
         $order = Mockery::mock(OrderDomainObject::class);
@@ -231,13 +276,17 @@ class HistoricalReceiptValidatorTest extends TestCase
         $organizer = Mockery::mock(OrganizerDomainObject::class);
         $organizer->shouldReceive('getEmail')->andReturn('support@example.test');
         $organizer->shouldReceive('getName')->andReturn('Kamp Love');
-        $theme = new UniversityEmailThemeDTO('#0032a0', '#13155c', '#ffffff', '#ffffff', '#e7e7ed');
+        $theme = $markdown ? null : new UniversityEmailThemeDTO('#0032a0', '#13155c', '#ffffff', '#ffffff', '#e7e7ed');
         $attendee = Mockery::mock(AttendeeDomainObject::class);
         $attendee->shouldReceive('getShortId')->andReturn('ATT123');
         $mail = $ticket
             ? new AttendeeTicketMail($order, $attendee, $event, $settings, $organizer, universityTheme: $theme)
             : new OrderSummary($order, $event, $organizer, $settings, null, universityTheme: $theme);
         $content = $mail->content();
+
+        if ($markdown) {
+            return ['TextBody' => (string) app(Markdown::class)->renderText($content->markdown, $content->with), 'HtmlBody' => (string) app(Markdown::class)->render($content->markdown, $content->with)];
+        }
 
         return ['TextBody' => view($content->text, $content->with)->render(), 'HtmlBody' => view($content->view, $content->with)->render()];
     }

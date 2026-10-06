@@ -108,7 +108,7 @@ final class HistoricalReceiptValidator
             self::require(is_array($m) && is_string($ids[$i]) && preg_match('/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i', $ids[$i]) === 1);
             self::require(! isset($seen[strtolower($ids[$i])]) && ($m['server'] ?? null) === $scope['postmark_server'] && ($m['MessageStream'] ?? null) === 'outbound' && ($m['MessageID'] ?? null) === $ids[$i]);
             $seen[strtolower($ids[$i])] = true;
-            self::require(($m['From'] ?? null) === $scope['sender'] && ($m['Cc'] ?? null) === [] && ($m['Bcc'] ?? null) === [] && is_array($m['To'] ?? null) && count($m['To']) === 1 && is_string($m['To'][0]['Email'] ?? null) && strtolower(trim($m['To'][0]['Email'])) === $locator);
+            self::require($this->senderMatches($m['From'] ?? null, $scope['sender']) && ($m['Cc'] ?? null) === [] && ($m['Bcc'] ?? null) === [] && is_array($m['To'] ?? null) && count($m['To']) === 1 && is_string($m['To'][0]['Email'] ?? null) && strtolower(trim($m['To'][0]['Email'])) === $locator);
             $received = self::time($m['ReceivedAt'] ?? null);
             self::require($received >= $chargeCreated - 30 && $received <= $chargeCreated + 600);
             self::require(is_array($m['MessageEvents'] ?? null));
@@ -130,7 +130,7 @@ final class HistoricalReceiptValidator
     {
         self::require(is_string($m['TextBody'] ?? null) && $m['TextBody'] !== '' && strlen($m['TextBody']) <= 65536 && is_string($m['HtmlBody'] ?? null) && $m['HtmlBody'] !== '' && strlen($m['HtmlBody']) <= 262144);
         $text = str_replace("\r\n", "\n", $m['TextBody']);
-        $lines = array_map('trim', explode("\n", $text));
+        $lines = $this->nativeTextLines($text);
         $htmlLines = array_map('trim', explode("\n", EmailHtmlToTextConverter::convert($m['HtmlBody'])));
         $dom = new \DOMDocument;
         $previous = libxml_use_internal_errors(true);
@@ -196,6 +196,22 @@ final class HistoricalReceiptValidator
         }
 
         return 'unknown';
+    }
+
+    private function senderMatches(mixed $from, string $sender): bool
+    {
+        // Postmark retains the native display name; authority is the exact single mailbox.
+        return is_string($from) && ($from === $sender || preg_match('/\A(?:"[^"\r\n<>]+"|[^"\r\n<>,]+) <'.preg_quote($sender, '/').'>\z/u', $from) === 1);
+    }
+
+    private function nativeTextLines(string $text): array
+    {
+        // Laravel's native Markdown mail and the university template encode these same fields differently.
+        $text = preg_replace('/^# Order Summary$/m', 'Order Summary', $text);
+        $text = preg_replace('/^- \*\*(Order Number:|Total Amount:)\*\* (.+)$/m', '$1 $2', $text);
+        $text = preg_replace('/^(View Order Summary & Tickets|View Ticket): (https:\/\/[^\s]+)$/m', "$1:\n$2", $text);
+
+        return array_map('trim', explode("\n", $text));
     }
 
     private function receiptFields(array $lines): ?array
