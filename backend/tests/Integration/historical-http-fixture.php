@@ -43,6 +43,45 @@ Http::globalRequestMiddleware(function ($request) use ($peer) {
 });
 if (PHP_SAPI === 'cli') {
     switch ($argv[1] ?? '') {
+        case 'import-disabled':
+            Fixture::reset();
+            Historical::prepareNative($rows);
+            // Load the real environment-backed key map, not Historical::configure's override.
+            config()->set('historical-receipt-recovery', require dirname(__DIR__, 2).'/config/historical-receipt-recovery.php');
+            config()->set('historical-receipt-recovery.approved_manifest_digest', hash('sha256', \HiEvents\Services\Domain\Registration\HistoricalReceiptValidator::canonical($manifest)));
+            config()->set('respondent-confirmation.enabled', false);
+            config()->set('respondent-confirmation.capture_enabled', false);
+            config()->set('respondent-confirmation.purge_schedule_enabled', false);
+            config()->set('services.gvsu_registration_bridge.enabled', false);
+            config()->set('services.gvsu_registration_bridge.mode', 'disabled');
+            config()->set('event-reminders.enabled', false);
+            \Illuminate\Support\Facades\Mail::fake();
+            $path = tempnam(sys_get_temp_dir(), 'synthetic-receipt-');
+            try {
+                chmod($path, 0600);
+                file_put_contents($path, json_encode(compact('manifest', 'rows'), JSON_THROW_ON_ERROR));
+                foreach ([[], ['--commit' => true]] as $options) {
+                    if (\Illuminate\Support\Facades\Artisan::call('registration:import-historical-receipts', ['bundle' => $path] + $options) !== 0) {
+                        throw new RuntimeException('Disabled import failed');
+                    }
+                    $result = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true, 8, JSON_THROW_ON_ERROR);
+                    if ($result['count'] !== 1 || $result['dry_run'] !== ! isset($options['--commit'])) {
+                        throw new RuntimeException('Unexpected importer result');
+                    }
+                }
+            } finally {
+                unlink($path);
+            }
+            app(RespondentConfirmationService::class)->request('order_11');
+            \Illuminate\Support\Facades\Mail::assertNothingSent();
+            $stored = DB::table('order_receipt_recovery_evidence')->first();
+            $cipher = new \Illuminate\Encryption\Encrypter(config('historical-receipt-recovery.encryption_keys.test1'), 'AES-256-GCM');
+            $plain = json_decode($cipher->decryptString($stored->evidence_encrypted), true, 32, JSON_THROW_ON_ERROR);
+            if ($plain['recipient'] !== 'buyer@example.test' || (new Recovery)->authority(11) !== null || DB::table('respondent_confirmation_challenges')->count() !== 0 || DB::table('gvsu_registration_assignments')->count() !== 0 || DB::table('order_effect_outbox')->where('effect_type', 'GVSU_REGISTRATION_BRIDGE')->count() !== 0 || DB::table('historical_receipt_recovery_cohorts')->whereNotNull('sealed_at')->count() !== 1) {
+                throw new RuntimeException('Disabled import invariants failed');
+            }
+            echo "imported-disabled:1;challenges:0;assignments:0;bridge-outbox:0\n";
+            break;
         case 'seed':
             Fixture::reset();
             Historical::prepareNative($rows);

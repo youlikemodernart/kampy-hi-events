@@ -11,7 +11,8 @@ final class HistoricalReceiptRecoveryRepository
 {
     private function integrityKey(string $version): string
     {
-        $key = config('historical-receipt-recovery.integrity_keys.'.$version);
+        $keys = config('historical-receipt-recovery.integrity_keys', []);
+        $key = is_array($keys) ? ($keys[$version] ?? null) : null;
         V::require(is_string($key) && strlen($key) === 32);
 
         return $key;
@@ -19,7 +20,8 @@ final class HistoricalReceiptRecoveryRepository
 
     private function cipher(string $version): Encrypter
     {
-        $key = config('historical-receipt-recovery.encryption_keys.'.$version);
+        $keys = config('historical-receipt-recovery.encryption_keys', []);
+        $key = is_array($keys) ? ($keys[$version] ?? null) : null;
         V::require(is_string($key) && strlen($key) === 32);
 
         return new Encrypter($key, 'AES-256-GCM');
@@ -41,30 +43,51 @@ final class HistoricalReceiptRecoveryRepository
         V::require($manifest['quarantined_order_ids'] === [$quarantine['order_id']] && hash_equals($manifest['quarantine_commitment'], hash('sha256', implode('|', [$quarantine['order_id'], $quarantine['pi'], $quarantine['charge'], $quarantine['message_id']]))));
         $integrityVersion = (string) config('historical-receipt-recovery.integrity_key_version');
         $evidenceKey = $this->integrityKey($integrityVersion);
-        $reconstructed = [];
+        // Continuity associations are not admission evidence. Excluded members must remain
+        // bound to the original cohort without having to pass today's strict validator.
+        $associations = $manifest['reconstructed_associations'];
+        $reconstructedIds = $manifest['reconstructed_order_ids'];
+        $sortedReconstructedIds = $reconstructedIds;
+        sort($sortedReconstructedIds, SORT_NUMERIC);
+        V::require(array_is_list($associations) && count($associations) > 0 && count($associations) <= 149 && array_column($associations, 'order_id') === $reconstructedIds);
+        V::require($reconstructedIds === $sortedReconstructedIds && count(array_unique($reconstructedIds)) === count($reconstructedIds) && count(array_filter($reconstructedIds, fn ($id) => is_int($id) && $id > 0)) === count($reconstructedIds));
+        V::require(! array_intersect($manifest['quarantined_order_ids'], $reconstructedIds) && ! array_diff($ids, $reconstructedIds));
+        $associationDigests = [];
+        $receiptIds = [];
+        foreach ($associations as $association) {
+            V::require(count($association) === 4 && isset($association['order_id'], $association['pi'], $association['charge'], $association['message_id']));
+            V::require(preg_match('/\Api_[A-Za-z0-9]+\z/', $association['pi']) === 1 && preg_match('/\A(?:ch|py)_[A-Za-z0-9]+\z/', $association['charge']) === 1 && preg_match('/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i', $association['message_id']) === 1);
+            V::require(! isset($receiptIds[$association['message_id']]));
+            $receiptIds[$association['message_id']] = true;
+            $associationDigests[$association['order_id']] = hash('sha256', implode('|', [$association['order_id'], $association['pi'], $association['charge'], $association['message_id']]));
+        }
+        V::require(hash_equals($manifest['original_aggregate_commitment'], hash('sha256', implode("\n", $associationDigests))));
+        $excluded = $manifest['excluded_orders'];
+        V::require(array_is_list($excluded) && array_column($excluded, 'order_id') === array_values(array_diff($reconstructedIds, $ids)));
+        foreach ($excluded as $exclusion) {
+            V::require(count($exclusion) === 2 && in_array($exclusion['reason'] ?? null, ['current_ineligible', 'native_history', 'portal_history', 'portal_unknown', 'receipt_ambiguous', 'evidence_invalid', 'evidence_unavailable', 'source_changed'], true));
+        }
+        V::require(array_is_list($rows) && array_column($rows, 'order_id') === $ids);
         $evidence = [];
         $receiptIds = [];
-        // Reproduce the full original ordered commitment before selecting the exact admitted subset.
-        V::require(array_column($rows, 'order_id') === $manifest['reconstructed_order_ids'] && count($rows) <= 149 && count(array_unique($manifest['reconstructed_order_ids'])) === count($rows));
-        V::require(count($manifest['quarantined_order_ids']) === 1 && ! array_intersect($manifest['quarantined_order_ids'], $manifest['reconstructed_order_ids']) && ! array_diff($ids, $manifest['reconstructed_order_ids']));
         foreach ($rows as $row) {
             $accepted = (new V)->validate($scope, $row['order'], $row['evidence']);
             V::require($row['order_id'] === $accepted['order_id']);
             $identity = $accepted['postmark_server'].'|'.$accepted['message_id'];
             V::require(! isset($receiptIds[$identity]));
             $receiptIds[$identity] = true;
-            $reconstructed[] = hash('sha256', implode('|', [$row['order_id'], $accepted['pi'], $accepted['charge'], $accepted['message_id']]));
-            if (in_array($row['order_id'], $ids, true)) {
-                V::require(hash_equals($manifest['evidence_commitments'][(string) $row['order_id']] ?? '', hash_hmac('sha256', V::canonical($accepted), $evidenceKey)));
-                $evidence[$row['order_id']] = $accepted;
-            }
+            V::require(hash_equals($associationDigests[$row['order_id']], hash('sha256', implode('|', [$row['order_id'], $accepted['pi'], $accepted['charge'], $accepted['message_id']]))));
+            V::require(hash_equals($manifest['evidence_commitments'][(string) $row['order_id']] ?? '', hash_hmac('sha256', V::canonical($accepted), $evidenceKey)));
+            $evidence[$row['order_id']] = $accepted;
         }
         V::require(count($evidence) === count($ids) && count($manifest['evidence_commitments']) === count($ids));
-        V::require(hash_equals($manifest['original_aggregate_commitment'], hash('sha256', implode("\n", $reconstructed))));
         if (! $commit) {
             return ['dry_run' => true, 'count' => count($evidence), 'manifest_digest' => $digest];
         }
         V::require(config('historical-receipt-recovery.import_enabled') === true);
+        // Reject missing encryption custody before any external preflight or transaction.
+        $cipher = $this->cipher((string) config('historical-receipt-recovery.encryption_key_version'));
+        V::require(! hash_equals($cipher->getKey(), $evidenceKey));
         $preflights = [];
         foreach ($evidence as $id => $_) {
             $preflights[$id] = $absencePreflight($id);

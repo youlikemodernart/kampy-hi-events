@@ -213,6 +213,98 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
         }
     }
 
+    public function test_subset_keeps_complete_continuity_without_admitting_excluded_evidence(): void
+    {
+        $excluded = ['order_id' => 13, 'pi' => 'pi_synthetic13', 'charge' => 'ch_synthetic13', 'message_id' => '33333333-3333-4333-8333-333333333333'];
+        $this->manifest['reconstructed_order_ids'][] = 13;
+        $this->manifest['reconstructed_associations'][] = $excluded;
+        $this->manifest['excluded_orders'] = [['order_id' => 13, 'reason' => 'receipt_ambiguous']];
+        $this->manifest['original_aggregate_commitment'] = hash('sha256', implode("\n", array_map(fn ($a) => hash('sha256', implode('|', [$a['order_id'], $a['pi'], $a['charge'], $a['message_id']])), $this->manifest['reconstructed_associations'])));
+        HistoricalReceiptFixture::configure($this->manifest);
+        self::assertSame(1, (new Recovery)->import($this->manifest, $this->rows, fn () => true)['count']);
+        $original = $this->manifest;
+        foreach (['missing_exclusion', 'aggregate', 'accepted_association', 'ambiguous_admitted'] as $failure) {
+            $manifest = $original;
+            $rows = $this->rows;
+            if ($failure === 'missing_exclusion') {
+                $manifest['excluded_orders'] = [];
+            }
+            if ($failure === 'aggregate') {
+                $manifest['original_aggregate_commitment'] = str_repeat('0', 64);
+            }
+            if ($failure === 'accepted_association') {
+                $manifest['reconstructed_associations'][0]['pi'] = 'pi_other';
+                $manifest['original_aggregate_commitment'] = hash('sha256', implode("\n", array_map(fn ($a) => hash('sha256', implode('|', [$a['order_id'], $a['pi'], $a['charge'], $a['message_id']])), $manifest['reconstructed_associations'])));
+            }
+            if ($failure === 'ambiguous_admitted') {
+                $rows[0]['evidence']['messages'][] = $rows[0]['evidence']['messages'][0];
+                $rows[0]['evidence']['search']['total'] = 2;
+                $rows[0]['evidence']['search']['message_ids'][] = $rows[0]['evidence']['search']['message_ids'][0];
+            }
+            HistoricalReceiptFixture::configure($manifest);
+            try {
+                (new Recovery)->import($manifest, $rows, fn () => self::fail('No preflight on invalid evidence'), true);
+                self::fail($failure);
+            } catch (\HiEvents\Exceptions\ResourceConflictException) {
+                self::assertSame(0, DB::table('order_receipt_recovery_evidence')->count());
+            }
+        }
+        HistoricalReceiptFixture::configure($original);
+        $this->admit();
+        self::assertSame([11], DB::table('order_receipt_recovery_evidence')->pluck('order_id')->all());
+        Mail::assertNothingSent();
+        Http::assertNothingSent();
+    }
+
+    public function test_environment_key_maps_and_missing_keys_fail_closed_before_preflight(): void
+    {
+        $env = \Illuminate\Support\Env::getRepository();
+        $name = 'KAMP_HISTORICAL_RECEIPT_ENCRYPTION_KEYS';
+        $previous = $env->get($name);
+        try {
+            foreach (['', 'not-json', '[]', '{"v1":"short"}', json_encode(['v1' => base64_encode(str_repeat('x', 31))]), json_encode(['bad version' => base64_encode(str_repeat('x', 32))])] as $invalid) {
+                $env->set($name, $invalid);
+                $config = require base_path('config/historical-receipt-recovery.php');
+                self::assertSame([], $config['encryption_keys']);
+            }
+            $env->set($name, json_encode(['v1' => base64_encode(str_repeat('x', 32)), 'v2' => base64_encode(str_repeat('y', 32))]));
+            $config = require base_path('config/historical-receipt-recovery.php');
+            self::assertSame(['v1' => str_repeat('x', 32), 'v2' => str_repeat('y', 32)], $config['encryption_keys']);
+        } finally {
+            if ($previous === null) {
+                $env->clear($name);
+            } else {
+                $env->set($name, $previous);
+            }
+        }
+        foreach (['encryption_keys', 'integrity_keys'] as $keyMap) {
+            HistoricalReceiptFixture::configure($this->manifest);
+            config()->set('historical-receipt-recovery.'.$keyMap, []);
+            try {
+                (new Recovery)->import($this->manifest, $this->rows, fn () => self::fail('Missing custody must stop before preflight'), true);
+                self::fail();
+            } catch (\HiEvents\Exceptions\ResourceConflictException) {
+                self::assertSame(0, DB::table('historical_receipt_recovery_cohorts')->count());
+            }
+        }
+        HistoricalReceiptFixture::configure($this->manifest);
+        config()->set('historical-receipt-recovery.encryption_keys', ['test1' => str_repeat('i', 32)]);
+        try {
+            (new Recovery)->import($this->manifest, $this->rows, fn () => self::fail('Keys must be separate'), true);
+            self::fail();
+        } catch (\HiEvents\Exceptions\ResourceConflictException) {
+            self::assertSame(0, DB::table('historical_receipt_recovery_cohorts')->count());
+        }
+        HistoricalReceiptFixture::configure($this->manifest);
+        config()->set('historical-receipt-recovery.encryption_key_version', 'test.1');
+        config()->set('historical-receipt-recovery.integrity_key_version', 'test.1');
+        config()->set('historical-receipt-recovery.encryption_keys', ['test.1' => str_repeat('e', 32)]);
+        config()->set('historical-receipt-recovery.integrity_keys', ['test.1' => str_repeat('i', 32)]);
+        self::assertSame('historical_receipt_v1', $this->admit()->authority(11)['type']);
+        Mail::assertNothingSent();
+        Http::assertNothingSent();
+    }
+
     public function test_unknown_preflight_and_revocation_and_changed_manifest_fail_closed(): void
     {
         try {

@@ -59,7 +59,9 @@ final class HistoricalReceiptFixture
                 'HtmlBody' => '<a href="https://tickets.example.test/event/7/order/order_11">View Order Summary &amp; Tickets</a>']],
         ]];
         $quarantine = ['order_id' => 12, 'pi' => 'pi_synthetic12', 'charge' => 'ch_synthetic12', 'message_id' => '22222222-2222-4222-8222-222222222222'];
-        $manifest = ['scope' => $scope, 'order_ids' => [11], 'reconstructed_order_ids' => [11], 'quarantined_order_ids' => [12], 'quarantined_association' => $quarantine,
+        $manifest = ['scope' => $scope, 'order_ids' => [11], 'reconstructed_order_ids' => [11],
+            'reconstructed_associations' => [['order_id' => 11, 'pi' => 'pi_synthetic11', 'charge' => 'ch_synthetic11', 'message_id' => $message]], 'excluded_orders' => [],
+            'quarantined_order_ids' => [12], 'quarantined_association' => $quarantine,
             'quarantine_commitment' => hash('sha256', implode('|', $quarantine)),
             'original_aggregate_commitment' => hash('sha256', hash('sha256', '11|pi_synthetic11|ch_synthetic11|'.$message)),
             'evidence_commitments' => ['11' => hash_hmac('sha256', V::canonical((new V)->validate($scope, $order, $row['evidence'])), str_repeat('i', 32))]];

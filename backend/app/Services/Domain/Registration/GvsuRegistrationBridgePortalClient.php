@@ -22,9 +22,7 @@ class GvsuRegistrationBridgePortalClient
 
     public function historicalAbsence(array $identity): bool
     {
-        if (! GvsuRegistrationBridgeConfig::enabled()) {
-            return false;
-        }
+        // Exact authenticated metadata read, independent of provisioning/delivery activation.
         $response = $this->request('/api/internal/gvsu-registration/historical-preflight', $identity);
 
         return $response->successful() && $response->json('classification') === 'absent'
