@@ -3,9 +3,41 @@
 namespace Tests\Support;
 
 use HiEvents\Services\Domain\Registration\HistoricalReceiptValidator as V;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 final class HistoricalReceiptFixture
 {
+    public static function configure(array $manifest): void
+    {
+        config()->set('historical-receipt-recovery', ['enabled' => true, 'import_enabled' => true,
+            'approved_manifest_digest' => hash('sha256', V::canonical($manifest)), 'encryption_key_version' => 'test1', 'integrity_key_version' => 'test1',
+            'encryption_keys' => ['test1' => str_repeat('e', 32)], 'integrity_keys' => ['test1' => str_repeat('i', 32)]]);
+    }
+
+    public static function prepareNative(array $rows): void
+    {
+        Schema::table('orders', fn (Blueprint $t) => $t->string('public_id')->nullable());
+        Schema::table('events', function (Blueprint $t) {
+            $t->integer('account_id')->default(1);
+            $t->integer('organizer_id')->default(2);
+        });
+        Schema::create('stripe_payments', function (Blueprint $t) {
+            $t->id();
+            $t->integer('order_id');
+            $t->string('payment_intent_id');
+            $t->string('charge_id');
+            $t->string('connected_account_id');
+            $t->string('stripe_platform')->nullable();
+            $t->softDeletes();
+        });
+        DB::table('order_purchase_contacts')->where('order_id', 11)->delete();
+        DB::table('orders')->where('id', 11)->update(['public_id' => 'PUBLIC-SYNTHETIC-11']);
+        DB::table('stripe_payments')->insert($rows[0]['evidence']['native_payments'][0]);
+        DB::table('order_effect_outbox')->insert($rows[0]['evidence']['native_outbox'][0] + ['delivery_id' => 'synthetic_initial_11', 'business_key' => 'synthetic_initial_11', 'effect_type' => 'EMAIL', 'available_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+    }
+
     public static function bundle(): array
     {
         $scope = ['event_id' => 7, 'account_id' => 1, 'organizer_id' => 2, 'stripe_platform' => null, 'stripe_platform_account' => 'acct_syntheticPlatform', 'stripe_account' => 'acct_syntheticConnected', 'postmark_server' => 999,

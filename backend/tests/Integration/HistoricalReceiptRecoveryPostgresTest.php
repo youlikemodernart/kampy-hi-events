@@ -8,11 +8,9 @@ use HiEvents\Repository\Eloquent\RespondentConfirmationRepository as Challenges;
 use HiEvents\Services\Domain\Registration\GvsuRegistrationBridgePortalClient;
 use HiEvents\Services\Domain\Registration\HistoricalReceiptValidator as V;
 use HiEvents\Services\Domain\Registration\RespondentConfirmationService;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Schema;
 use Tests\Support\HistoricalReceiptFixture;
 use Tests\Support\RespondentConfirmationFixture as Fixture;
 use Tests\TestCase;
@@ -35,27 +33,8 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
         Http::preventStrayRequests();
         Mail::fake();
         [$this->manifest, $this->rows] = HistoricalReceiptFixture::bundle();
-        config()->set('historical-receipt-recovery', ['enabled' => true, 'import_enabled' => true,
-            'approved_manifest_digest' => hash('sha256', V::canonical($this->manifest)), 'encryption_key_version' => 'test1', 'integrity_key_version' => 'test1',
-            'encryption_keys' => ['test1' => str_repeat('e', 32)], 'integrity_keys' => ['test1' => str_repeat('i', 32)]]);
-        Schema::table('orders', fn (Blueprint $t) => $t->string('public_id')->nullable());
-        Schema::table('events', function (Blueprint $t) {
-            $t->integer('account_id')->default(1);
-            $t->integer('organizer_id')->default(2);
-        });
-        Schema::create('stripe_payments', function (Blueprint $t) {
-            $t->id();
-            $t->integer('order_id');
-            $t->string('payment_intent_id');
-            $t->string('charge_id');
-            $t->string('connected_account_id');
-            $t->string('stripe_platform')->nullable();
-            $t->softDeletes();
-        });
-        DB::table('order_purchase_contacts')->where('order_id', 11)->delete();
-        DB::table('orders')->where('id', 11)->update(['public_id' => 'PUBLIC-SYNTHETIC-11']);
-        DB::table('stripe_payments')->insert($this->rows[0]['evidence']['native_payments'][0]);
-        DB::table('order_effect_outbox')->insert($this->rows[0]['evidence']['native_outbox'][0] + ['delivery_id' => 'synthetic_initial_11', 'business_key' => 'synthetic_initial_11', 'effect_type' => 'EMAIL', 'available_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+        HistoricalReceiptFixture::configure($this->manifest);
+        HistoricalReceiptFixture::prepareNative($this->rows);
         $portal = \Mockery::mock(GvsuRegistrationBridgePortalClient::class);
         $portal->shouldReceive('historicalAbsence')->andReturn(true)->byDefault();
         $portal->shouldNotReceive('provision');
