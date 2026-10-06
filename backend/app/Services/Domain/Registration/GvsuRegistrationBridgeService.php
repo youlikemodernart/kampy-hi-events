@@ -61,6 +61,9 @@ class GvsuRegistrationBridgeService
                 ->where('attendee_id', $attendeeId)
                 ->lockForUpdate()
                 ->first();
+            if ($existing !== null && $existing->status === 'expired') {
+                throw new ResourceConflictException(__('Expired historical assignment authority cannot resume.'));
+            }
             if ($existing !== null && $createOnly) {
                 throw new ResourceConflictException(__('Existing respondent assignment cannot be replaced.'));
             }
@@ -173,6 +176,9 @@ class GvsuRegistrationBridgeService
             $records = [];
             foreach ($attendees as $attendee) {
                 $assignment = $assignments->get($attendee->id);
+                if ($assignment !== null && $assignment->status === 'expired') {
+                    return ['terminal' => true];
+                }
                 if ($assignment === null) {
                     return null;
                 }

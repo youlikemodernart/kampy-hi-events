@@ -169,6 +169,23 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
         $code = $challenges->issue('order_11')->token;
         self::assertNotNull($challenges->verify('order_11', $code));
         self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $code, Fixture::payload()));
+        \Illuminate\Support\Facades\Schema::table('events', function ($table) {
+            $table->timestamp('start_date')->nullable();
+            $table->string('timezone')->default('UTC');
+        });
+        DB::table('events')->update(['start_date' => '2026-10-17 20:00:00']);
+        $ordinary = (array) DB::table('gvsu_registration_assignments')->first();
+        unset($ordinary['id']);
+        $ordinary = array_replace($ordinary, ['order_id' => 12, 'attendee_id' => 121, 'attendee_public_id' => 'invented_12_1', 'assignment_id' => 'gra_ordinary_retention_test', 'respondent_id' => 'grr_ordinary_retention_test', 'recovery_evidence_id' => null]);
+        DB::table('gvsu_registration_assignments')->insert($ordinary);
+        $bridge = app(\HiEvents\Services\Domain\Registration\GvsuRegistrationBridgeService::class);
+        $candidate = function ($a) {
+            return ['event_id' => '7', 'order_id' => (string) $a->order_id, 'attendee_id' => (string) $a->attendee_id, 'public_ticket_id' => $a->attendee_public_id, 'respondent_id' => $a->respondent_id, 'assignment_id' => $a->assignment_id, 'attendee_display_name' => $a->attendee_display_name, 'respondent_identity_digest_sha256' => $a->respondent_identity_digest_sha256, 'designated_delivery_email' => $a->delivery_destination_ciphertext];
+        };
+        $historicalCandidate = $candidate(\HiEvents\Models\GvsuRegistrationAssignment::where('order_id', 11)->first());
+        $ordinaryCandidate = $candidate(\HiEvents\Models\GvsuRegistrationAssignment::where('order_id', 12)->first());
+        self::assertSame('current', $bridge->currentState($historicalCandidate)['status']);
+        self::assertSame('current', $bridge->currentState($ordinaryCandidate)['status']);
         $orders = DB::table('orders')->orderBy('id')->get()->toJson();
         $assignments = DB::table('gvsu_registration_assignments')->orderBy('id')->get()->map(fn ($a) => (array) $a)->all();
         $cohort = (array) DB::table('historical_receipt_recovery_cohorts')->first();
@@ -212,6 +229,7 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
             DB::table('respondent_confirmation_challenges')->update(['expires_at' => now()->addMinute()]);
             $reject(fn () => $recovery->purgeMetadata());
             self::assertNotNull(DB::table('respondent_confirmation_challenges')->value('authority_id'));
+            self::assertSame($assignments, DB::table('gvsu_registration_assignments')->orderBy('id')->get()->map(fn ($a) => (array) $a)->all());
             DB::table('respondent_confirmation_challenges')->update(['expires_at' => now()]);
             self::assertSame(['evidence_deleted' => 1, 'cohorts_deleted' => 1], $recovery->purgeMetadata());
             self::assertSame(['evidence_deleted' => 0, 'cohorts_deleted' => 0], $recovery->purgeMetadata());
@@ -219,10 +237,24 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
             self::assertNull(DB::table('respondent_confirmation_challenges')->value('authority_id'));
             self::assertNull(DB::table('respondent_confirmation_challenges')->value('authority_commitment'));
             foreach ($assignments as &$assignment) {
-                $assignment['recovery_evidence_id'] = null;
+                if ($assignment['recovery_evidence_id'] !== null) {
+                    $assignment['recovery_evidence_id'] = null;
+                    $assignment['status'] = 'expired';
+                }
             }
             unset($assignment);
             self::assertSame($assignments, DB::table('gvsu_registration_assignments')->orderBy('id')->get()->map(fn ($a) => (array) $a)->all());
+            self::assertSame('blocked', $bridge->currentState($historicalCandidate)['status']);
+            self::assertSame('current', $bridge->currentState($ordinaryCandidate)['status']);
+            config()->set('services.gvsu_registration_bridge.enabled', true);
+            self::assertTrue($bridge->provisionCompletedOrder(11));
+            $reject(fn () => DB::table('gvsu_registration_assignments')->where('order_id', 11)->update(['status' => 'bound']));
+            try {
+                $bridge->bindRespondent(11, 111, 'Invented Attendee 1', 'Invented Adult', 'adult', 'adult@example.test', null, true);
+                self::fail('Expired assignment must not be rebound');
+            } catch (\HiEvents\Exceptions\ResourceConflictException) {
+                self::assertTrue(true);
+            }
             self::assertSame($orders, DB::table('orders')->orderBy('id')->get()->toJson());
             self::assertSame($outbox, DB::table('order_effect_outbox')->orderBy('id')->get()->toJson());
             $reject(fn () => DB::table('historical_receipt_recovery_cohorts')->insert($cohort));
