@@ -30,6 +30,10 @@ if (! preg_match('~\Ahttp://127\.0\.0\.1:[0-9]+\z~', $peer) || ! is_file($clock)
 Carbon::setTestNow(trim(file_get_contents($clock)));
 [$manifest, $rows] = Historical::bundle();
 Historical::configure($manifest);
+config()->set('respondent-confirmation.invitation_enabled', true);
+if (getenv('INVITATION_BROWSER_ORIGIN')) {
+    config()->set('respondent-confirmation.origin', getenv('INVITATION_BROWSER_ORIGIN'));
+}
 config()->set('services.gvsu_registration_bridge.portal_host', 'portal.example.test');
 config()->set('services.gvsu_registration_bridge.outgoing_bearer', str_repeat('b', 43));
 config()->set('services.gvsu_registration_bridge.incoming_current_digest', hash('sha256', str_repeat('b', 43)));
@@ -82,6 +86,7 @@ if (PHP_SAPI === 'cli') {
             }
             echo "imported-disabled:1;challenges:0;assignments:0;bridge-outbox:0\n";
             break;
+        case 'seed-invitation':
         case 'seed':
             Fixture::reset();
             Historical::prepareNative($rows);
@@ -92,6 +97,18 @@ if (PHP_SAPI === 'cli') {
             DB::table('events')->update(['start_date' => '2026-10-17 16:00:00']);
             $repo = new Recovery;
             $repo->import($manifest, $rows, fn ($id) => $repo->preflight($id), true);
+            if ($argv[1] === 'seed-invitation') {
+                \Illuminate\Support\Facades\Mail::fake();
+                app(RespondentConfirmationService::class)->request('order_11');
+                $html = null;
+                \Illuminate\Support\Facades\Mail::assertSent(\HiEvents\Mail\RespondentConfirmationChallenge::class, function ($mail) use (&$html) {
+                    $html = $mail->render();
+
+                    return $mail->hasTo('buyer@example.test');
+                });
+                echo json_encode(['html' => $html], JSON_THROW_ON_ERROR);
+                break;
+            }
             $challenges = new Challenges;
             $code = $challenges->issue('order_11')->token;
             if (! $challenges->verify('order_11', $code) || ! app(RespondentConfirmationService::class)->confirm('order_11', $code, Fixture::payload())) {
@@ -115,7 +132,7 @@ if (PHP_SAPI === 'cli') {
 
     return;
 }
-if (($_SERVER['REMOTE_ADDR'] ?? '') !== '127.0.0.1' || parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) !== '/api/internal/gvsu-registration/current-state') {
+if (($_SERVER['REMOTE_ADDR'] ?? '') !== '127.0.0.1' || ! (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/api/internal/gvsu-registration/current-state' || str_starts_with($_SERVER['REQUEST_URI'], '/api/registration/invitation'))) {
     http_response_code(404);
 
     return;

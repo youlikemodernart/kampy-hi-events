@@ -62,7 +62,7 @@ final class RespondentConfirmationFixture
             $t->string('last_name');
             $t->softDeletes();
         });
-        foreach (['2026_09_22_000001_create_gvsu_registration_assignments_table.php', '2026_07_25_000005_create_order_effect_outbox_table.php', '2026_10_05_000001_create_respondent_confirmation_challenges.php', '2026_10_05_000002_create_order_purchase_contacts.php', '2026_10_05_000003_create_historical_receipt_recovery.php', '2026_10_06_000001_bound_historical_receipt_retention.php', '2026_10_06_000002_preserve_expired_historical_assignment_boundary.php'] as $file) {
+        foreach (['2026_09_22_000001_create_gvsu_registration_assignments_table.php', '2026_07_25_000005_create_order_effect_outbox_table.php', '2026_10_05_000001_create_respondent_confirmation_challenges.php', '2026_10_05_000002_create_order_purchase_contacts.php', '2026_10_05_000003_create_historical_receipt_recovery.php', '2026_10_06_000001_bound_historical_receipt_retention.php', '2026_10_06_000002_preserve_expired_historical_assignment_boundary.php', '2026_10_06_000003_add_completion_invitation_marker.php'] as $file) {
             (require database_path('migrations/'.$file))->up();
         }
         DB::table('events')->insert(['id' => 7, 'status' => 'LIVE', 'end_date' => '2099-10-18 16:00:00']);

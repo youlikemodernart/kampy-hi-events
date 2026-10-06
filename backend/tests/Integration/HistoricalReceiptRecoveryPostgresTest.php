@@ -99,6 +99,37 @@ class HistoricalReceiptRecoveryPostgresTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_invitation_later_click_resume_and_earlier_historical_authority_cutoff(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $this->manifest['scope']['valid_until'] = '2026-10-10T20:00:00Z';
+        $this->manifest['scope']['purge_after'] = '2026-10-10T20:00:00Z';
+        config()->set('historical-receipt-recovery.approved_manifest_digest', hash('sha256', V::canonical($this->manifest)));
+        $this->admit();
+        $repo = new Challenges;
+        $token = $repo->issue('order_11', true)->token;
+        self::assertSame('2026-10-10 20:00:00', DB::table('respondent_confirmation_challenges')->value('expires_at'));
+        $cohort = DB::table('historical_receipt_recovery_cohorts')->first();
+        Carbon::setTestNow('2026-10-06T18:00:00Z');
+        self::assertFalse($repo->invitationContext('order_11', $token)['confirmed']);
+        self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $token, Fixture::payload()));
+        Carbon::setTestNow('2026-10-08T18:00:00Z');
+        self::assertTrue($repo->invitationContext('order_11', $token)['confirmed']);
+        self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $token, Fixture::payload()));
+        $assignments = DB::table('gvsu_registration_assignments')->get();
+        Carbon::setTestNow('2026-10-10T20:00:00Z');
+        self::assertNull($repo->invitationContext('order_11', $token));
+        self::assertFalse(app(RespondentConfirmationService::class)->confirm('order_11', $token, Fixture::payload()));
+        self::assertEquals($cohort, DB::table('historical_receipt_recovery_cohorts')->first());
+        self::assertEquals($assignments, DB::table('gvsu_registration_assignments')->get());
+        self::assertSame(1, DB::table('order_effect_outbox')->where('effect_type', 'GVSU_REGISTRATION_BRIDGE')->count());
+        Carbon::setTestNow('2026-10-08T18:00:00Z');
+        DB::table('historical_receipt_recovery_cohorts')->update(['revoked_at' => now()]);
+        self::assertNull($repo->invitationContext('order_11', $token));
+        self::assertFalse(app(RespondentConfirmationService::class)->confirm('order_11', $token, Fixture::payload()));
+        self::assertEquals($assignments, DB::table('gvsu_registration_assignments')->get());
+    }
+
     public function test_reissue_invalidates_verified_code_and_expiry_and_shared_attempt_limit(): void
     {
         $this->admit();

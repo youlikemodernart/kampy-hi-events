@@ -1,0 +1,772 @@
+/* Route-local copy of Portal src/app/r/[token]/registration.module.css at 01c0fffc.
+ * Preserves its font, spacing, control, state and card primitives without loading
+ * private Portal chrome. Fonts are served locally; hidden state wins over grid styles.
+ */
+
+@font-face {
+  font-family: "Kampy Registration DM Sans";
+  src: url("/api/registration/invitation-font/400.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kampy Registration DM Sans";
+  src: url("/api/registration/invitation-font/700.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   Tier 1 primitives, projected from the authoritative checkout source.
+   Plus the one declared composition exception (--reg-column).
+   -------------------------------------------------------------------------- */
+.publicSurface {
+  min-height: 100dvh;
+  background: #ffffff;
+}
+
+/* Route-local public chrome: keyboard users can bypass the introductory context. */
+.skipLink {
+  position: fixed;
+  z-index: 2;
+  left: var(--reg-space-4, 1rem);
+  top: -4rem;
+  padding: 0.5rem 0.75rem;
+  color: #ffffff;
+  background: #0032a0;
+}
+.skipLink:focus { top: var(--reg-space-4, 1rem); }
+
+.surface {
+  --page-brand-primary: #0032a0;
+  --page-brand-secondary: #13155c;
+  --page-brand-secondary-soft: #e8ecf8;
+  --page-on-primary: #ffffff;
+  --page-on-secondary: #ffffff;
+  --reg-font: "Kampy Registration DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --reg-cream: #ffffff;
+  --reg-paper: #ffffff;
+  --reg-ink: #222222;
+  --reg-muted: #585254;
+  --reg-line: #dadada;
+  --reg-line-control: #8a8a8a;
+  --reg-ok: #2f6b4f;
+  --reg-ok-tint: #e7f0ea;
+  --reg-wait: #3e5dac;
+  --reg-wait-tint: #e9edf2;
+  --reg-stop: #9f3620;
+  --reg-stop-tint: #f5e2dc;
+  --reg-space-1: 0.25rem;
+  --reg-space-2: 0.5rem;
+  --reg-space-3: 0.75rem;
+  --reg-space-4: 1rem;
+  --reg-space-5: 1.5rem;
+  --reg-space-6: 2rem;
+  --reg-space-7: 3rem;
+  --reg-radius: 10px;
+  --reg-radius-pill: 999px;
+  --reg-card-pad: 1.5rem;
+  --reg-panel-pad: clamp(1.5rem, 3vw, 2rem);
+  --reg-review-max: 60rem;
+  --reg-measure: 66ch;
+  --reg-motion-feedback: 120ms;
+  --reg-motion-transition: 200ms;
+
+  /* Declared composition exception: no counterpart in the authoritative
+     source. Section 3.1 input-column cap, a composition decision. */
+  --reg-column: min(100%, 40rem);
+
+  /* Tier 2 semantic roles. Components author against these only. */
+  --reg-surface: var(--reg-paper);
+  --reg-surface-raised: var(--reg-paper);
+  --reg-text: var(--reg-ink);
+  --reg-text-muted: var(--reg-muted);
+  --reg-border: var(--reg-line);
+  --reg-border-control: var(--reg-line-control);
+  --reg-accent: var(--page-brand-primary);
+  --reg-accent-on: var(--page-on-primary);
+  --reg-accent-2: var(--page-brand-secondary);
+  --reg-accent-2-on: var(--page-on-secondary);
+  --reg-accent-soft: var(--page-brand-secondary-soft);
+  --reg-state-ok: var(--reg-ok);
+  --reg-state-ok-soft: var(--reg-ok-tint);
+  --reg-state-wait: var(--reg-wait);
+  --reg-state-wait-soft: var(--reg-wait-tint);
+  --reg-state-stop: var(--reg-stop);
+  --reg-state-stop-soft: var(--reg-stop-tint);
+
+  box-sizing: border-box;
+  width: min(100%, var(--reg-review-max));
+  margin: 0 auto;
+  padding: var(--reg-panel-pad);
+  font-family: var(--reg-font);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--reg-text);
+  background: var(--reg-surface);
+}
+
+.surface *,
+.surface *::before,
+.surface *::after {
+  box-sizing: border-box;
+}
+
+/* Control geometry the checkout inherits from its own global stylesheet,
+   replicated route-locally because the Kampy app does not load it. */
+.surface button,
+.surface [role="button"],
+.surface input,
+.surface select {
+  min-height: 44px;
+  font: inherit;
+}
+
+.surface :focus-visible {
+  outline: 2px solid var(--reg-text);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--reg-surface);
+}
+
+/* --------------------------------------------------------------------------
+   Card and header hierarchy: chip, stage heading, event title, fact list.
+   -------------------------------------------------------------------------- */
+.card {
+  overflow-wrap: anywhere;
+  padding: var(--reg-card-pad);
+  border: 1px solid var(--reg-border);
+  border-top: var(--reg-space-1) solid var(--reg-accent);
+  border-radius: var(--reg-radius);
+  background: var(--reg-surface-raised);
+}
+
+.chip {
+  display: inline-block;
+  margin: 0 0 var(--reg-space-3);
+  padding: var(--reg-space-2) var(--reg-space-3);
+  border-radius: var(--reg-radius);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--reg-accent-on);
+  background: var(--reg-accent);
+}
+
+.eyebrow {
+  margin: 0 0 var(--reg-space-2);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--reg-accent-2);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  color: var(--reg-text);
+}
+
+.facts {
+  display: grid;
+  gap: var(--reg-space-2);
+  margin: var(--reg-card-pad) 0 0;
+}
+
+.factRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--reg-space-3);
+  margin: 0;
+}
+
+.factRow dt {
+  font-weight: 700;
+  color: var(--reg-text);
+}
+
+.factRow dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--reg-text);
+}
+
+.factEmphasis {
+  padding-top: var(--reg-space-3);
+  border-top: 1px solid var(--reg-border);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Progress: Step N of 6 plus a determinate bar. The bar is aria-hidden and
+   the text carries the equivalent, so there is one announcement not two.
+   -------------------------------------------------------------------------- */
+.progress {
+  margin: var(--reg-space-4) 0 0;
+  display: grid;
+  gap: var(--reg-space-2);
+}
+
+.progressText {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--reg-text);
+}
+
+.progressLocal {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--reg-text-muted);
+}
+
+.progressBar {
+  height: var(--reg-space-2);
+  border-radius: var(--reg-radius-pill);
+  background: var(--reg-accent-soft);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: var(--reg-radius-pill);
+  background: var(--reg-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Form: one column at every width, input column capped at --reg-column.
+   Sections are hairline rules with a coloured legend, never nested boxes.
+   -------------------------------------------------------------------------- */
+.form {
+  display: grid;
+  gap: var(--reg-space-5);
+  width: var(--reg-column);
+  margin-top: var(--reg-card-pad);
+}
+
+.section {
+  display: grid;
+  gap: var(--reg-space-5);
+  min-width: 0;
+  margin: 0;
+  padding: var(--reg-card-pad) 0 0;
+  border: 0;
+  border-top: 1px solid var(--reg-border);
+}
+
+.sectionFirst {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.sectionLegend {
+  margin: 0 0 var(--reg-space-4);
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--reg-accent-2);
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: var(--reg-space-2);
+}
+
+.label {
+  display: grid;
+  min-width: 0;
+  gap: var(--reg-space-2);
+  font-weight: 700;
+  color: var(--reg-text);
+}
+
+.requirement {
+  font-weight: 400;
+  color: var(--reg-text-muted);
+}
+
+.why {
+  margin: 0;
+  max-width: var(--reg-measure);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--reg-text-muted);
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  min-width: 0;
+  padding: var(--reg-space-3);
+  border: 1px solid var(--reg-border-control);
+  border-radius: var(--reg-radius);
+  font: inherit;
+  color: var(--reg-text);
+  background: var(--reg-surface);
+}
+
+.textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.input[aria-invalid="true"],
+.textarea[aria-invalid="true"],
+.select[aria-invalid="true"] {
+  border-color: var(--reg-state-stop);
+}
+
+.fieldError {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--reg-state-stop);
+}
+
+.choiceGroup {
+  display: grid;
+  gap: var(--reg-space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choiceLegend {
+  display: block;
+  margin: 0 0 var(--reg-space-2);
+  padding: 0;
+  max-width: var(--reg-measure);
+  font-weight: 700;
+  color: var(--reg-text);
+}
+
+/* --------------------------------------------------------------------------
+   Acceptance block: the checkout consent-block geometry, reused for agreement
+   acceptance and for the typed-signature affirmation.
+   -------------------------------------------------------------------------- */
+.acceptance {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--reg-space-3);
+  min-height: 44px;
+  padding: var(--reg-space-4);
+  border: 1px solid var(--reg-border);
+  border-radius: var(--reg-radius);
+  font-weight: 400;
+  color: var(--reg-text);
+  background: var(--reg-accent-soft);
+  cursor: pointer;
+}
+
+.acceptance input {
+  width: var(--reg-space-5);
+  min-width: var(--reg-space-5);
+  height: var(--reg-space-5);
+  min-height: var(--reg-space-5);
+  margin: var(--reg-space-1) 0 0;
+  accent-color: var(--reg-accent-2);
+}
+
+.acceptanceInvalid {
+  border-color: var(--reg-state-stop);
+}
+
+.agreement {
+  display: grid;
+  gap: var(--reg-space-3);
+}
+
+.agreementTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--reg-text);
+}
+
+.agreementMeta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--reg-text-muted);
+}
+
+.agreementBody {
+  margin: 0;
+  max-width: var(--reg-measure);
+  color: var(--reg-text);
+}
+
+/* --------------------------------------------------------------------------
+   Callouts: one pattern, three roles. Never colour alone; the text carries
+   the meaning and the rule is the accent.
+   -------------------------------------------------------------------------- */
+.callout {
+  display: grid;
+  gap: var(--reg-space-2);
+  margin: 0;
+  padding: var(--reg-space-4);
+  border-left: var(--reg-space-1) solid var(--reg-border);
+  color: var(--reg-text);
+  background: var(--reg-surface);
+}
+
+.calloutOk {
+  border-left-color: var(--reg-state-ok);
+  background: var(--reg-state-ok-soft);
+}
+
+.calloutWait {
+  border-left-color: var(--reg-state-wait);
+  background: var(--reg-state-wait-soft);
+}
+
+.calloutStop {
+  border-left-color: var(--reg-state-stop);
+  background: var(--reg-state-stop-soft);
+}
+
+.calloutTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--reg-text);
+}
+
+.calloutBody {
+  margin: 0;
+  max-width: var(--reg-measure);
+}
+
+/* --------------------------------------------------------------------------
+   Error summary. Focus destination after a rejected stage. One error renders
+   as a single focusable sentence, more than one as a heading plus list.
+   -------------------------------------------------------------------------- */
+.summary {
+  display: grid;
+  gap: var(--reg-space-2);
+  padding: var(--reg-space-4);
+  border: 1px solid var(--reg-state-stop);
+  border-radius: var(--reg-radius);
+  background: var(--reg-state-stop-soft);
+}
+
+.summaryHeading {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--reg-text);
+}
+
+.summaryList {
+  display: grid;
+  gap: var(--reg-space-2);
+  margin: 0;
+  padding-left: var(--reg-space-5);
+}
+
+.summary a {
+  color: var(--reg-text);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Status region and actions.
+   -------------------------------------------------------------------------- */
+.status {
+  /* Reserved height. A status line that grows or shrinks reflows the action
+     row below it, which on a phone can move the primary button between
+     pointerdown and pointerup and swallow the tap. */
+  min-height: 3rem;
+  margin: 0;
+  /* Supporting text, not a heading: the stage h2 and the progress line already
+     carry the stage, so this must not compete with them. */
+  font-weight: 400;
+  color: var(--reg-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-3);
+  align-items: center;
+  margin-top: var(--reg-space-2);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--reg-space-3) var(--reg-space-5);
+  border: 1px solid var(--reg-border-control);
+  border-radius: var(--reg-radius-pill);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--reg-text);
+  background: var(--reg-surface);
+  cursor: pointer;
+  transition: background var(--reg-motion-feedback) ease, color var(--reg-motion-feedback) ease;
+}
+
+.btnPrimary {
+  justify-self: start;
+  min-width: 10rem;
+  border: 0;
+  color: var(--reg-accent-on);
+  background: var(--reg-accent);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  color: var(--reg-accent-2-on);
+  background: var(--reg-accent-2);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  color: var(--reg-text-muted);
+  background: var(--reg-accent-soft);
+  cursor: not-allowed;
+}
+
+.btnQuiet {
+  min-height: 44px;
+  padding: var(--reg-space-2) 0;
+  border: 0;
+  font-weight: 700;
+  text-align: left;
+  color: var(--reg-accent-2);
+  background: var(--reg-surface);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.linkRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-4);
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   Signature primitive.
+   -------------------------------------------------------------------------- */
+.signature {
+  display: grid;
+  gap: var(--reg-space-4);
+}
+
+.sigMethods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-3);
+}
+
+.sigMethod {
+  min-width: 9rem;
+}
+
+.sigMethodActive {
+  border-color: var(--reg-accent);
+  color: var(--reg-accent-on);
+  background: var(--reg-accent);
+}
+
+.sigCanvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 2;
+  border: 1px solid var(--reg-border-control);
+  border-radius: var(--reg-radius);
+  color: var(--reg-text);
+  background: var(--reg-surface);
+  touch-action: auto;
+}
+
+.sigCanvasDrawing {
+  touch-action: none;
+}
+
+.sigCanvasInvalid {
+  border-color: var(--reg-state-stop);
+}
+
+.sigState {
+  margin: 0;
+  font-weight: 700;
+  color: var(--reg-text);
+}
+
+.sigControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-3);
+}
+
+.sigExpanded {
+  display: grid;
+  gap: var(--reg-space-4);
+  padding: var(--reg-space-4);
+  border: 1px solid var(--reg-accent);
+  border-radius: var(--reg-radius);
+  background: var(--reg-surface);
+}
+
+.sigExpanded .sigCanvas {
+  aspect-ratio: 3 / 2;
+}
+
+.confirm {
+  display: grid;
+  gap: var(--reg-space-3);
+  padding: var(--reg-space-4);
+  border: 1px solid var(--reg-state-stop);
+  border-radius: var(--reg-radius);
+  background: var(--reg-state-stop-soft);
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-3);
+}
+
+/* --------------------------------------------------------------------------
+   Review, receipt, legal nav.
+   -------------------------------------------------------------------------- */
+.reviewGroup {
+  display: grid;
+  gap: var(--reg-space-3);
+  padding: var(--reg-card-pad) 0 0;
+  border-top: 1px solid var(--reg-border);
+}
+
+.reviewItem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-3);
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--reg-space-3);
+  border-bottom: 1px solid var(--reg-border);
+}
+
+.reviewItem:last-child {
+  border-bottom: 0;
+}
+
+.reviewItem p {
+  margin: var(--reg-space-1) 0 0;
+}
+
+.reviewHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.reviewTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--reg-accent-2);
+}
+
+.digest {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+  color: var(--reg-text-muted);
+}
+
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--reg-space-3);
+  margin: var(--reg-card-pad) 0 0;
+  font-size: 0.875rem;
+}
+
+.legal a {
+  padding: var(--reg-space-1) var(--reg-space-2);
+  border-radius: var(--reg-radius);
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--reg-accent-2);
+}
+
+.legal a:hover {
+  color: var(--reg-accent-2-on);
+  background: var(--reg-accent-2);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   One breakpoint, matching the authoritative checkout surface.
+   -------------------------------------------------------------------------- */
+@media (max-width: 48rem) {
+  .form {
+    width: 100%;
+  }
+
+  .btnPrimary {
+    width: 100%;
+  }
+
+  .actions {
+    display: grid;
+  }
+
+  .sigCanvas {
+    aspect-ratio: 2 / 1;
+  }
+
+  .reviewHead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface *,
+  .surface *::before,
+  .surface *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.surface [hidden] { display: none !important; }

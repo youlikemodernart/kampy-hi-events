@@ -100,6 +100,84 @@ class RespondentConfirmationPostgresTest extends TestCase
         self::assertNotNull(DB::table('respondent_confirmation_challenges')->value('consumed_at'));
     }
 
+    public function test_invitation_parallel_commit_and_resumption_reject_corrected_assignments(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $repo = new RespondentConfirmationRepository;
+        $token = $repo->issue('order_11', true)->token;
+        $before = DB::table('respondent_confirmation_challenges')->first();
+        self::assertNull($before->verified_at);
+        self::assertFalse($repo->invitationContext('order_11', $token)['confirmed']);
+        self::assertEquals($before, DB::table('respondent_confirmation_challenges')->first());
+        $confirm = fn () => app(RespondentConfirmationService::class)->confirm('order_11', $token, Fixture::payload());
+        self::assertSame([true, true], $this->parallel([$confirm, $confirm]));
+        self::assertSame(2, DB::table('gvsu_registration_assignments')->count());
+        self::assertSame(1, DB::table('order_effect_outbox')->count());
+        self::assertTrue($repo->invitationContext('order_11', $token)['confirmed']);
+        config()->set('respondent-confirmation.invitation_enabled', false);
+        self::assertNull($repo->invitationContext('order_11', $token));
+        self::assertFalse($confirm());
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        DB::table('gvsu_registration_assignments')->where('attendee_id', 112)->update(['respondent_display_name' => 'Corrected Guardian']);
+        self::assertNull($repo->invitationContext('order_11', $token));
+    }
+
+    public function test_invitation_event_window_and_cancellation_block_resume_without_changing_committed_work(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $repo = new RespondentConfirmationRepository;
+        $issuedAt = \Carbon\Carbon::parse('2026-10-06T02:00:00Z');
+        $this->travelTo($issuedAt);
+        try {
+            $token = $repo->issue('order_11', true)->token;
+            $confirm = fn () => app(RespondentConfirmationService::class)->confirm('order_11', $token, Fixture::payload());
+            self::assertFalse(app(RespondentConfirmationService::class)->confirm('order_12', $token, Fixture::payload()));
+            self::assertSame('2026-10-17 20:00:00', DB::table('respondent_confirmation_challenges')->value('expires_at'));
+            $this->travelTo($issuedAt->copy()->addHours(8));
+            self::assertFalse($repo->invitationContext('order_11', $token)['confirmed']);
+            self::assertTrue($confirm());
+            $this->travelTo($issuedAt->copy()->addDays(2));
+            self::assertSame(0, app(RespondentConfirmationRetention::class)->purge()['challenges_deleted']);
+            self::assertTrue($repo->invitationContext('order_11', $token)['confirmed']);
+            self::assertTrue($confirm());
+            $assignments = DB::table('gvsu_registration_assignments')->orderBy('attendee_id')->get();
+            $outbox = DB::table('order_effect_outbox')->get();
+            $this->travelTo(\Carbon\Carbon::parse('2026-10-17T19:59:59Z'));
+            self::assertTrue($repo->invitationContext('order_11', $token)['confirmed']);
+            self::assertTrue($confirm());
+            $this->travel(1)->seconds();
+            self::assertNull($repo->invitationContext('order_11', $token));
+            self::assertFalse($confirm());
+            self::assertNull($repo->issue('order_12', true));
+            self::assertEquals($assignments, DB::table('gvsu_registration_assignments')->orderBy('attendee_id')->get());
+            self::assertEquals($outbox, DB::table('order_effect_outbox')->get());
+            $this->travelTo($issuedAt->copy()->addMinute());
+            DB::table('orders')->where('id', 11)->update(['status' => 'CANCELLED']);
+            self::assertNull($repo->invitationContext('order_11', $token));
+            self::assertFalse($confirm());
+            self::assertEquals($assignments, DB::table('gvsu_registration_assignments')->orderBy('attendee_id')->get());
+            self::assertEquals($outbox, DB::table('order_effect_outbox')->get());
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public function test_invitation_delivery_mode_survives_challenge_retention(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $token = (new RespondentConfirmationRepository)->issue('order_11', true)->token;
+        self::assertTrue(app(RespondentConfirmationService::class)->confirm('order_11', $token, Fixture::payload()));
+        self::assertSame(2, DB::table('gvsu_registration_assignments')->where('completion_invitation', true)->count());
+        DB::table('respondent_confirmation_challenges')->delete();
+        $portal = \Mockery::mock(\HiEvents\Services\Domain\Registration\GvsuRegistrationBridgePortalClient::class);
+        $portal->shouldReceive('provision')->once()->withArgs(function ($batch) {
+            self::assertTrue($batch['completion_invitation']);
+            return true;
+        });
+        $this->app->instance(\HiEvents\Services\Domain\Registration\GvsuRegistrationBridgePortalClient::class, $portal);
+        self::assertTrue(app(\HiEvents\Services\Domain\Registration\GvsuRegistrationBridgeService::class)->provisionCompletedOrder(11));
+    }
+
     public function test_source_refund_attendee_cancellation_and_event_cancellation_win_before_confirmation(): void
     {
         foreach (['refund', 'attendee', 'event'] as $case) {

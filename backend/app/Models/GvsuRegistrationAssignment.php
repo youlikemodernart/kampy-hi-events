@@ -11,6 +11,7 @@ class GvsuRegistrationAssignment extends BaseModel
     protected function getFillableFields(): array
     {
         return [
+            'completion_invitation',
             'recovery_evidence_id',
             'provision_batch_id',
             'event_id',
@@ -43,6 +44,7 @@ class GvsuRegistrationAssignment extends BaseModel
     protected function getCastMap(): array
     {
         return [
+            'completion_invitation' => 'boolean',
             'assignment_revision' => 'integer',
             'delivery_destination_ciphertext' => 'encrypted',
             'bound_at' => 'datetime',

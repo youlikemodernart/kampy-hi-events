@@ -11125,3 +11125,19 @@ msgstr "Contacten bevestigd"
 #: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
 msgid "Unable to confirm contacts"
 msgstr "Contacten konden niet worden bevestigd"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Complete your waivers"
+msgstr "Vul je vrijwaringsverklaringen in"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Send waiver invitation"
+msgstr "Uitnodiging voor vrijwaring versturen"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Unable to open the waiver invitation. Please contact Kamp Love for help."
+msgstr "De uitnodiging kan niet worden geopend. Neem contact op met Kamp Love voor hulp."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "We send the private invitation to the purchase email address. Choose the appropriate adult or guardian for each attendee, then continue to their waiver."
+msgstr "We sturen de privé-uitnodiging naar het e-mailadres van de aankoop. Kies voor elke deelnemer de juiste volwassene of wettelijke voogd en ga verder naar de vrijwaringsverklaring."

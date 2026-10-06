@@ -11,6 +11,7 @@ try {
     $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
     $kernel->bootstrap();
     Tests\Support\RespondentConfirmationFixture::configure();
+    config()->set('respondent-confirmation.invitation_enabled', true);
     config()->set('respondent-confirmation.origin', getenv('RESPONDENT_BROWSER_ORIGIN'));
     $fullCheckout = getenv('RESPONDENT_FULL_CHECKOUT') === '1';
     if ($fullCheckout) {
@@ -40,11 +41,13 @@ try {
     if ($fullCheckout && $path === '/_fixture/paid' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         Tests\Support\RespondentCheckoutFixture::paid(11);
         echo '{}';
+
         return;
     }
     if ($fullCheckout && $path === '/_fixture/respondents') {
         header('Content-Type: application/json');
         echo json_encode(Tests\Support\RespondentCheckoutFixture::respondents(11));
+
         return;
     }
     if ($path === '/_fixture/mailbox') {
@@ -69,6 +72,9 @@ try {
         file_put_contents($mailbox, $event->message->getHtmlBody(), LOCK_EX);
         chmod($mailbox, 0600);
     });
+    if (str_starts_with($_SERVER['REQUEST_URI'], '/api/registration/invitation')) {
+        $_SERVER['REQUEST_URI'] = substr($_SERVER['REQUEST_URI'], 4);
+    }
     $response = $kernel->handle(Illuminate\Http\Request::capture());
     $response->send();
     $kernel->terminate(Illuminate\Http\Request::capture(), $response);

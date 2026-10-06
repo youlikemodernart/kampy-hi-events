@@ -1,64 +1,22 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {useMutation} from '@tanstack/react-query';
-import {Alert, Button, Checkbox, Select, Stack, Text, TextInput, Title} from '@mantine/core';
+import {Alert, Button, Stack, Text, Title} from '@mantine/core';
 import {t} from '@lingui/macro';
 import {publicApi} from '../../../../api/public-client.ts';
 import {Order} from '../../../../types.ts';
 import {Card} from '../../../common/Card';
 
 export function RespondentConfirmationPanel({order}: {order: Order}) {
-    const attendees = (order.attendees ?? []).filter(attendee => attendee.status === 'ACTIVE');
-    const [verified, setVerified] = useState(false);
-    const [verifiedSiblings, setVerifiedSiblings] = useState<typeof attendees>([]);
-    const [code, setCode] = useState('');
-    const [acknowledged, setAcknowledged] = useState(false);
     const [message, setMessage] = useState('');
-    const [confirmed, setConfirmed] = useState(false);
-    const [rows, setRows] = useState<Record<string, {route: string; respondent_name: string; email: string}>>({});
-    useEffect(() => {setCode(''); setVerified(false); setRows({}); setAcknowledged(false); setConfirmed(false);}, [order.short_id]);
-    const headers = {'X-Kamp-Respondent-Intent': 'confirm'};
-    const post = async (path: string, body: unknown) => {
-        try {return (await publicApi.post(path, body, {headers})).data;}
-        catch {throw new Error('Respondent confirmation unavailable');}
-    };
-    const request = useMutation({
-        mutationFn: () => post(`/registration/orders/${encodeURIComponent(order.short_id)}/request-verification`, {}),
-        onSuccess: result => {setVerified(false); setCode(''); setRows({}); setAcknowledged(false); setMessage(result.message);},
-        onError: () => setMessage(t`Unable to confirm contacts`),
+    const invitation = useMutation({
+        mutationFn: async () => (await publicApi.post(`/registration/orders/${encodeURIComponent(order.short_id)}/request-verification`, {}, {headers: {'X-Kamp-Respondent-Intent': 'confirm'}})).data,
+        onSuccess: result => setMessage(result.message),
+        onError: () => setMessage(t`Unable to open the waiver invitation. Please contact Kamp Love for help.`),
     });
-    const verification = useMutation({
-        mutationFn: () => post(`/registration/orders/${encodeURIComponent(order.short_id)}/verify-mailbox`, {verification_code: code.trim()}),
-        onSuccess: result => {setVerified(true); setVerifiedSiblings(result.siblings); setRows({}); setAcknowledged(false);},
-        onError: () => {setVerified(false); setCode(''); setMessage(t`Unable to confirm contacts`);},
-    });
-    const confirmation = useMutation({
-        mutationFn: () => post(`/registration/orders/${encodeURIComponent(order.short_id)}/confirm-respondents`, {
-            verification_code: code.trim(), acknowledged,
-            respondents: verifiedSiblings.map(attendee => ({attendee_id: Number(attendee.id), ...rows[String(attendee.id)]})),
-        }),
-        onSuccess: () => {setConfirmed(true); setCode(''); setRows({}); setMessage(t`Contacts confirmed`);},
-        onError: () => {setVerified(false); setCode(''); setMessage(t`Unable to confirm contacts`);},
-    });
-    const update = (id: string, key: string, value: string) => setRows(previous => ({...previous, [id]: {...(previous[id] ?? {route: '', respondent_name: '', email: ''}), [key]: value}}));
     return <Card><Stack gap="md">
-        <Title order={2}>{t`Waiver contacts`}</Title>
-        <Text>{t`Every active attendee needs a contact. Email verification does not prove guardianship or sign a waiver.`}</Text>
+        <Title order={2}>{t`Complete your waivers`}</Title>
+        <Text>{t`We send the private invitation to the purchase email address. Choose the appropriate adult or guardian for each attendee, then continue to their waiver.`}</Text>
         {message && <Alert role="status">{message}</Alert>}
-        {!confirmed && <>
-            <Button loading={request.isPending} onClick={() => request.mutate()}>{t`Verify Email`}</Button>
-            <TextInput label={t`Verification code`} value={code} onChange={event => {setCode(event.currentTarget.value); setVerified(false); setRows({});}} maxLength={64} autoComplete="off" spellCheck={false}/>
-            <Button disabled={verified || !/^[a-f0-9]{64}$/.test(code.trim())} loading={verification.isPending} onClick={() => verification.mutate()}>{t`Continue`}</Button>
-            {verified && verifiedSiblings.map(attendee => {
-                const id = String(attendee.id);
-                return <Stack gap="sm" key={id}>
-                    <Text fw={600}>{attendee.first_name} {attendee.last_name}</Text>
-                    <Select aria-label={`${attendee.first_name} ${attendee.last_name}`} value={rows[id]?.route ?? null} onChange={value => update(id, 'route', value ?? '')} data={[{value: 'adult', label: t`Adult attendee`}, {value: 'guardian', label: t`Parent or guardian`}]} required/>
-                    {rows[id]?.route === 'guardian' && <TextInput label={t`Name`} value={rows[id]?.respondent_name ?? ''} onChange={event => update(id, 'respondent_name', event.currentTarget.value)} maxLength={200} required/>}
-                    <TextInput label={t`Email`} type="email" value={rows[id]?.email ?? ''} onChange={event => update(id, 'email', event.currentTarget.value)} maxLength={320} required/>
-                </Stack>;
-            })}
-            <Checkbox disabled={!verified} label={t`I confirm the appropriate contact for every attendee.`} checked={acknowledged} onChange={event => setAcknowledged(event.currentTarget.checked)}/>
-            <Button disabled={!verified || !acknowledged || !/^[a-f0-9]{64}$/.test(code.trim()) || verifiedSiblings.some(attendee => !rows[String(attendee.id)]?.route || !rows[String(attendee.id)]?.email)} loading={confirmation.isPending} onClick={() => confirmation.mutate()}>{t`Confirm all contacts`}</Button>
-        </>}
+        <Button loading={invitation.isPending} onClick={() => invitation.mutate()}>{t`Send waiver invitation`}</Button>
     </Stack></Card>;
 }

@@ -64,8 +64,12 @@ class RespondentConfirmationTest extends TestCase
         (require database_path('migrations/2026_10_05_000002_create_order_purchase_contacts.php'))->up();
         // PostgreSQL migration constraints are exercised by the dedicated disposable suite.
         Schema::create('order_receipt_recovery_evidence', fn (Blueprint $t) => $t->integer('order_id'));
-        Schema::table('gvsu_registration_assignments', fn (Blueprint $t) => $t->integer('recovery_evidence_id')->nullable());
+        Schema::table('gvsu_registration_assignments', function (Blueprint $t) {
+            $t->integer('recovery_evidence_id')->nullable();
+            $t->boolean('completion_invitation')->default(false);
+        });
         Schema::table('respondent_confirmation_challenges', function (Blueprint $t) {
+            $t->boolean('invitation')->default(false);
             $t->string('authority_type')->nullable();
             $t->integer('authority_id')->nullable();
             $t->string('authority_commitment')->nullable();
@@ -83,6 +87,108 @@ class RespondentConfirmationTest extends TestCase
             DB::table('attendees')->insert(['id' => $id, 'event_id' => 7, 'order_id' => 11, 'status' => 'ACTIVE', 'public_id' => 'ticket_'.$id, 'first_name' => 'Invented', 'last_name' => 'Attendee '.$id]);
         }
         Mail::fake();
+    }
+
+    public function test_invitation_is_read_only_frozen_single_use_and_resumable(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $repo = new RespondentConfirmationRepository;
+        $issued = $repo->issue('order_11', true);
+        $before = DB::table('respondent_confirmation_challenges')->first();
+        self::assertNull($repo->invitationContext('order_12', $issued->token));
+        self::assertNull($repo->invitationContext('order_11', str_repeat('0', 64)));
+        for ($i = 0; $i < 3; $i++) {
+            self::assertFalse($repo->invitationContext('order_11', $issued->token)['confirmed']);
+        }
+        self::assertEquals($before, DB::table('respondent_confirmation_challenges')->first());
+        for ($i = 0; $i < 8; $i++) {
+            self::assertFalse($repo->confirm('order_11', str_repeat('0', 64), $this->payload(), fn () => self::fail('invalid capability')));
+        }
+        self::assertSame(0, DB::table('respondent_confirmation_challenges')->value('attempts'));
+        $calls = 0;
+        self::assertTrue($repo->confirm('order_11', $issued->token, $this->payload(), function () use (&$calls) {
+            $calls++;
+        }));
+        self::assertNull($repo->invitationContext('order_11', $issued->token)); // Stub binding created no assignments; cannot hand off phantom work.
+        self::assertTrue($repo->confirm('order_11', $issued->token, $this->payload(), function () use (&$calls) {
+            $calls++;
+        }));
+        self::assertSame(1, $calls);
+        $changed = $this->payload();
+        $changed[0]['email'] = 'changed@example.test';
+        self::assertFalse($repo->confirm('order_11', $issued->token, $changed, fn () => self::fail('rebound')));
+        DB::table('attendees')->where('id', 21)->update(['first_name' => 'Changed']);
+        self::assertNull($repo->invitationContext('order_11', $issued->token));
+    }
+
+    public function test_invitation_cookie_expiry_requires_email_reopen_without_expiring_invitation(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $this->travelTo(\Carbon\Carbon::parse('2026-10-06T02:00:00Z'));
+        try {
+            $repo = new RespondentConfirmationRepository;
+            $token = $repo->issue('order_11', true)->token;
+            $before = DB::table('respondent_confirmation_challenges')->first();
+            $action = app(\HiEvents\Http\Actions\Registration\CompletionInvitationAction::class);
+            $path = '/registration/invitation/order_11';
+            $get = $action(Request::create($path, 'GET'), 'order_11');
+            self::assertSame(200, $get->getStatusCode());
+            self::assertCount(0, $get->headers->getCookies());
+            $post = function (array $body, array $cookies = []) use ($action, $path) {
+                return $action(Request::create($path, 'POST', [], $cookies, [], ['HTTP_ORIGIN' => 'https://tickets.kamplove.org', 'HTTP_X_KAMP_RESPONDENT_INTENT' => 'confirm', 'CONTENT_TYPE' => 'application/json'], json_encode($body)), 'order_11');
+            };
+            $this->travel(8)->hours();
+            $opened = $post(['action' => 'open', 'token' => $token]);
+            self::assertSame(200, $opened->getStatusCode());
+            $cookie = $opened->headers->getCookies()[0];
+            self::assertTrue($cookie->isSecure());
+            self::assertTrue($cookie->isHttpOnly());
+            self::assertSame('strict', $cookie->getSameSite());
+            self::assertSame('/api/registration/invitation/order_11', $cookie->getPath());
+            self::assertSame(200, $post(['action' => 'resume'], [$cookie->getName() => $cookie->getValue()])->getStatusCode());
+            $this->travel(15)->minutes();
+            self::assertSame(409, $post(['action' => 'resume'], [$cookie->getName() => $cookie->getValue()])->getStatusCode());
+            self::assertSame(200, $post(['action' => 'open', 'token' => $token])->getStatusCode());
+            self::assertEquals($before, DB::table('respondent_confirmation_challenges')->first());
+            self::assertSame(0, DB::table('gvsu_registration_assignments')->count());
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public function test_invitation_respects_earlier_event_end_and_legacy_code_still_expires_in_fifteen_minutes(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        $this->travelTo(\Carbon\Carbon::parse('2026-10-06T02:00:00Z'));
+        try {
+            DB::table('events')->where('id', 7)->update(['end_date' => '2026-10-07 02:00:00']);
+            $repo = new RespondentConfirmationRepository;
+            $token = $repo->issue('order_11', true)->token;
+            self::assertSame('2026-10-07 02:00:00', DB::table('respondent_confirmation_challenges')->value('expires_at'));
+            $this->travel(61)->seconds();
+            DB::table('attendees')->insert(['id' => 23, 'order_id' => 12, 'event_id' => 7, 'status' => 'ACTIVE', 'public_id' => 'ticket_23', 'first_name' => 'Invented', 'last_name' => 'Legacy']);
+            $legacy = $repo->issue('order_12')->token;
+            $this->travel(15)->minutes();
+            self::assertNull($repo->verify('order_12', $legacy));
+            self::assertNotNull($repo->invitationContext('order_11', $token));
+            $this->travelTo(\Carbon\Carbon::parse('2026-10-07T02:00:00Z'));
+            self::assertNull($repo->invitationContext('order_11', $token));
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public function test_invitation_email_uses_fragment_and_no_separate_code(): void
+    {
+        config()->set('respondent-confirmation.invitation_enabled', true);
+        app(RespondentConfirmationService::class)->request('order_11');
+        Mail::assertSent(RespondentConfirmationChallenge::class, function ($mail) {
+            self::assertTrue($mail->hasTo('buyer@example.test'));
+            self::assertStringContainsString('/api/registration/invitation/order_11#', $mail->completionUrl);
+            self::assertStringNotContainsString('Verification code', $mail->render());
+
+            return true;
+        });
     }
 
     private function payload(): array
@@ -186,6 +292,7 @@ class RespondentConfirmationTest extends TestCase
 
     public function test_http_request_is_generic_user_triggered_and_never_returns_buyer_address(): void
     {
+        config()->set('respondent-confirmation.invitation_enabled', true);
         config()->set('respondent-confirmation.enabled', true);
         $headers = ['Origin' => 'https://tickets.kamplove.org', 'X-Kamp-Respondent-Intent' => 'confirm'];
         $existing = $this->withHeaders($headers)->postJson('/public/registration/orders/order_11/request-verification')->assertStatus(202);
@@ -202,7 +309,6 @@ class RespondentConfirmationTest extends TestCase
         $outbox->shouldReceive('enqueueRespondentConfirmation')->once()->with(11);
         $this->app->instance(OrderEffectOutboxService::class, $outbox);
         $code = Mail::sent(RespondentConfirmationChallenge::class)->first()->confirmationCode;
-        $this->withHeaders($headers)->postJson('/public/registration/orders/order_11/verify-mailbox', ['verification_code' => $code])->assertOk()->assertJson(['status' => 'verified']);
         $this->withHeaders($headers)->postJson('/public/registration/orders/order_11/confirm-respondents', ['verification_code' => $code, 'acknowledged' => true, 'respondents' => $this->payload()])->assertOk()->assertJson(['status' => 'confirmed']);
         Mail::assertSent(RespondentConfirmationChallenge::class, 1);
     }

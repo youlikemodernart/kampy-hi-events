@@ -20,10 +20,19 @@ final class RespondentConfirmationService
 
     public function request(string $shortId): void
     {
-        $delivery = $this->repository->issue($shortId);
+        $invitation = config('respondent-confirmation.invitation_enabled') === true;
+        if ($invitation) {
+            $origin = parse_url((string) config('respondent-confirmation.origin'));
+            if (! is_array($origin) || ($origin['scheme'] ?? '') !== 'https' || empty($origin['host']) || (isset($origin['user']) || isset($origin['pass']))
+                || isset($origin['query']) || isset($origin['fragment']) || ! in_array($origin['path'] ?? '', ['', '/'], true)
+                || config('mail.default') === 'log' || in_array('log', config('mail.mailers.'.config('mail.default').'.mailers', []), true)) {
+                return;
+            }
+        }
+        $delivery = $this->repository->issue($shortId, $invitation);
         if ($delivery !== null) {
             // Synchronous single attempt: never serialize a plaintext challenge into a queue or retry an uncertain send.
-            Mail::to($delivery->email)->send(new RespondentConfirmationChallenge($delivery->token));
+            Mail::to($delivery->email)->send(new RespondentConfirmationChallenge($delivery->token, $invitation ? rtrim(config('respondent-confirmation.origin'), '/').'/api/registration/invitation/'.rawurlencode($shortId).'#'.$delivery->token : null));
         }
     }
 
@@ -61,7 +70,7 @@ final class RespondentConfirmationService
         }
         ksort($respondents, SORT_NUMERIC);
 
-        return $this->repository->confirm($shortId, $token, array_values($respondents), function ($orderId, $attendees, $rows, $authority): void {
+        return $this->repository->confirm($shortId, $token, array_values($respondents), function ($orderId, $attendees, $rows, $authority, bool $invitation): void {
             foreach ($attendees as $index => $attendee) {
                 $row = $rows[$index];
                 $attendeeName = trim($attendee->first_name.' '.$attendee->last_name);
@@ -69,7 +78,7 @@ final class RespondentConfirmationService
                     throw new ResourceConflictException(__('Attendee context is unavailable.'));
                 }
                 $this->bridge->bindRespondent($orderId, (int) $attendee->id, $attendeeName,
-                    $row['route'] === 'adult' ? $attendeeName : $row['respondent_name'], $row['route'], $row['email'], null, true, true, $authority['type'] === 'historical_receipt_v1' ? $authority['id'] : null);
+                    $row['route'] === 'adult' ? $attendeeName : $row['respondent_name'], $row['route'], $row['email'], null, true, true, $authority['type'] === 'historical_receipt_v1' ? $authority['id'] : null, $invitation);
             }
             $this->outbox->enqueueRespondentConfirmation($orderId);
         });

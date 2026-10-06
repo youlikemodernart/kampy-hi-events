@@ -11124,3 +11124,19 @@ msgstr "Контакты подтверждены"
 #: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
 msgid "Unable to confirm contacts"
 msgstr "Не удалось подтвердить контакты"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Complete your waivers"
+msgstr "Заполните заявления об освобождении от ответственности"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Send waiver invitation"
+msgstr "Отправить приглашение для заполнения заявления"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Unable to open the waiver invitation. Please contact Kamp Love for help."
+msgstr "Не удалось открыть приглашение. Обратитесь в Kamp Love за помощью."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "We send the private invitation to the purchase email address. Choose the appropriate adult or guardian for each attendee, then continue to their waiver."
+msgstr "Мы отправим личное приглашение на адрес электронной почты, указанный при покупке. Выберите соответствующего взрослого или законного опекуна для каждого участника и перейдите к его заявлению."

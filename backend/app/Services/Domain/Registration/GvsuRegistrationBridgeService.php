@@ -34,6 +34,7 @@ class GvsuRegistrationBridgeService
         bool $deferProvision = false,
         bool $createOnly = false,
         ?int $recoveryEvidenceId = null,
+        bool $completionInvitation = false,
     ): array {
         $attendeeName = $this->normalizedAttendeeDisplayName($attendeeDisplayName);
         $name = $this->normalizedRespondentDisplayName($respondentDisplayName);
@@ -42,7 +43,7 @@ class GvsuRegistrationBridgeService
         $relationship = $this->normalizedGuardianRelationshipReference($guardianRelationshipReference, $route);
         $identityDigest = $this->identityDigest($attendeeName, $name, $route, $relationship, $destination);
 
-        $result = DB::transaction(function () use ($orderId, $attendeeId, $attendeeName, $name, $route, $destination, $relationship, $identityDigest, $createOnly, $recoveryEvidenceId): array {
+        $result = DB::transaction(function () use ($orderId, $attendeeId, $attendeeName, $name, $route, $destination, $relationship, $identityDigest, $createOnly, $recoveryEvidenceId, $completionInvitation): array {
             $order = Order::withTrashed()->select(['id', 'event_id'])->lockForUpdate()->find($orderId);
             $attendee = Attendee::withTrashed()
                 ->select(['id', 'event_id', 'order_id', 'public_id', 'status', 'deleted_at'])
@@ -85,6 +86,7 @@ class GvsuRegistrationBridgeService
                 $identityDigest,
             ]);
             $attributes = [
+                'completion_invitation' => $completionInvitation || ($existing?->completion_invitation === true),
                 'recovery_evidence_id' => $recoveryEvidenceId,
                 'provision_batch_id' => null,
                 'event_id' => GvsuRegistrationBridgeConfig::EVENT_ID,
@@ -173,6 +175,10 @@ class GvsuRegistrationBridgeService
                 return null;
             }
 
+            $completionInvitation = $assignments->contains(fn ($assignment) => $assignment->completion_invitation === true);
+            if ($completionInvitation && ! $assignments->every(fn ($assignment) => $assignment->completion_invitation === true)) {
+                throw new ResourceConflictException(__('Mixed invitation delivery modes are unavailable.'));
+            }
             $records = [];
             foreach ($attendees as $attendee) {
                 $assignment = $assignments->get($attendee->id);
@@ -220,6 +226,7 @@ class GvsuRegistrationBridgeService
                 implode(',', array_column($records, 'assignment_id')),
             ]);
             $body = [
+                ...($completionInvitation ? ['completion_invitation' => true] : []),
                 'operation' => 'gvsu-registration-provision-v1',
                 'event_id' => (string) $order->event_id,
                 'order_id' => (string) $order->id,

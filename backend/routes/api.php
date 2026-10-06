@@ -576,3 +576,16 @@ $router->prefix('/public')->group(
 );
 
 include_once __DIR__ . '/mail.php';
+
+// Capability is carried only in a URL fragment, then exchanged by same-origin POST.
+$router->match(['GET', 'POST'], '/registration/invitation/{orderShortId}', \HiEvents\Http\Actions\Registration\CompletionInvitationAction::class)->middleware('throttle:30,1');
+$router->get('/registration/invitation-script', function () {
+    return response()->file(resource_path('js/completion-invitation.js'), ['Content-Type' => 'text/javascript', 'Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer']);
+});
+
+$router->get('/registration/invitation-style', fn () => response()->file(resource_path('css/completion-invitation.css'), ['Content-Type' => 'text/css', 'Cache-Control' => 'no-store']));
+$router->get('/registration/invitation-font/{weight}.ttf', function (string $weight) {
+    abort_unless(in_array($weight, ['400', '700'], true), 404);
+
+    return response()->file(resource_path('fonts/dmsans-'.$weight.'.ttf'), ['Content-Type' => 'font/ttf']);
+});

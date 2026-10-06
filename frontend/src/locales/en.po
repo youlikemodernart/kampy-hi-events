@@ -11128,3 +11128,19 @@ msgstr "Contacts confirmed"
 #: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
 msgid "Unable to confirm contacts"
 msgstr "Unable to confirm contacts"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Complete your waivers"
+msgstr "Complete your waivers"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Send waiver invitation"
+msgstr "Send waiver invitation"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Unable to open the waiver invitation. Please contact Kamp Love for help."
+msgstr "Unable to open the waiver invitation. Please contact Kamp Love for help."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "We send the private invitation to the purchase email address. Choose the appropriate adult or guardian for each attendee, then continue to their waiver."
+msgstr "We send the private invitation to the purchase email address. Choose the appropriate adult or guardian for each attendee, then continue to their waiver."

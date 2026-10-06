@@ -14,7 +14,7 @@ final class RequestRespondentVerificationAction extends BaseAction
 
     public function __invoke(Request $request, string $orderShortId): JsonResponse
     {
-        if (! RespondentConfirmationRequestGate::allows($request)) {
+        if (config('respondent-confirmation.invitation_enabled') !== true || ! RespondentConfirmationRequestGate::allows($request)) {
             return $this->jsonResponse([], 404);
         }
         try {
@@ -23,6 +23,6 @@ final class RequestRespondentVerificationAction extends BaseAction
             // Identical response for missing orders, throttling, unavailable configuration and uncertain mail handoff.
         }
 
-        return $this->jsonResponse(['message' => __('If this order is eligible, a verification code will be sent to the purchase email address.')], 202)->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'no-referrer');
+        return $this->jsonResponse(['message' => __('If this order is eligible, a private waiver invitation will be sent to the purchase email address.')], 202)->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'no-referrer');
     }
 }

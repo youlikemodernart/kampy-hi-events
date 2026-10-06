@@ -74,9 +74,9 @@ final class RespondentConfirmationRepository
             && hash_equals($challenge->destination_digest, $this->destinationDigest($authority['email']));
     }
 
-    public function issue(string $shortId): ?RespondentChallengeDelivery
+    public function issue(string $shortId, bool $invitation = false): ?RespondentChallengeDelivery
     {
-        if (config('respondent-confirmation.enabled') !== true) {
+        if (config('respondent-confirmation.enabled') !== true || ($invitation && config('respondent-confirmation.invitation_enabled') !== true)) {
             return null;
         }
         $preflight = $this->preflight($shortId);
@@ -84,7 +84,7 @@ final class RespondentConfirmationRepository
             return null;
         }
 
-        return DB::transaction(function () use ($shortId, $preflight) {
+        return DB::transaction(function () use ($shortId, $preflight, $invitation) {
             $order = $this->paidOrder($shortId);
             $authority = $order ? (new RespondentContactAuthorityRepository)->resolve((int) $order->id) : null;
             $email = $authority['email'] ?? null;
@@ -95,6 +95,18 @@ final class RespondentConfirmationRepository
                 || ! Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->exists()
                 || GvsuRegistrationAssignment::query()->where('order_id', $order->id)->exists()) {
                 return null;
+            }
+            // Email invitations last through the existing event window, not the interactive code TTL.
+            $expiresAt = now()->addMinutes(config('respondent-confirmation.ttl_minutes'));
+            if ($invitation) {
+                $expiresAt = CarbonImmutable::parse(config('respondent-confirmation.invitation_deadline'))
+                    ->min(CarbonImmutable::parse(DB::table('events')->where('id', 7)->value('end_date')));
+                if ($authority['type'] === 'historical_receipt_v1') {
+                    $expiresAt = $expiresAt->min(CarbonImmutable::parse($authority['valid_until']));
+                }
+                if ($expiresAt->lte(now())) {
+                    return null;
+                }
             }
             $digest = $this->destinationDigest($email);
             DB::table('respondent_confirmation_destinations')->insertOrIgnore(['destination_digest' => $digest]);
@@ -113,12 +125,52 @@ final class RespondentConfirmationRepository
             DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->whereNull('consumed_at')->update(['expires_at' => now()]);
             $token = bin2hex(random_bytes(32));
             DB::table('respondent_confirmation_challenges')->insert([
+                'invitation' => $invitation,
+                'verified_at' => null,
+                'verified_context_digest' => $invitation ? $this->contextDigest(Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->orderBy('id')->lockForUpdate()->get()) : null,
                 'authority_type' => $authority['type'], 'authority_id' => $authority['id'], 'authority_commitment' => $authority['commitment'],
                 'order_id' => $order->id, 'destination_digest' => $digest, 'token_digest' => hash('sha256', $token),
-                'created_at' => now(), 'expires_at' => now()->addMinutes(config('respondent-confirmation.ttl_minutes')),
+                'created_at' => now(), 'expires_at' => $expiresAt,
             ]);
 
             return new RespondentChallengeDelivery($email, $token);
+        });
+    }
+
+    /** Read-only capability resolution: opening/scanning a link never spends it. */
+    public function invitationContext(string $shortId, string $token): ?array
+    {
+        if (config('respondent-confirmation.enabled') !== true || config('respondent-confirmation.invitation_enabled') !== true || ! preg_match('/\A[0-9a-f]{64}\z/', $token)) {
+            return null;
+        }
+
+        return DB::transaction(function () use ($shortId, $token) {
+            $order = $this->paidOrder($shortId);
+            $authority = $order ? (new RespondentContactAuthorityRepository)->resolve((int) $order->id) : null;
+            $challenge = $order ? DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->orderByDesc('id')->first() : null;
+            if (! $authority || ! $challenge || ! $challenge->invitation || CarbonImmutable::parse($challenge->expires_at)->lte(now())
+                || ! hash_equals($challenge->token_digest, hash('sha256', $token)) || ! $this->matchesAuthority($challenge, $authority)) {
+                return null;
+            }
+            $siblings = Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->orderBy('id')->get();
+            if ($siblings->isEmpty() || ! hash_equals((string) $challenge->verified_context_digest, $this->contextDigest($siblings))) {
+                return null;
+            }
+            if ($challenge->consumed_at === null && GvsuRegistrationAssignment::query()->where('order_id', $order->id)->exists()) {
+                return null;
+            }
+            $assignments = GvsuRegistrationAssignment::query()->where('order_id', $order->id)->orderBy('attendee_id')->get();
+            if ($challenge->consumed_at !== null) {
+                $rows = $assignments->map(fn ($a) => ['attendee_id' => (int) $a->attendee_id, 'route' => $a->respondent_route,
+                    'respondent_name' => $a->respondent_route === 'adult' ? '' : $a->respondent_display_name, 'email' => $a->delivery_destination_ciphertext])->all();
+                if ($assignments->count() !== $siblings->count() || ! hash_equals((string) $challenge->confirmation_digest, hash('sha256', json_encode($rows, JSON_THROW_ON_ERROR)))) {
+                    return null;
+                }
+            }
+
+            return ['order_id' => (int) $order->id, 'confirmed' => $challenge->consumed_at !== null,
+                'assignment_ids' => $challenge->consumed_at !== null ? $assignments->pluck('assignment_id')->all() : [],
+                'siblings' => $siblings->map(fn ($a) => ['id' => (int) $a->id, 'first_name' => $a->first_name, 'last_name' => $a->last_name])->all()];
         });
     }
 
@@ -139,11 +191,13 @@ final class RespondentConfirmationRepository
                 return null;
             }
             $challenge = DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->orderByDesc('id')->lockForUpdate()->first();
-            if (! $challenge || $challenge->consumed_at !== null || CarbonImmutable::parse($challenge->expires_at)->lte(now()) || $challenge->attempts >= config('respondent-confirmation.attempts') || ! $this->matchesAuthority($challenge, $authority)) {
+            if (! $challenge || $challenge->consumed_at !== null || CarbonImmutable::parse($challenge->expires_at)->lte(now()) || (! $challenge->invitation && $challenge->attempts >= config('respondent-confirmation.attempts')) || ! $this->matchesAuthority($challenge, $authority)) {
                 return null;
             }
             if (! hash_equals($challenge->token_digest, hash('sha256', $token))) {
-                DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->increment('attempts');
+                if (! $challenge->invitation) {
+                    DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->increment('attempts');
+                }
 
                 return null;
             }
@@ -184,16 +238,18 @@ final class RespondentConfirmationRepository
             }
             $challenge = DB::table('respondent_confirmation_challenges')->where('order_id', $order->id)->orderByDesc('id')->lockForUpdate()->first();
             if (! $challenge || CarbonImmutable::parse($challenge->expires_at)->lte(now())
-                || $challenge->attempts >= config('respondent-confirmation.attempts')
+                || (! $challenge->invitation && $challenge->attempts >= config('respondent-confirmation.attempts'))
                 || ! $this->matchesAuthority($challenge, $authority)) {
                 return false;
             }
             if (! hash_equals($challenge->token_digest, hash('sha256', $token))) {
-                DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->increment('attempts');
+                if (! $challenge->invitation) {
+                    DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->increment('attempts');
+                }
 
                 return false;
             }
-            if ($challenge->verified_at === null) {
+            if (($challenge->invitation && config('respondent-confirmation.invitation_enabled') !== true) || ($challenge->verified_at === null && ! $challenge->invitation)) {
                 return false;
             }
             $attendees = Attendee::query()->where('order_id', $order->id)->where('event_id', 7)->where('status', 'ACTIVE')->orderBy('id')->lockForUpdate()->get();
@@ -213,7 +269,7 @@ final class RespondentConfirmationRepository
             if ($authority['type'] === 'historical_receipt_v1' && ($preflight === null || $preflight !== $this->siblingIdentity((int) $order->id))) {
                 return false;
             }
-            $bind((int) $order->id, $attendees, $respondents, $authority);
+            $bind((int) $order->id, $attendees, $respondents, $authority, (bool) $challenge->invitation);
             DB::table('respondent_confirmation_challenges')->where('id', $challenge->id)->update(['consumed_at' => now(), 'confirmation_digest' => $payloadDigest]);
 
             return true;

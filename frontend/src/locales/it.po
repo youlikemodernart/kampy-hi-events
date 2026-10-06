@@ -11128,3 +11128,19 @@ msgstr "Contatti confermati"
 #: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
 msgid "Unable to confirm contacts"
 msgstr "Impossibile confermare i contatti"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Complete your waivers"
+msgstr "Completa le tue liberatorie"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Send waiver invitation"
+msgstr "Invia invito per la liberatoria"
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "Unable to open the waiver invitation. Please contact Kamp Love for help."
+msgstr "Impossibile aprire l’invito. Contatta Kamp Love per assistenza."
+
+#: src/components/routes/product-widget/OrderSummaryAndProducts/RespondentConfirmationPanel.tsx
+msgid "We send the private invitation to the purchase email address. Choose the appropriate adult or guardian for each attendee, then continue to their waiver."
+msgstr "Inviamo l’invito privato all’indirizzo e-mail usato per l’acquisto. Scegli l’adulto o il tutore legale appropriato per ogni partecipante, quindi continua alla relativa liberatoria."

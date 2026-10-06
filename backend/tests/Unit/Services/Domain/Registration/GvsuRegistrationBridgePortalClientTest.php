@@ -31,6 +31,33 @@ class GvsuRegistrationBridgePortalClientTest extends TestCase
         });
     }
 
+    public function test_invitation_handoff_accepts_only_fixed_origin_fragment_capabilities(): void
+    {
+        $token = str_repeat('b', 43);
+        $path = '/r/invitation/'.substr(hash('sha256', $token), 0, 32);
+        $good = 'https://portal.example.test'.$path.'#'.$token;
+        $urls = [$good, 'https://portal.example.test:444'.$path.'#'.$token,
+            'https://user@portal.example.test'.$path.'#'.$token,
+            'https://portal.example.test'.$path.'?token='.$token.'#'.$token,
+            'https://portal.example.test/r/invitation/'.str_repeat('0', 32).'#'.$token,
+            'https://elsewhere.example.test'.$path.'#'.$token];
+        $sequence = Http::sequence();
+        foreach ($urls as $url) {
+            $sequence->push(['links' => [['url' => $url]]]);
+        }
+        Http::fake(['https://portal.example.test/api/internal/gvsu-registration/invitation-handoff' => $sequence]);
+        foreach ($urls as $index => $url) {
+            try {
+                $links = app(GvsuRegistrationBridgePortalClient::class)->invitationHandoff(11, ['gra_test']);
+                self::assertSame(0, $index, 'Unsafe link accepted');
+                self::assertSame($good, $links[0]['url']);
+            } catch (GvsuRegistrationBridgeUnknownException) {
+                self::assertGreaterThan(0, $index);
+            }
+        }
+        Http::assertSentCount(count($urls));
+    }
+
     public function test_timeout_or_non_acceptance_is_unknown_and_never_redirected_or_retried_here(): void
     {
         Http::fake(static fn () => throw new ConnectionException('network'));

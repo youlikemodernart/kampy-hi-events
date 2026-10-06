@@ -20,6 +20,28 @@ class GvsuRegistrationBridgePortalClient
         }
     }
 
+    public function invitationHandoff(int $orderId, array $assignmentIds): array
+    {
+        $response = $this->request('/api/internal/gvsu-registration/invitation-handoff', [
+            'operation' => 'completion-invitation-handoff-v1', 'event_id' => '7', 'order_id' => (string) $orderId, 'assignment_ids' => $assignmentIds,
+        ]);
+        if (! $response->successful() || ! is_array($response->json('links'))) {
+            throw new GvsuRegistrationBridgeUnknownException(__('Waivers are not ready yet.'));
+        }
+        foreach ($response->json('links') as $link) {
+            $url = $link['url'] ?? '';
+            if (! is_string($url) || parse_url($url, PHP_URL_SCHEME) !== 'https' || parse_url($url, PHP_URL_HOST) !== config('services.gvsu_registration_bridge.portal_host')
+                || parse_url($url, PHP_URL_USER) !== null || parse_url($url, PHP_URL_PASS) !== null || parse_url($url, PHP_URL_QUERY) !== null
+                || ! in_array(parse_url($url, PHP_URL_PORT), [null, 443], true)
+                || ! preg_match('/\A[A-Za-z0-9_-]{43}\z/', (string) parse_url($url, PHP_URL_FRAGMENT))
+                || parse_url($url, PHP_URL_PATH) !== '/r/invitation/'.substr(hash('sha256', (string) parse_url($url, PHP_URL_FRAGMENT)), 0, 32)) {
+                throw new GvsuRegistrationBridgeUnknownException(__('Waiver link unavailable.'));
+            }
+        }
+
+        return $response->json('links');
+    }
+
     public function historicalAbsence(array $identity): bool
     {
         // Exact authenticated metadata read, independent of provisioning/delivery activation.
