@@ -11,12 +11,12 @@ export function RespondentConfirmationPanel({order}: {order: Order}) {
     const invitation = useMutation({
         mutationFn: async () => (await publicApi.post(`/registration/orders/${encodeURIComponent(order.short_id)}/request-verification`, {}, {headers: {'X-Kamp-Respondent-Intent': 'confirm'}})).data,
         onSuccess: result => setMessage(result.message),
-        onError: () => setMessage(t`Unable to open the waiver invitation. Please contact Kamp Love for help.`),
+        onError: () => setMessage(t`We couldn't send the waiver link just now. Try again in a minute, or email kampy@kamplove.org for help.`),
     });
     return <Card><Stack gap="md">
-        <Title order={2}>{t`Complete your waivers`}</Title>
-        <Text>{t`We send the private invitation to the purchase email address. Choose the appropriate adult or guardian for each attendee, then continue to their waiver.`}</Text>
+        <Title order={2}>{t`Complete a waiver for each attendee`}</Title>
+        <Text>{t`Buying a ticket doesn't sign the waiver. We'll email a private link to the address you used at checkout. From there you pick who signs for each attendee: an adult signs for themselves, and a parent or guardian signs for a child. Then you can go straight to each waiver.`}</Text>
         {message && <Alert role="status">{message}</Alert>}
-        <Button loading={invitation.isPending} onClick={() => invitation.mutate()}>{t`Send waiver invitation`}</Button>
+        <Button loading={invitation.isPending} onClick={() => invitation.mutate()}>{t`Email the waiver link`}</Button>
     </Stack></Card>;
 }

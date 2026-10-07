@@ -23,6 +23,6 @@ final class RequestRespondentVerificationAction extends BaseAction
             // Identical response for missing orders, throttling, unavailable configuration and uncertain mail handoff.
         }
 
-        return $this->jsonResponse(['message' => __('If this order is eligible, a private waiver invitation will be sent to the purchase email address.')], 202)->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'no-referrer');
+        return $this->jsonResponse(['message' => __('If this order can use waivers, a private link is on its way to the email you used at checkout. It can take a few minutes. Check your spam folder too.')], 202)->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'no-referrer');
     }
 }

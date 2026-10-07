@@ -4,11 +4,11 @@ import fs from 'node:fs';
 /** Native-only fixture; the paired Portal harness separately proves canonical waiver completion. */
 export async function completeInvitationFixture({page,context,origin,width,output,prefix}) {
     const counts=async()=> (await context.request.get(origin+'/_fixture/counts')).json();
-    await page.getByRole('heading',{name:'Complete your waivers',exact:true}).waitFor();
+    await page.getByRole('heading',{name:'Complete a waiver for each attendee',exact:true}).waitFor();
     if(output){fs.mkdirSync(output,{recursive:true});await page.screenshot({path:`${output}/${prefix}-purchase-entry-${width}.png`,fullPage:true});}
     assert.equal(await page.getByLabel('Verification code',{exact:true}).count(),0);
     const requested=page.waitForResponse(response=>response.url().endsWith('/request-verification'));
-    await page.getByRole('button',{name:'Send waiver invitation',exact:true}).click();
+    await page.getByRole('button',{name:'Email the waiver link',exact:true}).click();
     assert.equal((await requested).status(),202);
     assert.deepEqual(await counts(),{challenges:1,assignments:0,outbox:0,consumed:0});
     await page.goto(origin+'/_fixture/mailbox');

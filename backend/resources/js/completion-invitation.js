@@ -17,7 +17,7 @@
         siblings = result.siblings;
         form.hidden = result.status !== 'choosing';
         document.querySelector('#ready').hidden = result.status !== 'confirmed';
-        status.textContent = result.status === 'confirmed' ? (result.pending ? 'Your choices are saved. The waivers are getting ready; refresh to continue. You do not need another email.' : 'Your choices are saved. Continue below. A waiver is complete only after it is signed and submitted.') : 'Who will sign for each attendee?';
+        status.textContent = result.status === 'confirmed' ? (result.pending ? 'Your choices are saved. We’re preparing each waiver — choose “Refresh waiver status” to continue. You don’t need another email.' : 'Your choices are saved. Continue below. A waiver is complete only after it is signed and submitted.') : 'Who will sign for each attendee?';
         if (result.status === 'choosing') {
             document.querySelector('#siblings').replaceChildren(...siblings.map(attendee => {
                 const group = document.createElement('fieldset'); group.dataset.id = attendee.id; group.className = 'section';
@@ -39,13 +39,13 @@
             a.href = url.href; a.textContent = `${link.attendee_name} — ${link.complete ? 'View completed waiver' : 'Complete waiver'}`; links.append(a);
         }
     }
-    function unavailable() {status.textContent = 'This invitation is unavailable or expired. Reopen the original email, or contact Kamp Love for help. No waiver has been signed by opening this page.';}
+    function unavailable() {status.textContent = 'This link is unavailable or has expired. Open the email we sent you again, or contact Kamp Love for help. Opening this page hasn’t signed anything.';}
     async function resume() {try {render(await post({action: 'resume'}));} catch {unavailable();}}
     form.onsubmit = async event => {
         event.preventDefault(); const button = form.querySelector('button'); button.disabled = true;
         const respondents = [...form.querySelectorAll('fieldset')].map(group => ({attendee_id: Number(group.dataset.id), route: group.querySelector('[name=route]').value, respondent_name: group.querySelector('[name=respondent_name]').value, email: group.querySelector('[name=email]').value}));
         try {render(await post({action: 'confirm', acknowledged: document.querySelector('#acknowledged').checked, respondents}));}
-        catch {status.textContent = 'We could not confirm the response. Refresh waiver status to check whether your choices were saved, or retry the same choices.'; document.querySelector('#ready').hidden = false;}
+        catch {status.textContent = 'We couldn’t save your choices just now. Choose “Refresh waiver status” to see if they saved, or try the same choices again.'; document.querySelector('#ready').hidden = false;}
         finally {button.disabled = false;}
     };
     document.querySelector('#resume').onclick = resume;
