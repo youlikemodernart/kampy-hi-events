@@ -42,11 +42,35 @@
     function unavailable() {status.textContent = 'This link is unavailable or has expired. Open the email we sent you again, or contact Kamp Love for help. Opening this page hasn’t signed anything.';}
     async function resume() {try {render(await post({action: 'resume'}));} catch {unavailable();}}
     form.onsubmit = async event => {
-        event.preventDefault(); const button = form.querySelector('button'); button.disabled = true;
+        event.preventDefault(); const button = form.querySelector('button');
+        if (button.dataset.pending === 'true') return;
+        button.dataset.pending = 'true'; button.disabled = true; button.setAttribute('aria-busy', 'true');
+        const originalLabel = button.textContent; button.textContent = 'Saving…';
         const respondents = [...form.querySelectorAll('fieldset')].map(group => ({attendee_id: Number(group.dataset.id), route: group.querySelector('[name=route]').value, respondent_name: group.querySelector('[name=respondent_name]').value, email: group.querySelector('[name=email]').value}));
-        try {render(await post({action: 'confirm', acknowledged: document.querySelector('#acknowledged').checked, respondents}));}
-        catch {status.textContent = 'We couldn’t save your choices just now. Choose “Refresh waiver status” to see if they saved, or try the same choices again.'; document.querySelector('#ready').hidden = false;}
-        finally {button.disabled = false;}
+        const confirmation = {action: 'confirm', acknowledged: document.querySelector('#acknowledged').checked, respondents};
+        try {
+            render(await post(confirmation));
+        } catch {
+            // The write may have succeeded even when its response was lost. Read the durable state
+            // first; if still unconfirmed, retry the same idempotent confirmation once.
+            status.textContent = 'Still saving — checking your waiver status…';
+            try {
+                const current = await post({action: 'resume'});
+                if (current.status === 'confirmed') {render(current); return;}
+            } catch {}
+            await new Promise(resolve => setTimeout(resolve, 350));
+            try {render(await post(confirmation)); return;}
+            catch {
+                try {
+                    const current = await post({action: 'resume'});
+                    if (current.status === 'confirmed') {render(current); return;}
+                } catch {}
+                status.textContent = 'We couldn’t save your choices just now. Your entries are still here. Choose “Continue to waivers” again or refresh your waiver status.';
+                document.querySelector('#ready').hidden = false;
+            }
+        } finally {
+            button.dataset.pending = 'false'; button.disabled = false; button.removeAttribute('aria-busy'); button.textContent = originalLabel;
+        }
     };
     document.querySelector('#resume').onclick = resume;
     if (/^[a-f0-9]{64}$/.test(token)) {

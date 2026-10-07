@@ -58,6 +58,36 @@ class GvsuRegistrationBridgePortalClientTest extends TestCase
         Http::assertSentCount(count($urls));
     }
 
+    public function test_historical_absence_retries_one_transient_server_failure(): void
+    {
+        $identity = ['operation' => 'historical-receipt-preflight-v1', 'event_id' => '7', 'order_id' => '11',
+            'siblings' => [['attendee_id' => '12', 'public_ticket_id' => 'ticket_test']]];
+        $digest = hash('sha256', \HiEvents\Services\Domain\Registration\HistoricalReceiptValidator::canonical($identity));
+        Http::fake(['https://portal.example.test/api/internal/gvsu-registration/historical-preflight' => Http::sequence()
+            ->pushStatus(503)->push(['classification' => 'absent', 'identity_digest' => $digest])]);
+
+        self::assertTrue(app(GvsuRegistrationBridgePortalClient::class)->historicalAbsence($identity));
+        Http::assertSentCount(2);
+    }
+
+    public function test_historical_absence_retries_one_lost_response(): void
+    {
+        $identity = ['operation' => 'historical-receipt-preflight-v1', 'event_id' => '7', 'order_id' => '11',
+            'siblings' => [['attendee_id' => '12', 'public_ticket_id' => 'ticket_test']]];
+        $digest = hash('sha256', \HiEvents\Services\Domain\Registration\HistoricalReceiptValidator::canonical($identity));
+        $attempts = 0;
+        Http::fake(static function () use (&$attempts, $digest) {
+            if (++$attempts === 1) {
+                throw new ConnectionException('network');
+            }
+
+            return Http::response(['classification' => 'absent', 'identity_digest' => $digest]);
+        });
+
+        self::assertTrue(app(GvsuRegistrationBridgePortalClient::class)->historicalAbsence($identity));
+        self::assertSame(2, $attempts);
+    }
+
     public function test_timeout_or_non_acceptance_is_unknown_and_never_redirected_or_retried_here(): void
     {
         Http::fake(static fn () => throw new ConnectionException('network'));

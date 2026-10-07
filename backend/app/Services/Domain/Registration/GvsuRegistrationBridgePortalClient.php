@@ -45,10 +45,29 @@ class GvsuRegistrationBridgePortalClient
     public function historicalAbsence(array $identity): bool
     {
         // Exact authenticated metadata read, independent of provisioning/delivery activation.
-        $response = $this->request('/api/internal/gvsu-registration/historical-preflight', $identity);
+        // This read is safe to repeat. One bounded retry absorbs a cold start or lost response
+        // without retrying any provisioning, assignment, handoff, or delivery write.
+        for ($attempt = 0; $attempt < 2; $attempt++) {
+            try {
+                $response = $this->request('/api/internal/gvsu-registration/historical-preflight', $identity);
+            } catch (GvsuRegistrationBridgeUnknownException $exception) {
+                if ($attempt === 0) {
+                    usleep(200000);
+                    continue;
+                }
 
-        return $response->successful() && $response->json('classification') === 'absent'
-            && $response->json('identity_digest') === hash('sha256', \HiEvents\Services\Domain\Registration\HistoricalReceiptValidator::canonical($identity));
+                throw $exception;
+            }
+            if ($response->serverError() && $attempt === 0) {
+                usleep(200000);
+                continue;
+            }
+
+            return $response->successful() && $response->json('classification') === 'absent'
+                && $response->json('identity_digest') === hash('sha256', \HiEvents\Services\Domain\Registration\HistoricalReceiptValidator::canonical($identity));
+        }
+
+        return false;
     }
 
     public function clearance(array $candidate): bool
