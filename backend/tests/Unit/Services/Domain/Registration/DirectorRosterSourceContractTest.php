@@ -32,6 +32,17 @@ class DirectorRosterSourceContractTest extends TestCase
         }
     }
 
+    public function test_owner_schema_create_is_temporary_and_migration_is_transactional(): void
+    {
+        $sql = file_get_contents(database_path('roster/director_roster_v1.sql'));
+        self::assertLessThan(strpos($sql, 'ALTER FUNCTION'), strpos($sql, 'GRANT CREATE ON SCHEMA public TO kampy_native_roster_owner;'));
+        self::assertGreaterThan(strrpos($sql, 'ALTER FUNCTION'), strpos($sql, 'REVOKE CREATE ON SCHEMA public FROM kampy_native_roster_owner;'));
+        self::assertStringNotContainsString('TO CURRENT_USER', $sql);
+        self::assertStringNotContainsString('SET ROLE', $sql);
+        $migration = require database_path('migrations/2026_10_07_000001_director_roster_read_projection.php');
+        self::assertTrue($migration->withinTransaction);
+    }
+
     public function test_reader_is_dormant_execute_only_with_no_seed_or_login(): void
     {
         $sql = file_get_contents(database_path('roster/director_roster_v1.sql'));

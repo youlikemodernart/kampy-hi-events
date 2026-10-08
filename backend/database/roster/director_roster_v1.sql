@@ -10,6 +10,9 @@ CREATE TABLE public.kampy_roster_approved_events (
   UNIQUE (source_namespace,account_id,event_id)
 );
 GRANT USAGE ON SCHEMA public TO kampy_native_roster_owner,kampy_native_roster_reader;
+-- PostgreSQL requires the destination owner to have schema CREATE during
+-- ownership transfer; the Laravel migration transaction contains this grant.
+GRANT CREATE ON SCHEMA public TO kampy_native_roster_owner;
 GRANT SELECT ON public.kampy_roster_approved_events TO kampy_native_roster_owner;
 GRANT SELECT (id,account_id,deleted_at) ON public.events TO kampy_native_roster_owner;
 GRANT SELECT (id,event_id,order_id,product_id,public_id,first_name,last_name,email,status,created_at,updated_at,deleted_at) ON public.attendees TO kampy_native_roster_owner;
@@ -111,3 +114,4 @@ ALTER FUNCTION public.kampy_roster_contact_v1(text,bigint,bigint,bigint,text[]) 
 REVOKE ALL ON FUNCTION public.kampy_roster_contact_v1(text,bigint,bigint,bigint,text[]) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.kampy_roster_contact_v1(text,bigint,bigint,bigint,text[]) TO kampy_native_roster_reader;
 REVOKE ALL ON public.kampy_roster_approved_events FROM PUBLIC,kampy_native_roster_reader;
+REVOKE CREATE ON SCHEMA public FROM kampy_native_roster_owner;
